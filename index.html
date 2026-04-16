@@ -99,8 +99,8 @@ header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-cont
 .potje { border-radius: 18px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 6px; position: relative; overflow: hidden; min-height: 90px; }
 .potje-name { font-size: 12px; font-weight: 500; opacity: 0.75; }
 .potje-amount { font-size: 22px; font-weight: 700; }
-.potje-bar { height: 3px; border-radius: 999px; background: rgba(255,255,255,0.2); margin-top: auto; }
-.potje-bar-fill { height: 100%; border-radius: 999px; background: rgba(255,255,255,0.6); transition: width 0.5s; }
+.potje-bar { display: none; }
+.potje-bar-fill { display: none; }
 
 /* Kalender */
 .cal-wrap { margin-bottom: 1.25rem; }
@@ -327,8 +327,9 @@ select option { background: #1a1830; }
       <input type="number" id="inp-amount" placeholder="€ Bedrag" min="0" step="0.01" inputmode="decimal" style="max-width:130px;flex:0 0 130px;" />
       <input type="text" id="inp-desc" placeholder="Omschrijving" oninput="suggestCategory()" autocomplete="off" autocorrect="off" />
     </div>
-    <div class="form-row">
-      <input type="date" id="inp-date" placeholder="Datum" style="width:100%;" />
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;flex-shrink:0;">Datum</span>
+      <input type="date" id="inp-date" style="flex:1;" />
     </div>
     <div class="cat-suggest-row" id="cat-suggest-row">
       <div class="cat-suggest-label">Voorgestelde categorie:</div>
@@ -495,11 +496,12 @@ async function addEntry() {
   const desc = document.getElementById('inp-desc').value.trim();
   const cat = document.getElementById('inp-cat').value;
   if (!amt || amt <= 0) { showToast('Voer een geldig bedrag in.'); return; }
+  const dateVal = document.getElementById('inp-date').value;
+  if (!dateVal) { showToast('Kies een datum.'); return; }
   const btn = document.getElementById('btn-add');
   btn.disabled = true; btn.textContent = '...';
   try {
-    const todayNL = new Date().toLocaleDateString('nl-NL', {timeZone:'Europe/Amsterdam', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-');
-    const today = document.getElementById('inp-date').value || todayNL;
+    const today = dateVal;
     const result = await api('POST', 'uitgaven', {
       datum: today,
       bedrag: Math.round(amt * 100) / 100,
