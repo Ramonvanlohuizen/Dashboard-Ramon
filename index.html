@@ -1784,7 +1784,8 @@ function saveScannedAsRecipe() {
     carbs: Math.round(scannedProduct.carbs_per100 * factor * 10) / 10,
     fat: Math.round(scannedProduct.fat_per100 * factor * 10) / 10,
     ingredients: scannedProduct.name + ': ' + grams + 'g',
-    instructions: ''
+    instructions: '',
+    image: scannedProduct.image || null
   });
   saveRecipes(recipes);
   document.getElementById('product-card').classList.remove('show');
@@ -1839,6 +1840,14 @@ function openRecipeDetail(id) {
   document.getElementById('recipe-modal-sub').textContent = MEAL_NAMES[r.meal] + ' · ' + r.kcal + ' kcal · E: ' + r.protein + 'g · KH: ' + r.carbs + 'g · V: ' + r.fat + 'g';
   const body = document.getElementById('recipe-modal-body');
   body.innerHTML = '';
+
+  // Product image in detail
+  if (r.image) {
+    const imgDiv = document.createElement('div');
+    imgDiv.style.cssText = 'display:flex;justify-content:center;margin-bottom:1rem;';
+    imgDiv.innerHTML = `<img src="${r.image}" style="width:120px;height:120px;object-fit:contain;background:white;border-radius:16px;padding:8px;" onerror="this.style.display='none'" />`;
+    body.appendChild(imgDiv);
+  }
 
   // Macros row
   const macroDiv = document.createElement('div');
@@ -1914,8 +1923,11 @@ function renderRecipes() {
   }
   list.innerHTML = filtered.map(r => {
     const icon = MEAL_ICONS[r.meal] || '🍽️';
+    const imgHtml = r.image 
+      ? `<img src="${r.image}" style="width:48px;height:48px;border-radius:10px;object-fit:contain;background:white;padding:3px;flex-shrink:0;" onerror="this.style.display='none'" />`
+      : `<div style="font-size:28px;flex-shrink:0;">${icon}</div>`;
     return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="openRecipeDetail(${r.id})">
-      <div style="font-size:28px;flex-shrink:0;">${icon}</div>
+      ${imgHtml}
       <div style="flex:1;min-width:0;">
         <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">${MEAL_NAMES[r.meal]} · ${r.kcal} kcal · E: ${r.protein}g</div>
