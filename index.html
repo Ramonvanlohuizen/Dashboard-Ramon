@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0f0e1a" />
 <title>Zakgeld — Ramon</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/umd/index.min.js"></script>
 <style>
 :root {
   --bg: #0f0e1a;
@@ -1597,25 +1597,44 @@ function closeScanner() {
 }
 
 async function startBarcodeDetection(video) {
-  // Use ZXing library for cross-browser barcode scanning (works on iOS Safari)
   try {
-    const { BrowserMultiFormatReader } = ZXing;
-    const codeReader = new BrowserMultiFormatReader();
-    codeReader.decodeFromVideoElement(video, async (result, err) => {
+    // Try ZXingBrowser first
+    const ZXingLib = window.ZXingBrowser || window.ZXing;
+    if (!ZXingLib) throw new Error('ZXing niet geladen');
+    const codeReader = new ZXingLib.BrowserMultiFormatReader();
+    window._barcodeReader = codeReader;
+    const result = await codeReader.decodeFromVideoElement(video);
+    if (result) {
+      closeScanner();
+      await lookupBarcode(result.getText());
+    }
+  } catch(e) {
+    if (e && e.name === 'NotFoundException') return; // still scanning
+    // Canvas-based fallback using interval
+    startCanvasScanner(video);
+  }
+}
+
+function startCanvasScanner(video) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  scannerInterval = setInterval(async () => {
+    try {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const ZXingLib = window.ZXingBrowser || window.ZXing;
+      if (!ZXingLib) return;
+      const reader = new ZXingLib.BrowserMultiFormatReader();
+      const imageData = canvas.toDataURL('image/png');
+      const result = await reader.decodeFromImageUrl(imageData);
       if (result) {
-        codeReader.reset();
+        clearInterval(scannerInterval);
         closeScanner();
         await lookupBarcode(result.getText());
       }
-    });
-    // Store reader for cleanup
-    window._barcodeReader = codeReader;
-  } catch(e) {
-    // Fallback: manual input
-    closeScanner();
-    const code = prompt('Voer barcode handmatig in:');
-    if (code) await lookupBarcode(code);
-  }
+    } catch(e) {}
+  }, 800);
 }
 
 async function lookupBarcode(barcode) {
