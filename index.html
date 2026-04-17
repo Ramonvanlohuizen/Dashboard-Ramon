@@ -673,7 +673,10 @@ select option { background: #1a1830; }
         <div style="font-size:15px;font-weight:600;">Scan een product</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Barcode scannen → macros automatisch ingevuld</div>
       </div>
-      <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:var(--green);border:none;border-radius:12px;color:#0f0e1a;font-size:14px;font-weight:700;padding:10px 16px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📷 Scannen</button>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+        <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:var(--green);border:none;border-radius:10px;color:#0f0e1a;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📷 Scannen</button>
+        <button onclick="showManualBarcodeInput()" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:500;padding:6px 12px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">🔢 Handmatig</button>
+      </div>
     </div>
 
     <!-- Product result after scan -->
@@ -740,6 +743,19 @@ select option { background: #1a1830; }
   </div>
 </div>
 </div><!-- end #page-recepten -->
+
+<!-- Manual barcode input modal -->
+<div class="page-picker-backdrop" id="manual-barcode-modal">
+  <div class="page-picker" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1.5rem);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="page-picker-title" style="margin-bottom:0;">Barcode invoeren</div>
+      <button onclick="document.getElementById('manual-barcode-modal').classList.remove('open')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.5;">Voer het barcodenummer in van het product. Dit staat onder de streepjescode op de verpakking.</p>
+    <input type="number" id="manual-barcode-input" placeholder="Bijv. 8723400940074" inputmode="numeric" style="width:100%;margin-bottom:12px;font-size:16px;" />
+    <button onclick="submitManualBarcode()" style="width:100%;height:52px;background:linear-gradient(135deg,var(--purple),#a855f7);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;">Product zoeken →</button>
+  </div>
+</div>
 
 <!-- Barcode scanner modal -->
 <div class="scanner-modal" id="scanner-modal">
@@ -1584,11 +1600,8 @@ async function openScanner() {
     await video.play();
 
     if (!('BarcodeDetector' in window)) {
-      showToast('BarcodeDetector niet beschikbaar — gebruik handmatige invoer');
       closeScanner();
-      // Show manual input instead
-      const code = prompt('Voer barcode handmatig in (bijv. 8718309242511):');
-      if (code && code.trim()) await lookupBarcode(code.trim());
+      showManualBarcodeInput();
       return;
     }
 
@@ -1610,8 +1623,7 @@ async function openScanner() {
       if (!found) {
         scanning = false;
         closeScanner();
-        const code = prompt('Niet herkend. Voer barcode handmatig in:');
-        if (code && code.trim()) lookupBarcode(code.trim());
+        showManualBarcodeInput();
       }
     }, 6000);
 
@@ -1646,6 +1658,20 @@ function closeScanner() {
   if (window._stopScanning) { window._stopScanning(); window._stopScanning = null; }
   document.getElementById('scanner-modal').classList.remove('open');
   if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+}
+
+function showManualBarcodeInput() {
+  const modal = document.getElementById('manual-barcode-modal');
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('manual-barcode-input').focus(), 300);
+}
+
+async function submitManualBarcode() {
+  const code = document.getElementById('manual-barcode-input').value.trim();
+  if (!code) { showToast('Voer een barcode in.'); return; }
+  document.getElementById('manual-barcode-modal').classList.remove('open');
+  document.getElementById('manual-barcode-input').value = '';
+  await lookupBarcode(code);
 }
 
 async function lookupBarcode(barcode) {
