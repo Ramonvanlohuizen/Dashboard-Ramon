@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#0f0e1a" />
 <title>Zakgeld — Ramon</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 <style>
 :root {
   --bg: #0f0e1a;
@@ -1590,29 +1591,29 @@ async function openScanner() {
 
 function closeScanner() {
   document.getElementById('scanner-modal').classList.remove('open');
+  if (window._barcodeReader) { try { window._barcodeReader.reset(); } catch(e) {} window._barcodeReader = null; }
   if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
   if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
 }
 
 async function startBarcodeDetection(video) {
-  // Use BarcodeDetector API (available on modern iOS/Android browsers)
-  if ('BarcodeDetector' in window) {
-    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] });
-    scannerInterval = setInterval(async () => {
-      try {
-        const barcodes = await detector.detect(video);
-        if (barcodes.length > 0) {
-          const code = barcodes[0].rawValue;
-          clearInterval(scannerInterval);
-          closeScanner();
-          await lookupBarcode(code);
-        }
-      } catch(e) {}
-    }, 500);
-  } else {
+  // Use ZXing library for cross-browser barcode scanning (works on iOS Safari)
+  try {
+    const { BrowserMultiFormatReader } = ZXing;
+    const codeReader = new BrowserMultiFormatReader();
+    codeReader.decodeFromVideoElement(video, async (result, err) => {
+      if (result) {
+        codeReader.reset();
+        closeScanner();
+        await lookupBarcode(result.getText());
+      }
+    });
+    // Store reader for cleanup
+    window._barcodeReader = codeReader;
+  } catch(e) {
     // Fallback: manual input
     closeScanner();
-    const code = prompt('BarcodeDetector niet beschikbaar. Voer barcode handmatig in:');
+    const code = prompt('Voer barcode handmatig in:');
     if (code) await lookupBarcode(code);
   }
 }
