@@ -673,16 +673,18 @@ select option { background: #1a1830; }
         <div style="font-size:15px;font-weight:600;">Scan een product</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Barcode scannen → macros automatisch ingevuld</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-        <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:var(--green);border:none;border-radius:10px;color:#0f0e1a;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📷 Scannen</button>
-        <button onclick="showManualBarcodeInput()" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:500;padding:6px 12px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">🔢 Handmatig</button>
-      </div>
+      <button onclick="showManualBarcodeInput()" style="display:flex;align-items:center;gap:6px;background:var(--green);border:none;border-radius:12px;color:#0f0e1a;font-size:14px;font-weight:700;padding:10px 16px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">🔢 Barcode invoeren</button>
     </div>
 
     <!-- Product result after scan -->
     <div class="product-card" id="product-card" style="margin-bottom:0;">
-      <div class="product-name" id="product-name"></div>
-      <div class="product-brand" id="product-brand"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img id="product-image" src="" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:white;padding:4px;display:none;flex-shrink:0;" />
+        <div>
+          <div class="product-name" id="product-name"></div>
+          <div class="product-brand" id="product-brand"></div>
+        </div>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
         <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
         <span style="font-size:13px;color:var(--muted);">gram</span>
@@ -1683,12 +1685,13 @@ async function lookupBarcode(barcode) {
       const p = data.product;
       const n = p.nutriments || {};
       scannedProduct = {
-        name: p.product_name || p.product_name_nl || 'Onbekend product',
+        name: p.product_name_nl || p.product_name || 'Onbekend product',
         brand: p.brands || '',
         kcal_per100: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
         protein_per100: Math.round((n['proteins_100g'] || 0) * 10) / 10,
         carbs_per100: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
         fat_per100: Math.round((n['fat_100g'] || 0) * 10) / 10,
+        image: p.image_front_small_url || p.image_url || null,
       };
       showProductCard();
     } else {
@@ -1702,8 +1705,19 @@ async function lookupBarcode(barcode) {
 function showProductCard() {
   const card = document.getElementById('product-card');
   document.getElementById('product-name').textContent = scannedProduct.name;
-  document.getElementById('product-brand').textContent = scannedProduct.brand ? scannedProduct.brand : 'Per 100g';
+  document.getElementById('product-brand').textContent = scannedProduct.brand ? scannedProduct.brand + ' · per 100g' : 'Per 100g';
   document.getElementById('product-grams').value = '100';
+
+  // Show product image if available
+  const img = document.getElementById('product-image');
+  if (scannedProduct.image) {
+    img.src = scannedProduct.image;
+    img.style.display = 'block';
+    img.onerror = () => { img.style.display = 'none'; };
+  } else {
+    img.style.display = 'none';
+  }
+
   updateProductMacros();
   card.classList.add('show');
   document.getElementById('product-grams').addEventListener('input', updateProductMacros);
