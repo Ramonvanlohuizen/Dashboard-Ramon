@@ -345,6 +345,15 @@ select option { background: #1a1830; }
     <div class="form-row">
       <input type="date" id="inp-date" style="width:100%;" />
     </div>
+    <script>
+      (function() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const day = String(d.getDate()).padStart(2,'0');
+        document.getElementById('inp-date').value = y + '-' + m + '-' + day;
+      })();
+    </script>
     <div class="cat-suggest-row" id="cat-suggest-row">
       <div class="cat-suggest-label">Voorgestelde categorie:</div>
       <div class="cat-suggest-pills" id="cat-suggest-pills"></div>
