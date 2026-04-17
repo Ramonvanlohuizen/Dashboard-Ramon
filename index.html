@@ -107,6 +107,30 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .dt-add-row input, .dt-add-row select { min-width: 0; flex: 1; }
 .btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #1a7a52, #22c55e); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
+/* Barcode scanner */
+.scanner-modal { position: fixed; inset: 0; background: #000; z-index: 70; display: none; flex-direction: column; }
+.scanner-modal.open { display: flex; }
+.scanner-header { display: flex; align-items: center; gap: 12px; padding: 1.25rem; padding-top: env(safe-area-inset-top, 1.25rem); background: rgba(0,0,0,0.8); }
+.scanner-close { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.scanner-title { font-size: 16px; font-weight: 600; color: white; }
+.scanner-video-wrap { flex: 1; position: relative; overflow: hidden; }
+.scanner-video-wrap video { width: 100%; height: 100%; object-fit: cover; }
+.scanner-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.scanner-frame { width: 260px; height: 160px; border: 2px solid var(--green); border-radius: 16px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5); position: relative; }
+.scanner-line { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--green); animation: scanline 2s ease-in-out infinite; }
+@keyframes scanline { 0% { top: 0; } 50% { top: calc(100% - 2px); } 100% { top: 0; } }
+.scanner-hint { position: absolute; bottom: 2rem; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.7); font-size: 14px; }
+
+/* Product result card */
+.product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.25rem; margin-bottom: 1rem; display: none; }
+.product-card.show { display: block; }
+.product-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.product-brand { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
+.product-macros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1rem; }
+.product-macro { background: var(--surface2); border-radius: 10px; padding: 8px; text-align: center; }
+.product-macro-val { font-size: 15px; font-weight: 700; }
+.product-macro-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
 .progress-ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
 .progress-ring-wrap svg { transform: rotate(-90deg); }
 .progress-ring-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
@@ -596,7 +620,35 @@ select option { background: #1a1830; }
 
     <!-- Voeding toevoegen -->
     <div class="dt-add-food">
-      <div class="dt-add-title">Voeding toevoegen</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="dt-add-title" style="margin-bottom:0;">Voeding toevoegen</div>
+        <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;padding:7px 12px;cursor:pointer;font-family:'Outfit',sans-serif;">📷 Scan barcode</button>
+      </div>
+
+      <!-- Product result after scan -->
+      <div class="product-card" id="product-card">
+        <div class="product-name" id="product-name"></div>
+        <div class="product-brand" id="product-brand"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+          <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
+          <span style="font-size:13px;color:var(--muted);">gram</span>
+        </div>
+        <div class="product-macros" id="product-macros"></div>
+        <div class="dt-add-row" style="margin-bottom:8px;">
+          <select id="product-meal" style="flex:1;">
+            <option value="ontbijt">🌅 Ontbijt</option>
+            <option value="lunch">🥗 Lunch</option>
+            <option value="middagsnack">🍌 Middagsnack</option>
+            <option value="diner">🍽️ Diner</option>
+            <option value="avondsnack">🌙 Avondsnack</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="addScannedProduct()" class="btn-dt-add" style="flex:1;">+ Toevoegen aan dag</button>
+          <button onclick="saveScannedAsRecipe()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">📖 Opslaan als recept</button>
+        </div>
+      </div>
+
       <div class="dt-add-row">
         <input type="text" id="dt-food-name" placeholder="Naam (bijv. Kipfilet)" autocomplete="off" />
       </div>
@@ -680,6 +732,23 @@ select option { background: #1a1830; }
   </div>
 </div>
 </div><!-- end #page-recepten -->
+
+<!-- Barcode scanner modal -->
+<div class="scanner-modal" id="scanner-modal">
+  <div class="scanner-header">
+    <button class="scanner-close" onclick="closeScanner()">×</button>
+    <span class="scanner-title">Scan een barcode</span>
+  </div>
+  <div class="scanner-video-wrap">
+    <video id="scanner-video" autoplay playsinline muted></video>
+    <div class="scanner-overlay">
+      <div class="scanner-frame">
+        <div class="scanner-line"></div>
+      </div>
+    </div>
+    <div class="scanner-hint">Richt de camera op een barcode</div>
+  </div>
+</div>
 
 <!-- Recipe detail modal -->
 <div class="day-modal" id="recipe-modal" style="background:var(--bg);">
@@ -1488,6 +1557,158 @@ function renderWater() {
   track.innerHTML = Array.from({length:8},(_,i) =>
     `<div class="water-glass ${i < dtWater ? 'filled' : ''}" onclick="toggleWater(${i})">💧</div>`
   ).join('');
+}
+
+// ===== BARCODE SCANNER =====
+let scannerStream = null;
+let scannerInterval = null;
+let scannedProduct = null;
+
+async function openScanner() {
+  const modal = document.getElementById('scanner-modal');
+  modal.classList.add('open');
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    const video = document.getElementById('scanner-video');
+    video.srcObject = scannerStream;
+    await video.play();
+    startBarcodeDetection(video);
+  } catch(e) {
+    showToast('Camera toegang geweigerd. Geef toestemming in instellingen.');
+    closeScanner();
+  }
+}
+
+function closeScanner() {
+  document.getElementById('scanner-modal').classList.remove('open');
+  if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+  if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
+}
+
+async function startBarcodeDetection(video) {
+  // Use BarcodeDetector API (available on modern iOS/Android browsers)
+  if ('BarcodeDetector' in window) {
+    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] });
+    scannerInterval = setInterval(async () => {
+      try {
+        const barcodes = await detector.detect(video);
+        if (barcodes.length > 0) {
+          const code = barcodes[0].rawValue;
+          clearInterval(scannerInterval);
+          closeScanner();
+          await lookupBarcode(code);
+        }
+      } catch(e) {}
+    }, 500);
+  } else {
+    // Fallback: manual input
+    closeScanner();
+    const code = prompt('BarcodeDetector niet beschikbaar. Voer barcode handmatig in:');
+    if (code) await lookupBarcode(code);
+  }
+}
+
+async function lookupBarcode(barcode) {
+  showToast('Product zoeken...');
+  try {
+    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/' + barcode + '.json');
+    const data = await res.json();
+    if (data.status === 1 && data.product) {
+      const p = data.product;
+      const n = p.nutriments || {};
+      scannedProduct = {
+        name: p.product_name || p.product_name_nl || 'Onbekend product',
+        brand: p.brands || '',
+        kcal_per100: Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0),
+        protein_per100: Math.round((n['proteins_100g'] || 0) * 10) / 10,
+        carbs_per100: Math.round((n['carbohydrates_100g'] || 0) * 10) / 10,
+        fat_per100: Math.round((n['fat_100g'] || 0) * 10) / 10,
+      };
+      showProductCard();
+    } else {
+      showToast('Product niet gevonden. Vul handmatig in.');
+    }
+  } catch(e) {
+    showToast('Fout bij opzoeken. Controleer je internetverbinding.');
+  }
+}
+
+function showProductCard() {
+  const card = document.getElementById('product-card');
+  document.getElementById('product-name').textContent = scannedProduct.name;
+  document.getElementById('product-brand').textContent = scannedProduct.brand ? scannedProduct.brand : 'Per 100g';
+  document.getElementById('product-grams').value = '100';
+  updateProductMacros();
+  card.classList.add('show');
+  document.getElementById('product-grams').addEventListener('input', updateProductMacros);
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateProductMacros() {
+  if (!scannedProduct) return;
+  const grams = parseFloat(document.getElementById('product-grams').value) || 100;
+  const factor = grams / 100;
+  const kcal = Math.round(scannedProduct.kcal_per100 * factor);
+  const protein = Math.round(scannedProduct.protein_per100 * factor * 10) / 10;
+  const carbs = Math.round(scannedProduct.carbs_per100 * factor * 10) / 10;
+  const fat = Math.round(scannedProduct.fat_per100 * factor * 10) / 10;
+  document.getElementById('product-macros').innerHTML = [
+    ['Kcal', kcal, '#ffffff'],
+    ['Eiwit', protein+'g', '#4ade80'],
+    ['Koolh.', carbs+'g', '#fbbf24'],
+    ['Vet', fat+'g', '#f472b6']
+  ].map(([label, val, color]) => `<div class="product-macro">
+    <div class="product-macro-val" style="color:${color};">${val}</div>
+    <div class="product-macro-label">${label}</div>
+  </div>`).join('');
+}
+
+function addScannedProduct() {
+  if (!scannedProduct) return;
+  const grams = parseFloat(document.getElementById('product-grams').value) || 100;
+  const factor = grams / 100;
+  const meal = document.getElementById('product-meal').value;
+  const dk = dateKey(dtViewDate);
+  const log = getFoodLog(dk);
+  log.push({
+    id: Date.now(),
+    name: scannedProduct.name + ' (' + grams + 'g)',
+    kcal: Math.round(scannedProduct.kcal_per100 * factor),
+    protein: Math.round(scannedProduct.protein_per100 * factor * 10) / 10,
+    carbs: Math.round(scannedProduct.carbs_per100 * factor * 10) / 10,
+    fat: Math.round(scannedProduct.fat_per100 * factor * 10) / 10,
+    meal
+  });
+  saveFoodLog(dk, log);
+  document.getElementById('product-card').classList.remove('show');
+  scannedProduct = null;
+  renderDT();
+  showToast('Toegevoegd aan ' + MEAL_NAMES[meal] + ' ✓');
+}
+
+function saveScannedAsRecipe() {
+  if (!scannedProduct) return;
+  const grams = parseFloat(document.getElementById('product-grams').value) || 100;
+  const factor = grams / 100;
+  const meal = document.getElementById('product-meal').value;
+  const recipes = getRecipes();
+  recipes.push({
+    id: Date.now(),
+    name: scannedProduct.name + ' (' + grams + 'g)',
+    meal,
+    kcal: Math.round(scannedProduct.kcal_per100 * factor),
+    protein: Math.round(scannedProduct.protein_per100 * factor * 10) / 10,
+    carbs: Math.round(scannedProduct.carbs_per100 * factor * 10) / 10,
+    fat: Math.round(scannedProduct.fat_per100 * factor * 10) / 10,
+    ingredients: scannedProduct.name + ': ' + grams + 'g',
+    instructions: ''
+  });
+  saveRecipes(recipes);
+  document.getElementById('product-card').classList.remove('show');
+  scannedProduct = null;
+  showToast('Opgeslagen als recept ✓');
 }
 
 // ===== RECEPTEN =====
