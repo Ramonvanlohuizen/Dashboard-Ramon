@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0f0e1a" />
 <title>Zakgeld — Ramon</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <style>
 :root {
   --bg: #0f0e1a;
@@ -1572,69 +1572,64 @@ let scannerStream = null;
 let scannerInterval = null;
 let scannedProduct = null;
 
-async function openScanner() {
+function openScanner() {
   const modal = document.getElementById('scanner-modal');
   modal.classList.add('open');
-  try {
-    scannerStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+  // Replace video element with quagga container
+  const videoWrap = document.querySelector('.scanner-video-wrap');
+  videoWrap.innerHTML = '<div id="quagga-container" style="width:100%;height:100%;"></div><div class="scanner-overlay"><div class="scanner-frame"><div class="scanner-line"></div></div></div><div class="scanner-hint">Richt de camera op een barcode</div>';
+
+  setTimeout(() => {
+    Quagga.init({
+      inputStream: {
+        name: 'Live',
+        type: 'LiveStream',
+        target: document.getElementById('quagga-container'),
+        constraints: {
+          facingMode: 'environment',
+          width: { min: 640 },
+          height: { min: 480 }
+        }
+      },
+      decoder: {
+        readers: ['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader']
+      },
+      locate: true
+    }, function(err) {
+      if (err) {
+        showToast('Camera toegang geweigerd.');
+        closeScanner();
+        return;
+      }
+      Quagga.start();
     });
-    const video = document.getElementById('scanner-video');
-    video.srcObject = scannerStream;
-    await video.play();
-    startBarcodeDetection(video);
-  } catch(e) {
-    showToast('Camera toegang geweigerd. Geef toestemming in instellingen.');
-    closeScanner();
-  }
+
+    let lastCode = null;
+    let codeCount = 0;
+    Quagga.onDetected(async function(result) {
+      const code = result.codeResult.code;
+      if (code === lastCode) {
+        codeCount++;
+        if (codeCount >= 2) {
+          Quagga.stop();
+          closeScanner();
+          await lookupBarcode(code);
+        }
+      } else {
+        lastCode = code;
+        codeCount = 1;
+      }
+    });
+  }, 300);
 }
 
 function closeScanner() {
+  try { Quagga.stop(); } catch(e) {}
   document.getElementById('scanner-modal').classList.remove('open');
-  if (window._barcodeReader) { try { window._barcodeReader.reset(); } catch(e) {} window._barcodeReader = null; }
+  // Reset video wrap
+  const videoWrap = document.querySelector('.scanner-video-wrap');
+  videoWrap.innerHTML = '<video id="scanner-video" autoplay playsinline muted></video><div class="scanner-overlay"><div class="scanner-frame"><div class="scanner-line"></div></div></div><div class="scanner-hint">Richt de camera op een barcode</div>';
   if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
-  if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
-}
-
-async function startBarcodeDetection(video) {
-  try {
-    // Try ZXingBrowser first
-    const ZXingLib = window.ZXingBrowser || window.ZXing;
-    if (!ZXingLib) throw new Error('ZXing niet geladen');
-    const codeReader = new ZXingLib.BrowserMultiFormatReader();
-    window._barcodeReader = codeReader;
-    const result = await codeReader.decodeFromVideoElement(video);
-    if (result) {
-      closeScanner();
-      await lookupBarcode(result.getText());
-    }
-  } catch(e) {
-    if (e && e.name === 'NotFoundException') return; // still scanning
-    // Canvas-based fallback using interval
-    startCanvasScanner(video);
-  }
-}
-
-function startCanvasScanner(video) {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  scannerInterval = setInterval(async () => {
-    try {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0);
-      const ZXingLib = window.ZXingBrowser || window.ZXing;
-      if (!ZXingLib) return;
-      const reader = new ZXingLib.BrowserMultiFormatReader();
-      const imageData = canvas.toDataURL('image/png');
-      const result = await reader.decodeFromImageUrl(imageData);
-      if (result) {
-        clearInterval(scannerInterval);
-        closeScanner();
-        await lookupBarcode(result.getText());
-      }
-    } catch(e) {}
-  }, 800);
 }
 
 async function lookupBarcode(barcode) {
