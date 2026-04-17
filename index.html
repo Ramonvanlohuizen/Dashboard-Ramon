@@ -620,35 +620,7 @@ select option { background: #1a1830; }
 
     <!-- Voeding toevoegen -->
     <div class="dt-add-food">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div class="dt-add-title" style="margin-bottom:0;">Voeding toevoegen</div>
-        <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);border-radius:10px;color:var(--green);font-size:13px;font-weight:600;padding:7px 12px;cursor:pointer;font-family:'Outfit',sans-serif;">📷 Scan barcode</button>
-      </div>
-
-      <!-- Product result after scan -->
-      <div class="product-card" id="product-card">
-        <div class="product-name" id="product-name"></div>
-        <div class="product-brand" id="product-brand"></div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-          <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
-          <span style="font-size:13px;color:var(--muted);">gram</span>
-        </div>
-        <div class="product-macros" id="product-macros"></div>
-        <div class="dt-add-row" style="margin-bottom:8px;">
-          <select id="product-meal" style="flex:1;">
-            <option value="ontbijt">🌅 Ontbijt</option>
-            <option value="lunch">🥗 Lunch</option>
-            <option value="middagsnack">🍌 Middagsnack</option>
-            <option value="diner">🍽️ Diner</option>
-            <option value="avondsnack">🌙 Avondsnack</option>
-          </select>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="addScannedProduct()" class="btn-dt-add" style="flex:1;">+ Toevoegen aan dag</button>
-          <button onclick="saveScannedAsRecipe()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">📖 Opslaan als recept</button>
-        </div>
-      </div>
-
+      <div class="dt-add-title">Voeding toevoegen</div>
       <div class="dt-add-row">
         <input type="text" id="dt-food-name" placeholder="Naam (bijv. Kipfilet)" autocomplete="off" />
       </div>
@@ -692,6 +664,41 @@ select option { background: #1a1830; }
       <div class="header-name">Recepten</div>
     </div>
   </header>
+
+  <!-- Scan knop -->
+  <div style="background:linear-gradient(135deg,rgba(74,222,128,0.1),rgba(74,222,128,0.05));border:1px solid rgba(74,222,128,0.2);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div>
+        <div style="font-size:15px;font-weight:600;">Scan een product</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Barcode scannen → macros automatisch ingevuld</div>
+      </div>
+      <button onclick="openScanner()" style="display:flex;align-items:center;gap:6px;background:var(--green);border:none;border-radius:12px;color:#0f0e1a;font-size:14px;font-weight:700;padding:10px 16px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📷 Scannen</button>
+    </div>
+
+    <!-- Product result after scan -->
+    <div class="product-card" id="product-card" style="margin-bottom:0;">
+      <div class="product-name" id="product-name"></div>
+      <div class="product-brand" id="product-brand"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+        <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
+        <span style="font-size:13px;color:var(--muted);">gram</span>
+      </div>
+      <div class="product-macros" id="product-macros"></div>
+      <div class="dt-add-row" style="margin-bottom:8px;">
+        <select id="product-meal" style="flex:1;">
+          <option value="ontbijt">🌅 Ontbijt</option>
+          <option value="lunch">🥗 Lunch</option>
+          <option value="middagsnack">🍌 Middagsnack</option>
+          <option value="diner">🍽️ Diner</option>
+          <option value="avondsnack">🌙 Avondsnack</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveScannedAsRecipe()" class="btn-dt-add" style="flex:1;">📖 Opslaan als recept</button>
+        <button onclick="addScannedProduct()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Aan dag</button>
+      </div>
+    </div>
+  </div>
 
   <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1.25rem;">
     <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
