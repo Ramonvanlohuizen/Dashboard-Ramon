@@ -1808,22 +1808,26 @@ function undoWater() {
 }
 
 // ===== INGEBOUWDE DROOGTRAINING RECEPTEN =====
+function pollinationsImg(prompt) {
+  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent('professional food photography, ' + prompt + ', top view, clean plate, appetizing, high quality') + '?width=400&height=300&nologo=true';
+}
+
 const BUILTIN_RECIPES = [
-  { id:'b1', name:'Kipfilet met rijst & broccoli', meal:'diner', kcal:480, protein:48, carbs:52, fat:6, time:25, ingredients:'200g kipfilet\n150g rijst (droog)\n200g broccoli\n1 el olijfolie\nKnoflook, zout, peper', instructions:'Kook de rijst. Bak de kipfilet op middelhoog vuur 6-7 min per kant. Stoom of kook de broccoli. Breng op smaak met knoflook, zout en peper.', category:'Kip', image:null },
-  { id:'b2', name:'Zalm met zoete aardappel', meal:'diner', kcal:520, protein:42, carbs:45, fat:14, time:25, ingredients:'180g zalmmoot\n250g zoete aardappel\n100g sperziebonen\n1 el olijfolie\nCitroensap, dille', instructions:'Schil en snij de zoete aardappel in blokjes, rooster 20 min op 200°C. Bak de zalm 4 min per kant. Kook de sperziebonen. Serveer met citroensap en dille.', category:'Vis', image:null },
-  { id:'b3', name:'Gehakt met pasta & tomatensaus', meal:'diner', kcal:560, protein:44, carbs:58, fat:12, time:25, ingredients:'150g mager rundergehakt\n100g volkoren pasta\n200ml passata\n1 ui\nKnoflook, Italiaanse kruiden', instructions:'Kook de pasta. Fruit de ui en knoflook. Bak het gehakt rul. Voeg passata toe en laat 10 min sudderen. Meng met pasta.', category:'Rood vlees', image:null },
-  { id:'b4', name:'Tonijn pasta', meal:'diner', kcal:440, protein:40, carbs:55, fat:6, time:15, ingredients:'1 blik tonijn (150g)\n100g volkoren pasta\n50g maïs\n100ml passata\nKnoflook, basilicum', instructions:'Kook de pasta. Verwarm de passata met knoflook. Meng met tonijn en maïs. Doe over de pasta.', category:'Vis', image:null },
-  { id:'b5', name:'Kipshoarma bowl', meal:'diner', kcal:490, protein:46, carbs:48, fat:10, time:20, ingredients:'200g kipfilet\n150g rijst\n50g komkommer\n50g tomaat\nShoarma kruidenmix, Griekse yoghurt', instructions:'Marineer kip met shoarma kruiden. Kook de rijst. Bak de kip op hoog vuur. Serveer als bowl met komkommer, tomaat en yoghurt.', category:'Kip', image:null },
-  { id:'b6', name:'Biefstuk met aardappelen & spinazie', meal:'diner', kcal:530, protein:50, carbs:35, fat:16, time:25, ingredients:'180g biefstuk\n200g aardappelen\n150g spinazie\n1 el olijfolie\nRozemarijn, knoflook', instructions:'Kook de aardappelen. Bak de biefstuk 3 min per kant op hoog vuur. Laat rusten. Roerbak de spinazie met knoflook.', category:'Rood vlees', image:null },
-  { id:'b7', name:'Tilapia met quinoa & groenten', meal:'diner', kcal:420, protein:44, carbs:40, fat:8, time:25, ingredients:'180g tilapia\n80g quinoa\n150g paprika en courgette\n1 el olijfolie\nCitroensap, peterselie', instructions:'Kook de quinoa. Rooster de groenten in de oven op 200°C. Bak de tilapia 3-4 min per kant. Serveer met citroensap.', category:'Vis', image:null },
-  { id:'b8', name:'Kippensoep met rijst', meal:'diner', kcal:380, protein:38, carbs:42, fat:6, time:30, ingredients:'200g kipfilet\n100g rijst\n2 wortelen\n2 stengels bleekselderij\n1 ui\nKippenbouillon, peterselie', instructions:'Snij de groenten. Kook alles samen met bouillon 20 min. Voeg rijst toe en kook nog 10 min. Haal kip eruit, scheur fijn en doe terug.', category:'Kip', image:null },
-  { id:'b9', name:'Wrap met kip & avocado', meal:'diner', kcal:460, protein:40, carbs:38, fat:14, time:15, ingredients:'180g kipfilet\n2 volkoren wraps\n1 avocado\n50g ijsbergsla\n50g tomaat\nLimoen, koriander', instructions:'Bak de kip en snij in reepjes. Prak de avocado met limoensap. Beleg de wraps met kip, avocadospread, sla en tomaat.', category:'Kip', image:null },
-  { id:'b10', name:'Gehakt met rijst & peultjes', meal:'diner', kcal:510, protein:42, carbs:50, fat:12, time:20, ingredients:'150g rundergehakt\n150g rijst\n150g peultjes\nSojasaus, gember, knoflook\n1 el sesamolie', instructions:'Kook de rijst. Roerbak het gehakt met gember en knoflook. Voeg peultjes toe en bak 3 min. Breng op smaak met sojasaus en sesamolie.', category:'Rood vlees', image:null },
-  { id:'b11', name:'Kabeljauw met aardappelpuree', meal:'diner', kcal:400, protein:40, carbs:38, fat:8, time:25, ingredients:'200g kabeljauw\n250g aardappelen\n100ml magere melk\n150g spinazie\nMosterd, citroen', instructions:'Kook de aardappelen en pureer met melk. Bak de kabeljauw 4 min per kant. Roerbak de spinazie. Serveer met een schepje mosterd.', category:'Vis', image:null },
-  { id:'b12', name:'Kippenburger met zoete aardappelfriet', meal:'diner', kcal:500, protein:44, carbs:48, fat:10, time:30, ingredients:'180g kipgehakt\n300g zoete aardappel\n1 volkoren broodje\nSla, tomaat\nKruiden naar smaak', instructions:'Maak zoete aardappelfriet in de oven op 200°C (20 min). Meng kipgehakt met kruiden en vorm een burger. Bak 5 min per kant.', category:'Kip', image:null },
-  { id:'b13', name:'Pasta carbonara light', meal:'diner', kcal:490, protein:38, carbs:54, fat:12, time:20, ingredients:'100g volkoren pasta\n100g kipfilet\n2 eieren\n30g Parmezaan\nZwarte peper, peterselie', instructions:'Kook de pasta. Bak de kip en snij in reepjes. Mix eieren met Parmezaan. Meng met hete pasta (geen warmte). Voeg kip toe.', category:'Kip', image:null },
-  { id:'b14', name:'Zalmburger met aardappelsalade', meal:'diner', kcal:480, protein:40, carbs:36, fat:16, time:25, ingredients:'180g zalmfilet\n200g aardappelen\n50g komkommer\n2 el Griekse yoghurt\nDille, mosterd, citroen', instructions:'Kook de aardappelen en laat afkoelen. Bak de zalm 4 min per kant. Maak salade met yoghurt, mosterd en dille.', category:'Vis', image:null },
-  { id:'b15', name:'Rundvlees wokschotel', meal:'diner', kcal:520, protein:46, carbs:44, fat:14, time:20, ingredients:'180g runderreepjes\n150g rijst\n200g wokvgroenten mix\nOestersaus, sojasaus\nGember, knoflook, sesamolie', instructions:'Kook de rijst. Verhit wok op hoog vuur. Bak het vlees 3 min. Voeg groenten en sauzen toe. Bak nog 3 min. Serveer over rijst.', category:'Rood vlees', image:null }
+  { id:'b1', name:'Kipfilet met rijst & broccoli', meal:'diner', kcal:480, protein:48, carbs:52, fat:6, time:25, ingredients:'200g kipfilet\n150g rijst (droog)\n200g broccoli\n1 el olijfolie\nKnoflook, zout, peper', prepSteps:['Kook rijst volgens verpakking (±15 min).','Bestrooi kipfilet met knoflook, zout en peper.','Bak kip op middelhoog vuur 6-7 min per kant tot gaar.','Stoom of kook broccoli 5 min tot beetgaar.','Verdeel alles over bakjes.'], category:'Kip', image: pollinationsImg('grilled chicken breast with white rice and broccoli') },
+  { id:'b2', name:'Zalm met zoete aardappel', meal:'diner', kcal:520, protein:42, carbs:45, fat:14, time:25, ingredients:'180g zalmmoot\n250g zoete aardappel\n100g sperziebonen\n1 el olijfolie\nCitroensap, dille', prepSteps:['Verwarm oven op 200°C.','Schil zoete aardappel, snij in blokjes, besprenkel met olie. Rooster 20 min.','Kook sperziebonen 5 min.','Bak zalm 4 min per kant op middelhoog vuur.','Serveer met citroensap en verse dille.'], category:'Vis', image: pollinationsImg('salmon fillet with sweet potato and green beans') },
+  { id:'b3', name:'Gehakt met pasta & tomatensaus', meal:'diner', kcal:560, protein:44, carbs:58, fat:12, time:25, ingredients:'150g mager rundergehakt\n100g volkoren pasta\n200ml passata\n1 ui\nKnoflook, Italiaanse kruiden', prepSteps:['Kook pasta volgens verpakking.','Snipper ui en knoflook fijn.','Fruit ui 3 min, voeg knoflook toe.','Bak gehakt rul ±5 min.','Voeg passata en kruiden toe, laat 10 min sudderen.','Meng met pasta.'], category:'Rood vlees', image: pollinationsImg('pasta bolognese with ground beef tomato sauce') },
+  { id:'b4', name:'Tonijn pasta', meal:'diner', kcal:440, protein:40, carbs:55, fat:6, time:15, ingredients:'1 blik tonijn (150g)\n100g volkoren pasta\n50g maïs\n100ml passata\nKnoflook, basilicum', prepSteps:['Kook pasta al dente.','Verwarm passata met knoflook 3 min.','Voeg tonijn en maïs toe.','Verwarm nog 2 min.','Meng met pasta en garneer met basilicum.'], category:'Vis', image: pollinationsImg('tuna pasta with tomato sauce and corn') },
+  { id:'b5', name:'Kipshoarma bowl', meal:'diner', kcal:490, protein:46, carbs:48, fat:10, time:20, ingredients:'200g kipfilet\n150g rijst\n50g komkommer\n50g tomaat\nShoarma kruidenmix, Griekse yoghurt', prepSteps:['Kook rijst.','Snij kip in reepjes, bestrooi met shoarma kruidenmix.','Bak kip op hoog vuur 8-10 min tot gaar.','Snij komkommer en tomaat.','Serveer als bowl: rijst, kip, groenten en yoghurt.'], category:'Kip', image: pollinationsImg('chicken shawarma bowl with rice cucumber tomato yogurt') },
+  { id:'b6', name:'Biefstuk met aardappelen & spinazie', meal:'diner', kcal:530, protein:50, carbs:35, fat:16, time:25, ingredients:'180g biefstuk\n200g aardappelen\n150g spinazie\n1 el olijfolie\nRozemarijn, knoflook', prepSteps:['Schil en kook aardappelen 15 min.','Laat biefstuk op kamertemperatuur komen.','Bak biefstuk 3 min per kant op hoog vuur.','Laat 5 min rusten onder folie.','Roerbak spinazie met knoflook 2 min.'], category:'Rood vlees', image: pollinationsImg('beef steak with potatoes and wilted spinach') },
+  { id:'b7', name:'Tilapia met quinoa & groenten', meal:'diner', kcal:420, protein:44, carbs:40, fat:8, time:25, ingredients:'180g tilapia\n80g quinoa\n150g paprika en courgette\n1 el olijfolie\nCitroensap, peterselie', prepSteps:['Kook quinoa 15 min.','Verwarm oven op 200°C.','Snij paprika en courgette, besprenkel met olie, rooster 15 min.','Bak tilapia 3-4 min per kant.','Serveer met citroensap en peterselie.'], category:'Vis', image: pollinationsImg('tilapia fish with quinoa and roasted vegetables') },
+  { id:'b8', name:'Kippensoep met rijst', meal:'diner', kcal:380, protein:38, carbs:42, fat:6, time:30, ingredients:'200g kipfilet\n100g rijst\n2 wortelen\n2 stengels bleekselderij\n1 ui\nKippenbouillon, peterselie', prepSteps:['Snij alle groenten in stukken.','Doe kip, groenten en bouillon in pan.','Kook 20 min op middelhoog vuur.','Voeg rijst toe, kook nog 10 min.','Haal kip eruit, scheur fijn en doe terug.'], category:'Kip', image: pollinationsImg('chicken soup with rice carrots celery') },
+  { id:'b9', name:'Wrap met kip & avocado', meal:'diner', kcal:460, protein:40, carbs:38, fat:14, time:15, ingredients:'180g kipfilet\n2 volkoren wraps\n1 avocado\n50g ijsbergsla\n50g tomaat\nLimoen, koriander', prepSteps:['Bak kipfilet gaar, snij in reepjes.','Prak avocado met limoensap en zout.','Snij tomaat en sla.','Beleg wraps met avocado, kip, sla en tomaat.','Rol strak op en snij doormidden.'], category:'Kip', image: pollinationsImg('chicken avocado wrap with lettuce tomato lime') },
+  { id:'b10', name:'Gehakt met rijst & peultjes', meal:'diner', kcal:510, protein:42, carbs:50, fat:12, time:20, ingredients:'150g rundergehakt\n150g rijst\n150g peultjes\nSojasaus, gember, knoflook\n1 el sesamolie', prepSteps:['Kook rijst.','Rasp gember, pers knoflook.','Bak gehakt rul in sesamolie met gember en knoflook.','Voeg peultjes toe, bak 3 min.','Breng op smaak met sojasaus.'], category:'Rood vlees', image: pollinationsImg('minced beef with rice and snow peas asian style') },
+  { id:'b11', name:'Kabeljauw met aardappelpuree', meal:'diner', kcal:400, protein:40, carbs:38, fat:8, time:25, ingredients:'200g kabeljauw\n250g aardappelen\n100ml magere melk\n150g spinazie\nMosterd, citroen', prepSteps:['Schil en kook aardappelen 15 min.','Pureer met warme melk en breng op smaak.','Bak kabeljauw 4 min per kant.','Roerbak spinazie 2 min met knoflook.','Serveer met schepje mosterd en citroen.'], category:'Vis', image: pollinationsImg('cod fish with mashed potato and spinach') },
+  { id:'b12', name:'Kipburger met zoete aardappelfriet', meal:'diner', kcal:500, protein:44, carbs:48, fat:10, time:30, ingredients:'180g kipgehakt\n300g zoete aardappel\n1 volkoren broodje\nSla, tomaat\nKruiden naar smaak', prepSteps:['Verwarm oven op 200°C.','Snij zoete aardappel in frietjes, besprenkel met olie. Rooster 20-25 min.','Meng kipgehakt met kruiden, vorm een burger.','Bak kipburger 5 min per kant.','Beleg broodje met sla, tomaat en burger.'], category:'Kip', image: pollinationsImg('chicken burger with sweet potato fries') },
+  { id:'b13', name:'Pasta carbonara light', meal:'diner', kcal:490, protein:38, carbs:54, fat:12, time:20, ingredients:'100g volkoren pasta\n100g kipfilet\n2 eieren\n30g Parmezaan\nZwarte peper, peterselie', prepSteps:['Kook pasta al dente, bewaar wat kookwater.','Bak kipfilet gaar, snij in blokjes.','Klop eieren met Parmezaan en peper.','Meng hete pasta met eimix (geen vuur), voeg lepel kookwater toe.','Voeg kip toe en garneer met peterselie.'], category:'Kip', image: pollinationsImg('pasta carbonara with chicken parmesan') },
+  { id:'b14', name:'Zalmburger met aardappelsalade', meal:'diner', kcal:480, protein:40, carbs:36, fat:16, time:25, ingredients:'180g zalmfilet\n200g aardappelen\n50g komkommer\n2 el Griekse yoghurt\nDille, mosterd, citroen', prepSteps:['Kook aardappelen 15 min, laat afkoelen.','Snij aardappelen en komkommer in blokjes.','Meng yoghurt, mosterd en dille tot dressing.','Bak zalm 4 min per kant.','Meng aardappel en komkommer met dressing.'], category:'Vis', image: pollinationsImg('salmon burger with potato salad cucumber dill') },
+  { id:'b15', name:'Rundvlees wokschotel', meal:'diner', kcal:520, protein:46, carbs:44, fat:14, time:20, ingredients:'180g runderreepjes\n150g rijst\n200g wokvgroenten mix\nOestersaus, sojasaus\nGember, knoflook, sesamolie', prepSteps:['Kook rijst.','Snij vlees in dunne reepjes, marineer 5 min in sojasaus.','Verhit wok op hoogste stand met sesamolie.','Bak vlees 3 min op hoog vuur.','Voeg groenten, gember en knoflook toe, bak 3 min.','Blus af met oestersaus.'], category:'Rood vlees', image: pollinationsImg('beef stir fry with wok vegetables rice asian') }
 ];
 
 // ===== MEALPREP =====
@@ -1876,10 +1880,10 @@ function openMpMealPicker(dayStr) {
   </div>` +
   allRecipes.map(r => `
     <div onclick="selectMpMeal('${r.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
-      ${r.image ? `<img src="${r.image}" style="width:44px;height:44px;border-radius:10px;object-fit:contain;background:var(--surface);padding:3px;flex-shrink:0;" onerror="this.style.display='none'" />` : `<span style="font-size:24px;flex-shrink:0;">🍽️</span>`}
+      <img src="${r.image || ''}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--surface);flex-shrink:0;" onerror="this.style.display='none'" />
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:600;">${r.name}</div>
-        <div style="font-size:11px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g · ${r.time || '?'} min</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${r.kcal} kcal · E: ${r.protein}g · ⏱ ${r.time || '?'} min</div>
       </div>
     </div>`).join('');
   
@@ -2007,24 +2011,40 @@ function renderMealprep() {
     return;
   }
 
-  // Generate prep steps
-  const steps = [];
-  steps.push({ text: 'Zet water op voor rijst/pasta en verwarm de oven voor op 200°C.', time: '0 min' });
-  
-  plannedRecipes.forEach((r, i) => {
-    steps.push({ text: `Bereid ${r.name}: ${r.instructions ? r.instructions.split('.')[0] + '.' : 'Volg de bereidingswijze.'}`, time: `~${r.time || 20} min` });
-  });
-  
-  steps.push({ text: 'Verdeel alle maaltijden over bakjes en laat afkoelen. Zet in de koelkast (max 4 dagen) of vriezer.', time: '10 min' });
-
-  prepDiv.innerHTML = steps.map((s, i) => `
+  // Generate prep schema per recipe
+  prepDiv.innerHTML = `
     <div class="mp-prep-step">
-      <div class="mp-prep-num">${i+1}</div>
+      <div class="mp-prep-num" style="background:var(--cyan);">🔥</div>
       <div>
-        <div class="mp-prep-text">${s.text}</div>
-        <div class="mp-prep-time">⏱ ${s.time}</div>
+        <div class="mp-prep-text"><strong>Voorbereiding</strong> — Zet water op voor rijst/pasta, verwarm oven op 200°C. Haal vlees/vis uit koelkast.</div>
+        <div class="mp-prep-time">⏱ 0 min</div>
       </div>
-    </div>`).join('');
+    </div>` +
+  plannedRecipes.map((r, ri) => {
+    const steps = r.prepSteps || (r.instructions ? r.instructions.split('.').filter(s => s.trim()).map(s => s.trim() + '.') : ['Bereid volgens recept.']);
+    return `
+      <div style="margin:1rem 0 0.5rem;padding:10px 12px;background:rgba(124,92,252,0.08);border-radius:12px;border-left:3px solid var(--purple);display:flex;align-items:center;gap:10px;">
+        ${r.image ? `<img src="${r.image}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" />` : ''}
+        <div>
+          <div style="font-size:13px;font-weight:700;">${r.name}</div>
+          <div style="font-size:11px;color:var(--muted);">⏱ ${r.time || 20} min · ${r.kcal} kcal · E: ${r.protein}g</div>
+        </div>
+      </div>` +
+      steps.map((step, si) => `
+        <div class="mp-prep-step">
+          <div class="mp-prep-num" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:11px;">${si+1}</div>
+          <div>
+            <div class="mp-prep-text">${step}</div>
+          </div>
+        </div>`).join('');
+  }).join('') +
+  `<div class="mp-prep-step" style="margin-top:1rem;">
+    <div class="mp-prep-num" style="background:var(--green);color:#0f0e1a;">✓</div>
+    <div>
+      <div class="mp-prep-text"><strong>Klaar!</strong> Verdeel over meal prep bakjes, laat afkoelen en zet in de koelkast (max 4 dagen) of vriezer.</div>
+      <div class="mp-prep-time">⏱ 10 min</div>
+    </div>
+  </div>`;
 }
 
 // ===== BARCODE SCANNER =====
