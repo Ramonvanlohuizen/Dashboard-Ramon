@@ -32,12 +32,93 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-weight: 400; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Top dropdown nav */
+.top-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; display: flex; justify-content: center; padding: env(safe-area-inset-top, 12px) 1.25rem 12px; background: var(--bg); border-bottom: 1px solid var(--border); }
+.top-nav-btn { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
+.top-nav-btn span { font-size: 12px; color: var(--muted); }
+
+.page-picker-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
+.page-picker-backdrop.open { display: flex; }
+.page-picker { background: var(--surface); border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem); width: 100%; max-width: 480px; }
+.page-picker-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; text-align: center; }
+.page-picker-item { display: flex; align-items: center; gap: 14px; padding: 1rem 1.25rem; border-radius: 16px; cursor: pointer; margin-bottom: 8px; border: 1px solid var(--border); background: var(--surface2); transition: border-color 0.2s; }
+.page-picker-item.active { border-color: var(--purple); }
+.page-picker-item-icon { font-size: 26px; }
+.page-picker-item-info { flex: 1; }
+.page-picker-item-name { font-size: 16px; font-weight: 600; }
+.page-picker-item-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.page-picker-item-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.page-picker-item.active .page-picker-item-check { background: var(--purple); border-color: var(--purple); color: white; }
+
+/* Droogtraining */
+.dt-hero { background: linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #22c55e 100%); border-radius: 24px; padding: 1.75rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; }
+.dt-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: rgba(255,255,255,0.06); border-radius: 50%; }
+.dt-hero-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.dt-hero-kcal { font-size: 42px; font-weight: 700; color: white; line-height: 1; margin-bottom: 4px; }
+.dt-hero-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 1.25rem; }
+.dt-hero-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; position: relative; z-index: 1; }
+.dt-macro { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 12px; }
+.dt-macro-label { font-size: 10px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.dt-macro-val { font-size: 15px; font-weight: 600; color: white; }
+
+.dt-section { margin-bottom: 1.5rem; }
+.dt-week-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; background: var(--surface); border-radius: 14px; padding: 10px 14px; border: 1px solid var(--border); }
+.dt-week-label { flex: 1; text-align: center; font-size: 14px; font-weight: 500; }
+.dt-week-btn { background: var(--surface2); border: none; color: var(--muted); cursor: pointer; width: 28px; height: 28px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.dt-week-btn:hover { background: var(--purple); color: white; }
+
+.dt-day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 1rem; scrollbar-width: none; }
+.dt-day-tabs::-webkit-scrollbar { display: none; }
+.dt-day-tab { flex-shrink: 0; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all 0.15s; white-space: nowrap; }
+.dt-day-tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+
+.meal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+.meal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; }
+.meal-header-left { display: flex; align-items: center; gap: 10px; }
+.meal-icon { font-size: 18px; }
+.meal-name { font-size: 14px; font-weight: 600; }
+.meal-kcal { font-size: 12px; color: var(--muted); }
+.meal-add-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--purple-light); font-size: 18px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.meal-items { padding: 0 14px 12px; display: flex; flex-direction: column; gap: 6px; }
+.meal-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: 10px; }
+.meal-item-name { font-size: 13px; font-weight: 500; }
+.meal-item-macros { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.meal-item-kcal { font-size: 13px; font-weight: 600; color: var(--green); flex-shrink: 0; }
+.meal-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 0 4px; }
+
+.dt-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+.dt-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1rem 1.25rem; }
+.dt-stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.dt-stat-value { font-size: 28px; font-weight: 700; }
+.dt-stat-unit { font-size: 13px; color: var(--muted); margin-left: 4px; }
+.dt-stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.water-track { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.water-glass { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; background: var(--surface2); transition: all 0.15s; }
+.water-glass.filled { background: rgba(34,211,238,0.2); border-color: rgba(34,211,238,0.4); }
+
+.dt-add-food { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; }
+.dt-add-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+.dt-add-row { display: flex; gap: 8px; margin-bottom: 8px; overflow: hidden; }
+.dt-add-row input, .dt-add-row select { min-width: 0; flex: 1; }
+.btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #1a7a52, #22c55e); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+
+.progress-ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.progress-ring-wrap svg { transform: rotate(-90deg); }
+.progress-ring-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
+.progress-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+.progress-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; text-align: center; line-height: 1.2; }
+
 /* Background */
 .bg-blob { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; }
 .blob1 { width: 600px; height: 600px; background: rgba(124,92,252,0.15); top: -200px; right: -150px; }
 .blob2 { width: 400px; height: 400px; background: rgba(244,114,182,0.1); bottom: 0; left: -100px; }
 
-.app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: env(safe-area-inset-top, 2rem) 1.25rem calc(env(safe-area-inset-bottom, 0px) + 5rem); }
+.app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
 
 /* Header */
 header { margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
@@ -269,7 +350,51 @@ select option { background: #1a1830; }
   </div>
 </div>
 
-<div class="app">
+
+
+<!-- Top nav -->
+<div class="top-nav">
+  <button class="top-nav-btn" onclick="openPagePicker()">
+    <span id="top-nav-icon">💰</span>
+    <span id="top-nav-label">Zakgeld</span>
+    <span>▾</span>
+  </button>
+</div>
+
+<!-- Page picker -->
+<div class="page-picker-backdrop" id="page-picker" onclick="closePagePicker(event)">
+  <div class="page-picker">
+    <div class="page-picker-title">Kies een pagina</div>
+    <div class="page-picker-item active" id="picker-zakgeld" onclick="switchPage('zakgeld')">
+      <div class="page-picker-item-icon">💰</div>
+      <div class="page-picker-item-info">
+        <div class="page-picker-item-name">Zakgeld</div>
+        <div class="page-picker-item-sub">Budget & uitgaven bijhouden</div>
+      </div>
+      <div class="page-picker-item-check">✓</div>
+    </div>
+    <div class="page-picker-item" id="picker-droogtraining" onclick="switchPage('droogtraining')">
+      <div class="page-picker-item-icon">💪</div>
+      <div class="page-picker-item-info">
+        <div class="page-picker-item-name">Droogtraining</div>
+        <div class="page-picker-item-sub">Voeding, macro's & gewicht</div>
+      </div>
+      <div class="page-picker-item-check"></div>
+    </div>
+    <div class="page-picker-item" id="picker-recepten" onclick="switchPage('recepten')">
+      <div class="page-picker-item-icon">📖</div>
+      <div class="page-picker-item-info">
+        <div class="page-picker-item-name">Recepten</div>
+        <div class="page-picker-item-sub">Jouw receptenbibliotheek</div>
+      </div>
+      <div class="page-picker-item-check"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Zakgeld page -->
+<div class="page active" id="page-zakgeld">
+<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
   <header>
     <div class="header-left">
       <div class="header-greeting">Hé Ramon 👋</div>
@@ -396,6 +521,176 @@ select option { background: #1a1830; }
   <div class="entries-list" id="entries-list">
     <div class="loading"><span class="spinner"></span>Laden...</div>
   </div>
+</div>
+
+</div><!-- end #page-zakgeld -->
+
+<!-- Droogtraining page -->
+<div class="page" id="page-droogtraining">
+<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
+  <header>
+    <div class="header-left">
+      <div class="header-greeting">Droogtraining 💪</div>
+      <div class="header-name">Voeding & Training</div>
+    </div>
+  </header>
+
+  <!-- Kcal hero -->
+  <div class="dt-hero">
+    <div class="dt-hero-label">Calorieën vandaag</div>
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <div class="dt-hero-kcal" id="dt-kcal-consumed">0</div>
+      <div style="font-size:18px;color:rgba(255,255,255,0.6);">/ <span id="dt-kcal-goal">2000</span> kcal</div>
+    </div>
+    <div class="dt-hero-sub" id="dt-kcal-sub">Nog 2000 kcal over</div>
+    <div class="dt-hero-row">
+      <div class="dt-macro">
+        <div class="dt-macro-label">Eiwit</div>
+        <div class="dt-macro-val"><span id="dt-protein">0</span>g</div>
+      </div>
+      <div class="dt-macro">
+        <div class="dt-macro-label">Koolhydraten</div>
+        <div class="dt-macro-val"><span id="dt-carbs">0</span>g</div>
+      </div>
+      <div class="dt-macro">
+        <div class="dt-macro-label">Vet</div>
+        <div class="dt-macro-val"><span id="dt-fat">0</span>g</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="dt-stats-grid">
+    <div class="dt-stat-card">
+      <div class="dt-stat-label">Gewicht</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <div class="dt-stat-value" id="dt-weight">—</div>
+        <div class="dt-stat-unit">kg</div>
+      </div>
+      <div class="dt-stat-sub" id="dt-weight-sub">Nog niet ingevuld</div>
+      <button onclick="logWeight()" style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--purple-light);font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;">+ Invullen</button>
+    </div>
+    <div class="dt-stat-card">
+      <div class="dt-stat-label">Water</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <div class="dt-stat-value" id="dt-water-val">0</div>
+        <div class="dt-stat-unit">/ 8 glazen</div>
+      </div>
+      <div class="water-track" id="water-track"></div>
+    </div>
+  </div>
+
+  <!-- Week nav -->
+  <div class="dt-section">
+    <div class="dt-week-nav">
+      <button class="dt-week-btn" onclick="changeWeek(-1)">&#8592;</button>
+      <span class="dt-week-label" id="dt-week-label"></span>
+      <button class="dt-week-btn" onclick="changeWeek(1)">&#8594;</button>
+    </div>
+
+    <!-- Day tabs -->
+    <div class="dt-day-tabs" id="dt-day-tabs"></div>
+
+    <!-- Maaltijden -->
+    <div id="dt-meals-wrap"></div>
+
+    <!-- Voeding toevoegen -->
+    <div class="dt-add-food">
+      <div class="dt-add-title">Voeding toevoegen</div>
+      <div class="dt-add-row">
+        <input type="text" id="dt-food-name" placeholder="Naam (bijv. Kipfilet)" autocomplete="off" />
+      </div>
+      <div class="dt-add-row">
+        <input type="number" id="dt-food-kcal" placeholder="kcal" inputmode="decimal" style="max-width:80px;flex:0 0 80px;" />
+        <input type="number" id="dt-food-protein" placeholder="Eiwit (g)" inputmode="decimal" />
+        <input type="number" id="dt-food-carbs" placeholder="Koolh. (g)" inputmode="decimal" />
+        <input type="number" id="dt-food-fat" placeholder="Vet (g)" inputmode="decimal" />
+      </div>
+      <div class="dt-add-row">
+        <select id="dt-food-meal" style="flex:1;">
+          <option value="ontbijt">🌅 Ontbijt</option>
+          <option value="lunch">🥗 Lunch</option>
+          <option value="middagsnack">🍌 Middagsnack</option>
+          <option value="diner">🍽️ Diner</option>
+          <option value="avondsnack">🌙 Avondsnack</option>
+        </select>
+        <button class="btn-dt-add" onclick="addFood()">+ Toevoegen</button>
+      </div>
+    </div>
+
+    <!-- Doelen instellen -->
+    <div class="dt-add-food">
+      <div class="dt-add-title">Dagdoelen instellen</div>
+      <div class="dt-add-row">
+        <input type="number" id="dt-goal-kcal" placeholder="Caloriedoel (kcal)" inputmode="decimal" />
+        <input type="number" id="dt-goal-protein" placeholder="Eiwit doel (g)" inputmode="decimal" />
+      </div>
+      <button class="btn-dt-add" onclick="saveGoals()" style="width:100%;margin-top:4px;">Opslaan</button>
+    </div>
+  </div>
+</div>
+</div><!-- end #page-droogtraining -->
+
+<!-- Recepten page -->
+<div class="page" id="page-recepten">
+<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
+  <header>
+    <div class="header-left">
+      <div class="header-greeting">Jouw kookboek 📖</div>
+      <div class="header-name">Recepten</div>
+    </div>
+  </header>
+
+  <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1.25rem;">
+    <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
+    <div class="dt-day-tab" onclick="filterRecipes('ontbijt')" data-filter="ontbijt">🌅 Ontbijt</div>
+    <div class="dt-day-tab" onclick="filterRecipes('lunch')" data-filter="lunch">🥗 Lunch</div>
+    <div class="dt-day-tab" onclick="filterRecipes('middagsnack')" data-filter="middagsnack">🍌 Middagsnack</div>
+    <div class="dt-day-tab" onclick="filterRecipes('diner')" data-filter="diner">🍽️ Diner</div>
+    <div class="dt-day-tab" onclick="filterRecipes('avondsnack')" data-filter="avondsnack">🌙 Avondsnack</div>
+  </div>
+
+  <div id="recipe-list" style="margin-bottom:1.25rem;"></div>
+
+  <div class="dt-add-food">
+    <div class="dt-add-title">Nieuw recept toevoegen</div>
+    <div class="dt-add-row"><input type="text" id="rec-name" placeholder="Naam recept" autocomplete="off" /></div>
+    <div class="dt-add-row">
+      <select id="rec-meal" style="flex:1;">
+        <option value="ontbijt">🌅 Ontbijt</option>
+        <option value="lunch">🥗 Lunch</option>
+        <option value="middagsnack">🍌 Middagsnack</option>
+        <option value="diner">🍽️ Diner</option>
+        <option value="avondsnack">🌙 Avondsnack</option>
+      </select>
+    </div>
+    <div class="dt-add-row">
+      <input type="number" id="rec-kcal" placeholder="kcal" inputmode="decimal" style="max-width:80px;flex:0 0 80px;" />
+      <input type="number" id="rec-protein" placeholder="Eiwit (g)" inputmode="decimal" />
+      <input type="number" id="rec-carbs" placeholder="Koolh. (g)" inputmode="decimal" />
+      <input type="number" id="rec-fat" placeholder="Vet (g)" inputmode="decimal" />
+    </div>
+    <div class="dt-add-row">
+      <textarea id="rec-ingredients" placeholder="Ingrediënten (één per regel)" style="flex:1;min-height:80px;resize:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;outline:none;line-height:1.5;"></textarea>
+    </div>
+    <div class="dt-add-row">
+      <textarea id="rec-instructions" placeholder="Bereidingswijze" style="flex:1;min-height:80px;resize:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;outline:none;line-height:1.5;"></textarea>
+    </div>
+    <button class="btn-dt-add" onclick="addRecipe()" style="width:100%;margin-top:4px;">+ Recept opslaan</button>
+  </div>
+</div>
+</div><!-- end #page-recepten -->
+
+<!-- Recipe detail modal -->
+<div class="day-modal" id="recipe-modal" style="background:var(--bg);">
+  <div class="day-modal-header">
+    <button class="day-back-btn" onclick="closeRecipeModal()">←</button>
+    <div class="day-modal-title">
+      <div class="day-modal-date" id="recipe-modal-name"></div>
+      <div class="day-modal-total" id="recipe-modal-sub"></div>
+    </div>
+  </div>
+  <div class="day-modal-body" id="recipe-modal-body"></div>
 </div>
 
 <!-- Day detail modal -->
@@ -1093,6 +1388,407 @@ document.getElementById('install-banner').querySelector('button').addEventListen
 });
 
 loadEntries();
+
+// ===== DROOGTRAINING =====
+const MEALS = ['ontbijt','lunch','middagsnack','diner','avondsnack'];
+const MEAL_ICONS = { ontbijt:'🌅', lunch:'🥗', middagsnack:'🍌', diner:'🍽️', avondsnack:'🌙' };
+const MEAL_NAMES = { ontbijt:'Ontbijt', lunch:'Lunch', middagsnack:'Middagsnack', diner:'Diner', avondsnack:'Avondsnack' };
+const WEEK_DAYS = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+const WEEK_DAYS_FULL = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+
+let dtViewDate = new Date();
+let dtGoals = JSON.parse(localStorage.getItem('dt_goals') || '{"kcal":2000,"protein":150}');
+let dtWater = JSON.parse(localStorage.getItem('dt_water_' + todayKey()) || '0');
+let dtWeightLog = JSON.parse(localStorage.getItem('dt_weight') || '[]');
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getFoodLog(dateStr) {
+  return JSON.parse(localStorage.getItem('dt_food_' + dateStr) || '[]');
+}
+function saveFoodLog(dateStr, log) {
+  localStorage.setItem('dt_food_' + dateStr, JSON.stringify(log));
+}
+
+function getWeekStart(date) {
+  const d = new Date(date);
+  const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+  d.setDate(d.getDate() - dow);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function changeWeek(dir) {
+  dtViewDate.setDate(dtViewDate.getDate() + dir * 7);
+  renderDT();
+}
+
+function selectDay(dateStr) {
+  dtViewDate = new Date(dateStr + 'T12:00:00');
+  renderDT();
+}
+
+function addFood() {
+  const name = document.getElementById('dt-food-name').value.trim();
+  const kcal = parseFloat(document.getElementById('dt-food-kcal').value) || 0;
+  const protein = parseFloat(document.getElementById('dt-food-protein').value) || 0;
+  const carbs = parseFloat(document.getElementById('dt-food-carbs').value) || 0;
+  const fat = parseFloat(document.getElementById('dt-food-fat').value) || 0;
+  const meal = document.getElementById('dt-food-meal').value;
+  if (!name || !kcal) { showToast('Vul naam en calorieën in.'); return; }
+  const dk = dateKey(dtViewDate);
+  const log = getFoodLog(dk);
+  log.push({ id: Date.now(), name, kcal, protein, carbs, fat, meal });
+  saveFoodLog(dk, log);
+  ['dt-food-name','dt-food-kcal','dt-food-protein','dt-food-carbs','dt-food-fat'].forEach(id => document.getElementById(id).value = '');
+  renderDT();
+  showToast('Voeding toegevoegd ✓');
+}
+
+function removeFood(id, dateStr) {
+  const log = getFoodLog(dateStr).filter(f => f.id !== id);
+  saveFoodLog(dateStr, log);
+  renderDT();
+}
+
+function saveGoals() {
+  const kcal = parseInt(document.getElementById('dt-goal-kcal').value) || 2000;
+  const protein = parseInt(document.getElementById('dt-goal-protein').value) || 150;
+  dtGoals = { kcal, protein };
+  localStorage.setItem('dt_goals', JSON.stringify(dtGoals));
+  renderDT();
+  showToast('Doelen opgeslagen ✓');
+}
+
+function logWeight() {
+  const val = prompt('Huidig gewicht (kg):');
+  if (!val || isNaN(parseFloat(val))) return;
+  dtWeightLog.push({ date: todayKey(), weight: parseFloat(val) });
+  localStorage.setItem('dt_weight', JSON.stringify(dtWeightLog));
+  renderDT();
+}
+
+function toggleWater(idx) {
+  const dk = 'dt_water_' + todayKey();
+  let w = parseInt(localStorage.getItem(dk) || '0');
+  w = idx < w ? idx : idx + 1;
+  localStorage.setItem(dk, w);
+  dtWater = w;
+  renderWater();
+}
+
+function renderWater() {
+  const track = document.getElementById('water-track');
+  document.getElementById('dt-water-val').textContent = dtWater;
+  track.innerHTML = Array.from({length:8},(_,i) =>
+    `<div class="water-glass ${i < dtWater ? 'filled' : ''}" onclick="toggleWater(${i})">💧</div>`
+  ).join('');
+}
+
+// ===== RECEPTEN =====
+let recipeFilter = 'alle';
+
+function getRecipes() { return JSON.parse(localStorage.getItem('dt_recipes') || '[]'); }
+function saveRecipes(r) { localStorage.setItem('dt_recipes', JSON.stringify(r)); }
+
+function addRecipe() {
+  const name = document.getElementById('rec-name').value.trim();
+  const meal = document.getElementById('rec-meal').value;
+  const kcal = parseFloat(document.getElementById('rec-kcal').value) || 0;
+  const protein = parseFloat(document.getElementById('rec-protein').value) || 0;
+  const carbs = parseFloat(document.getElementById('rec-carbs').value) || 0;
+  const fat = parseFloat(document.getElementById('rec-fat').value) || 0;
+  const ingredients = document.getElementById('rec-ingredients').value.trim();
+  const instructions = document.getElementById('rec-instructions').value.trim();
+  if (!name || !kcal) { showToast('Vul naam en calorieën in.'); return; }
+  const recipes = getRecipes();
+  recipes.push({ id: Date.now(), name, meal, kcal, protein, carbs, fat, ingredients, instructions });
+  saveRecipes(recipes);
+  ['rec-name','rec-kcal','rec-protein','rec-carbs','rec-fat'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rec-ingredients').value = '';
+  document.getElementById('rec-instructions').value = '';
+  renderRecipes();
+  showToast('Recept opgeslagen ✓');
+}
+
+function deleteRecipe(id) {
+  saveRecipes(getRecipes().filter(r => r.id !== id));
+  renderRecipes();
+  showToast('Recept verwijderd');
+}
+
+function filterRecipes(filter) {
+  recipeFilter = filter;
+  document.querySelectorAll('#recipe-filter-tabs .dt-day-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.filter === filter);
+  });
+  renderRecipes();
+}
+
+function openRecipeDetail(id) {
+  const r = getRecipes().find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('recipe-modal-name').textContent = r.name;
+  document.getElementById('recipe-modal-sub').textContent = MEAL_NAMES[r.meal] + ' · ' + r.kcal + ' kcal · E: ' + r.protein + 'g · KH: ' + r.carbs + 'g · V: ' + r.fat + 'g';
+  const body = document.getElementById('recipe-modal-body');
+  body.innerHTML = '';
+
+  // Macros row
+  const macroDiv = document.createElement('div');
+  macroDiv.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem;';
+  [['Eiwit', r.protein+'g', '#4ade80'], ['Koolh.', r.carbs+'g', '#fbbf24'], ['Vet', r.fat+'g', '#f472b6']].forEach(([label, val, color]) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:var(--surface2);border-radius:12px;padding:10px 12px;text-align:center;';
+    d.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">'+label+'</div><div style="font-size:18px;font-weight:700;color:'+color+';">'+val+'</div>';
+    macroDiv.appendChild(d);
+  });
+  body.appendChild(macroDiv);
+
+  // Ingredients
+  if (r.ingredients) {
+    const ingDiv = document.createElement('div');
+    ingDiv.style.cssText = 'margin-bottom:1.25rem;';
+    ingDiv.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Ingrediënten</div>';
+    const lines = r.ingredients.split('
+').filter(l => l.trim());
+    lines.forEach(line => {
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;';
+      item.innerHTML = '<span style="color:var(--green);font-size:12px;">●</span> ' + line.trim();
+      ingDiv.appendChild(item);
+    });
+    body.appendChild(ingDiv);
+  }
+
+  // Instructions
+  if (r.instructions) {
+    const instDiv = document.createElement('div');
+    instDiv.style.cssText = 'margin-bottom:1.25rem;';
+    instDiv.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Bereidingswijze</div>' +
+      '<div style="font-size:14px;line-height:1.7;color:var(--text);">' + r.instructions.replace(/
+/g, '<br>') + '</div>';
+    body.appendChild(instDiv);
+  }
+
+  // Add to day button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-dt-add';
+  addBtn.style.cssText = 'width:100%;margin-top:8px;';
+  addBtn.textContent = '+ Voeg toe aan dag';
+  addBtn.onclick = () => addRecipeToDay(id);
+  body.appendChild(addBtn);
+
+  document.getElementById('recipe-modal').classList.add('open');
+}
+
+function closeRecipeModal() {
+  document.getElementById('recipe-modal').classList.remove('open');
+}
+
+function addRecipeToDay(id) {
+  const r = getRecipes().find(x => x.id === id);
+  if (!r) return;
+  const dk = dateKey(dtViewDate);
+  const log = getFoodLog(dk);
+  log.push({ id: Date.now(), name: r.name, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, meal: r.meal });
+  saveFoodLog(dk, log);
+  closeRecipeModal();
+  switchPage('droogtraining');
+  renderDT();
+  showToast(r.name + ' toegevoegd aan ' + MEAL_NAMES[r.meal] + ' ✓');
+}
+
+function renderRecipes() {
+  const recipes = getRecipes();
+  const filtered = recipeFilter === 'alle' ? recipes : recipes.filter(r => r.meal === recipeFilter);
+  const list = document.getElementById('recipe-list');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:2rem 0;font-size:14px;">Nog geen recepten' + (recipeFilter !== 'alle' ? ' in deze categorie' : '') + '.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(r => {
+    const icon = MEAL_ICONS[r.meal] || '🍽️';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="openRecipeDetail(${r.id})">
+      <div style="font-size:28px;flex-shrink:0;">${icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">${MEAL_NAMES[r.meal]} · ${r.kcal} kcal · E: ${r.protein}g</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button onclick="event.stopPropagation();deleteRecipe(${r.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Recipe picker modal for meal
+let recipePickerMeal = null;
+
+function addRecipeFromMeal(meal) {
+  recipePickerMeal = meal;
+  const recipes = getRecipes().filter(r => r.meal === meal || true); // show all
+  if (recipes.length === 0) {
+    showToast('Geen recepten gevonden. Voeg eerst recepten toe.');
+    switchPage('recepten');
+    return;
+  }
+  // Build quick picker
+  const existing = document.getElementById('recipe-quick-picker');
+  if (existing) existing.remove();
+  const picker = document.createElement('div');
+  picker.id = 'recipe-quick-picker';
+  picker.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:55;display:flex;align-items:flex-end;justify-content:center;';
+  picker.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;max-height:70vh;overflow-y:auto;">
+    <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;text-align:center;">Kies een recept</div>
+    ${recipes.map(r => `<div onclick="addRecipeToMeal(${r.id},'${meal}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:14px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
+      <span style="font-size:24px;">${MEAL_ICONS[r.meal]||'🍽️'}</span>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${r.name}</div><div style="font-size:12px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g</div></div>
+    </div>`).join('')}
+    <button onclick="document.getElementById('recipe-quick-picker').remove()" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px;">Annuleren</button>
+  </div>`;
+  document.body.appendChild(picker);
+}
+
+function addRecipeToMeal(id, meal) {
+  const r = getRecipes().find(x => x.id === id);
+  if (!r) return;
+  const dk = dateKey(dtViewDate);
+  const log = getFoodLog(dk);
+  log.push({ id: Date.now(), name: r.name, kcal: r.kcal, protein: r.protein, carbs: r.carbs, fat: r.fat, meal: meal });
+  saveFoodLog(dk, log);
+  const picker = document.getElementById('recipe-quick-picker');
+  if (picker) picker.remove();
+  renderDT();
+  showToast(r.name + ' toegevoegd ✓');
+}
+
+function renderDT() {
+  const dk = dateKey(dtViewDate);
+  const log = getFoodLog(dk);
+  const totalKcal = log.reduce((s,f) => s+f.kcal, 0);
+  const totalProtein = log.reduce((s,f) => s+f.protein, 0);
+  const totalCarbs = log.reduce((s,f) => s+f.carbs, 0);
+  const totalFat = log.reduce((s,f) => s+f.fat, 0);
+  const remaining = dtGoals.kcal - totalKcal;
+
+  // Hero
+  document.getElementById('dt-kcal-consumed').textContent = Math.round(totalKcal);
+  document.getElementById('dt-kcal-goal').textContent = dtGoals.kcal;
+  document.getElementById('dt-kcal-sub').textContent = remaining >= 0 ? 'Nog ' + Math.round(remaining) + ' kcal over' : Math.round(Math.abs(remaining)) + ' kcal over doel';
+  document.getElementById('dt-protein').textContent = Math.round(totalProtein);
+  document.getElementById('dt-carbs').textContent = Math.round(totalCarbs);
+  document.getElementById('dt-fat').textContent = Math.round(totalFat);
+
+  // Goals prefill
+  document.getElementById('dt-goal-kcal').placeholder = 'Caloriedoel: ' + dtGoals.kcal;
+  document.getElementById('dt-goal-protein').placeholder = 'Eiwit doel: ' + dtGoals.protein + 'g';
+
+  // Weight
+  const lastWeight = dtWeightLog.length > 0 ? dtWeightLog[dtWeightLog.length-1] : null;
+  document.getElementById('dt-weight').textContent = lastWeight ? lastWeight.weight : '—';
+  if (lastWeight && dtWeightLog.length > 1) {
+    const prev = dtWeightLog[dtWeightLog.length-2];
+    const diff = (lastWeight.weight - prev.weight).toFixed(1);
+    document.getElementById('dt-weight-sub').textContent = diff > 0 ? '+' + diff + 'kg vs vorige meting' : diff + 'kg vs vorige meting';
+  } else if (lastWeight) {
+    document.getElementById('dt-weight-sub').textContent = 'Gemeten op ' + lastWeight.date;
+  }
+
+  // Water
+  dtWater = parseInt(localStorage.getItem('dt_water_' + todayKey()) || '0');
+  renderWater();
+
+  // Week nav
+  const weekStart = getWeekStart(dtViewDate);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  const wsStr = weekStart.getDate() + ' ' + ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][weekStart.getMonth()];
+  const weStr = weekEnd.getDate() + ' ' + ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][weekEnd.getMonth()];
+  document.getElementById('dt-week-label').textContent = wsStr + ' – ' + weStr;
+
+  // Day tabs
+  const tabs = document.getElementById('dt-day-tabs');
+  tabs.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i);
+    const dStr = dateKey(d);
+    const dayLog = getFoodLog(dStr);
+    const dayKcal = dayLog.reduce((s,f)=>s+f.kcal,0);
+    const isActive = dStr === dk;
+    const tab = document.createElement('div');
+    tab.className = 'dt-day-tab' + (isActive ? ' active' : '');
+    tab.innerHTML = WEEK_DAYS[i] + (dayKcal > 0 ? ' · ' + Math.round(dayKcal) : '');
+    tab.onclick = () => selectDay(dStr);
+    tabs.appendChild(tab);
+  }
+
+  // Meals
+  const wrap = document.getElementById('dt-meals-wrap');
+  wrap.innerHTML = MEALS.map(meal => {
+    const items = log.filter(f => f.meal === meal);
+    const mealKcal = items.reduce((s,f)=>s+f.kcal,0);
+    return `<div class="meal-card">
+      <div class="meal-header">
+        <div class="meal-header-left">
+          <span class="meal-icon">${MEAL_ICONS[meal]}</span>
+          <div>
+            <div class="meal-name">${MEAL_NAMES[meal]}</div>
+            <div class="meal-kcal">${mealKcal > 0 ? Math.round(mealKcal) + ' kcal' : 'Leeg'}</div>
+          </div>
+        </div>
+        <button onclick="addRecipeFromMeal('${meal}')" style="background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:8px;color:var(--purple-light);font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📖 Recept</button>
+      </div>
+      ${items.length > 0 ? `<div class="meal-items">${items.map(f =>
+        `<div class="meal-item">
+          <div>
+            <div class="meal-item-name">${f.name}</div>
+            <div class="meal-item-macros">E: ${f.protein}g · KH: ${f.carbs}g · V: ${f.fat}g</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="meal-item-kcal">${f.kcal} kcal</span>
+            <button class="meal-item-del" onclick="removeFood(${f.id},'${dk}')">×</button>
+          </div>
+        </div>`
+      ).join('')}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖' };
+const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten' };
+
+function openPagePicker() {
+  document.getElementById('page-picker').classList.add('open');
+}
+
+function closePagePicker(evt) {
+  if (evt && evt.target !== document.getElementById('page-picker')) return;
+  document.getElementById('page-picker').classList.remove('open');
+}
+
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-picker-item').forEach(n => {
+    n.classList.remove('active');
+    n.querySelector('.page-picker-item-check').textContent = '';
+  });
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('picker-' + page).classList.add('active');
+  document.getElementById('picker-' + page).querySelector('.page-picker-item-check').textContent = '✓';
+  document.getElementById('top-nav-icon').textContent = PAGE_ICONS[page];
+  document.getElementById('top-nav-label').textContent = PAGE_NAMES[page];
+  document.getElementById('page-picker').classList.remove('open');
+  if (page === 'droogtraining') renderDT();
+  if (page === 'recepten') renderRecipes();
+  window.scrollTo(0, 0);
+}
+
+renderDT();
 </script>
 </body>
 </html>
