@@ -411,24 +411,24 @@ select option { background: #1a1830; }
     <div class="page-picker-item active" id="picker-zakgeld" onclick="switchPage('zakgeld')">
       <div class="page-picker-item-icon">💰</div>
       <div class="page-picker-item-info">
-        <div class="page-picker-item-name">Zakgeld</div>
+        <div class="page-picker-item-name">Budget</div>
         <div class="page-picker-item-sub">Budget & uitgaven bijhouden</div>
       </div>
       <div class="page-picker-item-check">✓</div>
     </div>
     <div class="page-picker-item" id="picker-droogtraining" onclick="switchPage('droogtraining')">
-      <div class="page-picker-item-icon">💪</div>
+      <div class="page-picker-item-icon">🥗</div>
       <div class="page-picker-item-info">
-        <div class="page-picker-item-name">Droogtraining</div>
-        <div class="page-picker-item-sub">Voeding, macro's & gewicht</div>
+        <div class="page-picker-item-name">Voeding</div>
+        <div class="page-picker-item-sub">Macro's, gewicht & training</div>
       </div>
       <div class="page-picker-item-check"></div>
     </div>
     <div class="page-picker-item" id="picker-recepten" onclick="switchPage('recepten')">
-      <div class="page-picker-item-icon">📖</div>
+      <div class="page-picker-item-icon">🍳</div>
       <div class="page-picker-item-info">
-        <div class="page-picker-item-name">Recepten</div>
-        <div class="page-picker-item-sub">Jouw receptenbibliotheek</div>
+        <div class="page-picker-item-name">Keuken</div>
+        <div class="page-picker-item-sub">Recepten & mealprep</div>
       </div>
       <div class="page-picker-item-check"></div>
     </div>
@@ -574,8 +574,8 @@ select option { background: #1a1830; }
 <div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
   <header>
     <div class="header-left">
-      <div class="header-greeting">Droogtraining 💪</div>
-      <div class="header-name">Voeding & Training</div>
+      <div class="header-greeting">Voeding & Training 🥗</div>
+      <div class="header-name">Voeding</div>
     </div>
   </header>
 
@@ -2826,8 +2826,8 @@ function renderDT() {
   }).join('');
 }
 
-const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖' };
-const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten' };
+const PAGE_ICONS = { zakgeld: '💰', droogtraining: '🥗', recepten: '🍳' };
+const PAGE_NAMES = { zakgeld: 'Budget', droogtraining: 'Voeding', recepten: 'Keuken' };
 
 function openPagePicker() {
   document.getElementById('page-picker').classList.add('open');
