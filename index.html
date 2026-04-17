@@ -109,6 +109,23 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .dt-add-row input, .dt-add-row select { min-width: 0; flex: 1; }
 .btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #1a7a52, #22c55e); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
+/* Mealprep */
+.mp-week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 1.25rem; }
+.mp-day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 4px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+.mp-day-card.has-meal { border-color: rgba(124,92,252,0.4); background: rgba(124,92,252,0.08); }
+.mp-day-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+.mp-day-meal { font-size: 9px; color: var(--purple-light); line-height: 1.2; min-height: 20px; }
+.mp-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; }
+.mp-section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+.mp-grocery-cat { font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 0 6px; }
+.mp-grocery-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.mp-grocery-item input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--purple); cursor: pointer; flex-shrink: 0; }
+.mp-grocery-item.checked span { text-decoration: line-through; color: var(--muted); }
+.mp-prep-step { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.mp-prep-num { width: 28px; height: 28px; border-radius: 50%; background: var(--purple); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mp-prep-text { font-size: 13px; line-height: 1.5; flex: 1; }
+.mp-prep-time { font-size: 11px; color: var(--cyan); margin-top: 2px; }
+
 /* Barcode scanner */
 .scanner-modal { position: fixed; inset: 0; background: #000; z-index: 70; display: none; flex-direction: column; }
 .scanner-modal.open { display: flex; }
@@ -412,6 +429,14 @@ select option { background: #1a1830; }
       <div class="page-picker-item-info">
         <div class="page-picker-item-name">Recepten</div>
         <div class="page-picker-item-sub">Jouw receptenbibliotheek</div>
+      </div>
+      <div class="page-picker-item-check"></div>
+    </div>
+    <div class="page-picker-item" id="picker-mealprep" onclick="switchPage('mealprep')">
+      <div class="page-picker-item-icon">🥗</div>
+      <div class="page-picker-item-info">
+        <div class="page-picker-item-name">Mealprep</div>
+        <div class="page-picker-item-sub">Weekplanning & boodschappenlijst</div>
       </div>
       <div class="page-picker-item-check"></div>
     </div>
@@ -836,6 +861,54 @@ select option { background: #1a1830; }
       </div>
     </div>
     <div class="scanner-hint">Richt de camera op een barcode</div>
+  </div>
+</div>
+
+<!-- Mealprep page -->
+<div class="page" id="page-mealprep">
+<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
+  <header>
+    <div class="header-left">
+      <div class="header-greeting">Zondag mealprep 🥗</div>
+      <div class="header-name">Weekplanning</div>
+    </div>
+  </header>
+
+  <!-- Week selector -->
+  <div class="dt-week-nav" style="margin-bottom:1.25rem;">
+    <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
+    <span class="dt-week-label" id="mp-week-label"></span>
+    <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
+  </div>
+
+  <!-- Week grid -->
+  <div class="mp-week-grid" id="mp-week-grid"></div>
+
+  <!-- Boodschappenlijst -->
+  <div class="mp-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
+      <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
+    </div>
+    <div id="mp-grocery-list"></div>
+  </div>
+
+  <!-- Mealprep schema -->
+  <div class="mp-section">
+    <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
+    <div id="mp-prep-schema"></div>
+  </div>
+</div>
+</div><!-- end #page-mealprep -->
+
+<!-- Meal picker for mealprep day -->
+<div class="page-picker-backdrop" id="mp-meal-picker">
+  <div class="page-picker" style="max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="page-picker-title" style="margin-bottom:0;" id="mp-picker-title">Kies een diner</div>
+      <button onclick="document.getElementById('mp-meal-picker').classList.remove('open')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div id="mp-meal-picker-list"></div>
   </div>
 </div>
 
@@ -1734,6 +1807,226 @@ function undoWater() {
   showToast('Laatste ' + lastMl + ' ml ongedaan gemaakt');
 }
 
+// ===== INGEBOUWDE DROOGTRAINING RECEPTEN =====
+const BUILTIN_RECIPES = [
+  { id:'b1', name:'Kipfilet met rijst & broccoli', meal:'diner', kcal:480, protein:48, carbs:52, fat:6, time:25, ingredients:'200g kipfilet\n150g rijst (droog)\n200g broccoli\n1 el olijfolie\nKnoflook, zout, peper', instructions:'Kook de rijst. Bak de kipfilet op middelhoog vuur 6-7 min per kant. Stoom of kook de broccoli. Breng op smaak met knoflook, zout en peper.', category:'Kip', image:null },
+  { id:'b2', name:'Zalm met zoete aardappel', meal:'diner', kcal:520, protein:42, carbs:45, fat:14, time:25, ingredients:'180g zalmmoot\n250g zoete aardappel\n100g sperziebonen\n1 el olijfolie\nCitroensap, dille', instructions:'Schil en snij de zoete aardappel in blokjes, rooster 20 min op 200°C. Bak de zalm 4 min per kant. Kook de sperziebonen. Serveer met citroensap en dille.', category:'Vis', image:null },
+  { id:'b3', name:'Gehakt met pasta & tomatensaus', meal:'diner', kcal:560, protein:44, carbs:58, fat:12, time:25, ingredients:'150g mager rundergehakt\n100g volkoren pasta\n200ml passata\n1 ui\nKnoflook, Italiaanse kruiden', instructions:'Kook de pasta. Fruit de ui en knoflook. Bak het gehakt rul. Voeg passata toe en laat 10 min sudderen. Meng met pasta.', category:'Rood vlees', image:null },
+  { id:'b4', name:'Tonijn pasta', meal:'diner', kcal:440, protein:40, carbs:55, fat:6, time:15, ingredients:'1 blik tonijn (150g)\n100g volkoren pasta\n50g maïs\n100ml passata\nKnoflook, basilicum', instructions:'Kook de pasta. Verwarm de passata met knoflook. Meng met tonijn en maïs. Doe over de pasta.', category:'Vis', image:null },
+  { id:'b5', name:'Kipshoarma bowl', meal:'diner', kcal:490, protein:46, carbs:48, fat:10, time:20, ingredients:'200g kipfilet\n150g rijst\n50g komkommer\n50g tomaat\nShoarma kruidenmix, Griekse yoghurt', instructions:'Marineer kip met shoarma kruiden. Kook de rijst. Bak de kip op hoog vuur. Serveer als bowl met komkommer, tomaat en yoghurt.', category:'Kip', image:null },
+  { id:'b6', name:'Biefstuk met aardappelen & spinazie', meal:'diner', kcal:530, protein:50, carbs:35, fat:16, time:25, ingredients:'180g biefstuk\n200g aardappelen\n150g spinazie\n1 el olijfolie\nRozemarijn, knoflook', instructions:'Kook de aardappelen. Bak de biefstuk 3 min per kant op hoog vuur. Laat rusten. Roerbak de spinazie met knoflook.', category:'Rood vlees', image:null },
+  { id:'b7', name:'Tilapia met quinoa & groenten', meal:'diner', kcal:420, protein:44, carbs:40, fat:8, time:25, ingredients:'180g tilapia\n80g quinoa\n150g paprika en courgette\n1 el olijfolie\nCitroensap, peterselie', instructions:'Kook de quinoa. Rooster de groenten in de oven op 200°C. Bak de tilapia 3-4 min per kant. Serveer met citroensap.', category:'Vis', image:null },
+  { id:'b8', name:'Kippensoep met rijst', meal:'diner', kcal:380, protein:38, carbs:42, fat:6, time:30, ingredients:'200g kipfilet\n100g rijst\n2 wortelen\n2 stengels bleekselderij\n1 ui\nKippenbouillon, peterselie', instructions:'Snij de groenten. Kook alles samen met bouillon 20 min. Voeg rijst toe en kook nog 10 min. Haal kip eruit, scheur fijn en doe terug.', category:'Kip', image:null },
+  { id:'b9', name:'Wrap met kip & avocado', meal:'diner', kcal:460, protein:40, carbs:38, fat:14, time:15, ingredients:'180g kipfilet\n2 volkoren wraps\n1 avocado\n50g ijsbergsla\n50g tomaat\nLimoen, koriander', instructions:'Bak de kip en snij in reepjes. Prak de avocado met limoensap. Beleg de wraps met kip, avocadospread, sla en tomaat.', category:'Kip', image:null },
+  { id:'b10', name:'Gehakt met rijst & peultjes', meal:'diner', kcal:510, protein:42, carbs:50, fat:12, time:20, ingredients:'150g rundergehakt\n150g rijst\n150g peultjes\nSojasaus, gember, knoflook\n1 el sesamolie', instructions:'Kook de rijst. Roerbak het gehakt met gember en knoflook. Voeg peultjes toe en bak 3 min. Breng op smaak met sojasaus en sesamolie.', category:'Rood vlees', image:null },
+  { id:'b11', name:'Kabeljauw met aardappelpuree', meal:'diner', kcal:400, protein:40, carbs:38, fat:8, time:25, ingredients:'200g kabeljauw\n250g aardappelen\n100ml magere melk\n150g spinazie\nMosterd, citroen', instructions:'Kook de aardappelen en pureer met melk. Bak de kabeljauw 4 min per kant. Roerbak de spinazie. Serveer met een schepje mosterd.', category:'Vis', image:null },
+  { id:'b12', name:'Kippenburger met zoete aardappelfriet', meal:'diner', kcal:500, protein:44, carbs:48, fat:10, time:30, ingredients:'180g kipgehakt\n300g zoete aardappel\n1 volkoren broodje\nSla, tomaat\nKruiden naar smaak', instructions:'Maak zoete aardappelfriet in de oven op 200°C (20 min). Meng kipgehakt met kruiden en vorm een burger. Bak 5 min per kant.', category:'Kip', image:null },
+  { id:'b13', name:'Pasta carbonara light', meal:'diner', kcal:490, protein:38, carbs:54, fat:12, time:20, ingredients:'100g volkoren pasta\n100g kipfilet\n2 eieren\n30g Parmezaan\nZwarte peper, peterselie', instructions:'Kook de pasta. Bak de kip en snij in reepjes. Mix eieren met Parmezaan. Meng met hete pasta (geen warmte). Voeg kip toe.', category:'Kip', image:null },
+  { id:'b14', name:'Zalmburger met aardappelsalade', meal:'diner', kcal:480, protein:40, carbs:36, fat:16, time:25, ingredients:'180g zalmfilet\n200g aardappelen\n50g komkommer\n2 el Griekse yoghurt\nDille, mosterd, citroen', instructions:'Kook de aardappelen en laat afkoelen. Bak de zalm 4 min per kant. Maak salade met yoghurt, mosterd en dille.', category:'Vis', image:null },
+  { id:'b15', name:'Rundvlees wokschotel', meal:'diner', kcal:520, protein:46, carbs:44, fat:14, time:20, ingredients:'180g runderreepjes\n150g rijst\n200g wokvgroenten mix\nOestersaus, sojasaus\nGember, knoflook, sesamolie', instructions:'Kook de rijst. Verhit wok op hoog vuur. Bak het vlees 3 min. Voeg groenten en sauzen toe. Bak nog 3 min. Serveer over rijst.', category:'Rood vlees', image:null }
+];
+
+// ===== MEALPREP =====
+let mpViewDate = new Date();
+let mpWeekPlan = JSON.parse(localStorage.getItem('mp_weekplan') || '{}');
+let mpGroceries = JSON.parse(localStorage.getItem('mp_groceries') || '{}');
+let mpPickerDay = null;
+
+const GROCERY_CATS = {
+  'Vlees & Vis': ['kipfilet','zalm','gehakt','biefstuk','tonijn','tilapia','kabeljauw','kipgehakt','rundergehakt','runderreepjes','zalmfilet','zalmfilet'],
+  'Groente': ['broccoli','spinazie','paprika','courgette','peultjes','sperziebonen','wokvgroenten','tomaat','komkommer','ui','wortelen','bleekselderij','knoflook','gember','avocado','ijsbergsla'],
+  'Koolhydraten': ['rijst','pasta','aardappel','aardappelen','zoete aardappel','quinoa','wrap','wraps','broodje'],
+  'Zuivel & Eieren': ['eieren','melk','parmezaan','griekse yoghurt'],
+  'Overig': []
+};
+
+function getMpWeekStart(date) {
+  const d = new Date(date);
+  const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+  d.setDate(d.getDate() - dow);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function changeMpWeek(dir) {
+  mpViewDate.setDate(mpViewDate.getDate() + dir * 7);
+  renderMealprep();
+}
+
+function getMpWeekKey(date) {
+  const ws = getMpWeekStart(date);
+  return ws.getFullYear() + '-' + String(ws.getMonth()+1).padStart(2,'0') + '-' + String(ws.getDate()).padStart(2,'0');
+}
+
+function openMpMealPicker(dayStr) {
+  mpPickerDay = dayStr;
+  const d = new Date(dayStr + 'T12:00:00');
+  const dayNames = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+  const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;
+  document.getElementById('mp-picker-title').textContent = 'Diner voor ' + dayNames[dow];
+
+  // Show builtin recipes + user recipes
+  const allRecipes = [...BUILTIN_RECIPES, ...getRecipes().filter(r => r.meal === 'diner')];
+  const list = document.getElementById('mp-meal-picker-list');
+  
+  // Remove option
+  list.innerHTML = `<div onclick="removeMpMeal('${dayStr}')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
+    <span style="font-size:20px;">🗑️</span>
+    <div style="font-size:14px;color:var(--muted);">Geen diner deze dag</div>
+  </div>` +
+  allRecipes.map(r => `
+    <div onclick="selectMpMeal('${r.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
+      ${r.image ? `<img src="${r.image}" style="width:44px;height:44px;border-radius:10px;object-fit:contain;background:var(--surface);padding:3px;flex-shrink:0;" onerror="this.style.display='none'" />` : `<span style="font-size:24px;flex-shrink:0;">🍽️</span>`}
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${r.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g · ${r.time || '?'} min</div>
+      </div>
+    </div>`).join('');
+  
+  document.getElementById('mp-meal-picker').classList.add('open');
+}
+
+function selectMpMeal(recipeId) {
+  if (!mpPickerDay) return;
+  const wk = getMpWeekKey(new Date(mpPickerDay + 'T12:00:00'));
+  if (!mpWeekPlan[wk]) mpWeekPlan[wk] = {};
+  mpWeekPlan[wk][mpPickerDay] = recipeId;
+  localStorage.setItem('mp_weekplan', JSON.stringify(mpWeekPlan));
+  document.getElementById('mp-meal-picker').classList.remove('open');
+  renderMealprep();
+}
+
+function removeMpMeal(dayStr) {
+  const wk = getMpWeekKey(new Date(dayStr + 'T12:00:00'));
+  if (mpWeekPlan[wk]) delete mpWeekPlan[wk][dayStr];
+  localStorage.setItem('mp_weekplan', JSON.stringify(mpWeekPlan));
+  document.getElementById('mp-meal-picker').classList.remove('open');
+  renderMealprep();
+}
+
+function getRecipeById(id) {
+  const builtin = BUILTIN_RECIPES.find(r => r.id === id);
+  if (builtin) return builtin;
+  return getRecipes().find(r => r.id == id) || null;
+}
+
+function clearGroceries() {
+  const wk = getMpWeekKey(mpViewDate);
+  delete mpGroceries[wk];
+  localStorage.setItem('mp_groceries', JSON.stringify(mpGroceries));
+  renderMealprep();
+}
+
+function toggleGrocery(wk, item) {
+  if (!mpGroceries[wk]) mpGroceries[wk] = {};
+  mpGroceries[wk][item] = !mpGroceries[wk][item];
+  localStorage.setItem('mp_groceries', JSON.stringify(mpGroceries));
+  renderGroceryList(wk);
+}
+
+function renderGroceryList(wk) {
+  const plan = mpWeekPlan[wk] || {};
+  const checked = mpGroceries[wk] || {};
+  const groceryDiv = document.getElementById('mp-grocery-list');
+
+  // Collect all ingredients
+  const allIngredients = [];
+  Object.values(plan).forEach(recipeId => {
+    const r = getRecipeById(recipeId);
+    if (r && r.ingredients) {
+      r.ingredients.split('\n').forEach(line => {
+        const clean = line.replace(/^\d+[xg]?\s*/,'').trim().toLowerCase();
+        if (clean) allIngredients.push({ raw: line.trim(), clean });
+      });
+    }
+  });
+
+  if (allIngredients.length === 0) {
+    groceryDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;font-size:14px;">Plan eerst diners in de weekgrid hierboven.</div>';
+    return;
+  }
+
+  // Categorize
+  const categorized = {};
+  Object.keys(GROCERY_CATS).forEach(cat => categorized[cat] = []);
+  
+  allIngredients.forEach(item => {
+    let placed = false;
+    for (const [cat, keywords] of Object.entries(GROCERY_CATS)) {
+      if (cat === 'Overig') continue;
+      if (keywords.some(kw => item.clean.includes(kw))) {
+        categorized[cat].push(item.raw);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) categorized['Overig'].push(item.raw);
+  });
+
+  groceryDiv.innerHTML = Object.entries(categorized).map(([cat, items]) => {
+    if (items.length === 0) return '';
+    return `<div class="mp-grocery-cat">${cat}</div>` +
+      items.map(item => `
+        <div class="mp-grocery-item ${checked[item] ? 'checked' : ''}" onclick="toggleGrocery('${wk}','${item.replace(/'/g,'\'')}')" style="cursor:pointer;">
+          <input type="checkbox" ${checked[item] ? 'checked' : ''} onclick="event.stopPropagation();toggleGrocery('${wk}','${item.replace(/'/g,'\'')}')" />
+          <span style="font-size:14px;">${item}</span>
+        </div>`).join('');
+  }).join('');
+}
+
+function renderMealprep() {
+  const wk = getMpWeekKey(mpViewDate);
+  const plan = mpWeekPlan[wk] || {};
+  const ws = getMpWeekStart(mpViewDate);
+  const we = new Date(ws); we.setDate(we.getDate() + 6);
+  const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  document.getElementById('mp-week-label').textContent = ws.getDate() + ' ' + months[ws.getMonth()] + ' – ' + we.getDate() + ' ' + months[we.getMonth()];
+
+  // Week grid
+  const DAYS = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+  const grid = document.getElementById('mp-week-grid');
+  grid.innerHTML = DAYS.map((d, i) => {
+    const date = new Date(ws); date.setDate(date.getDate() + i);
+    const dStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+    const recipe = plan[dStr] ? getRecipeById(plan[dStr]) : null;
+    return `<div class="mp-day-card ${recipe ? 'has-meal' : ''}" onclick="openMpMealPicker('${dStr}')">
+      <div class="mp-day-label">${d}</div>
+      <div class="mp-day-meal">${recipe ? recipe.name.split(' ').slice(0,2).join(' ') : '+'}</div>
+    </div>`;
+  }).join('');
+
+  // Grocery list
+  renderGroceryList(wk);
+
+  // Prep schema
+  const prepDiv = document.getElementById('mp-prep-schema');
+  const plannedRecipes = [...new Set(Object.values(plan))].map(id => getRecipeById(id)).filter(Boolean);
+  
+  if (plannedRecipes.length === 0) {
+    prepDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;font-size:14px;">Plan diners in om een mealprep schema te zien.</div>';
+    return;
+  }
+
+  // Generate prep steps
+  const steps = [];
+  steps.push({ text: 'Zet water op voor rijst/pasta en verwarm de oven voor op 200°C.', time: '0 min' });
+  
+  plannedRecipes.forEach((r, i) => {
+    steps.push({ text: `Bereid ${r.name}: ${r.instructions ? r.instructions.split('.')[0] + '.' : 'Volg de bereidingswijze.'}`, time: `~${r.time || 20} min` });
+  });
+  
+  steps.push({ text: 'Verdeel alle maaltijden over bakjes en laat afkoelen. Zet in de koelkast (max 4 dagen) of vriezer.', time: '10 min' });
+
+  prepDiv.innerHTML = steps.map((s, i) => `
+    <div class="mp-prep-step">
+      <div class="mp-prep-num">${i+1}</div>
+      <div>
+        <div class="mp-prep-text">${s.text}</div>
+        <div class="mp-prep-time">⏱ ${s.time}</div>
+      </div>
+    </div>`).join('');
+}
+
 // ===== BARCODE SCANNER =====
 let scannerStream = null;
 let scannerInterval = null;
@@ -2488,8 +2781,8 @@ function renderDT() {
   }).join('');
 }
 
-const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖' };
-const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten' };
+const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖', mealprep: '🥗' };
+const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten', mealprep: 'Mealprep' };
 
 function openPagePicker() {
   document.getElementById('page-picker').classList.add('open');
@@ -2514,6 +2807,7 @@ function switchPage(page) {
   document.getElementById('page-picker').classList.remove('open');
   if (page === 'droogtraining') renderDT();
   if (page === 'recepten') renderRecipes();
+  if (page === 'mealprep') renderMealprep();
   window.scrollTo(0, 0);
 }
 
