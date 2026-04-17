@@ -327,9 +327,9 @@ select option { background: #1a1830; }
     <div class="feedback-block" id="feedback-block"></div>
     <div style="height:1px;background:var(--border);margin:1rem 0;"></div>
     <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Past dit in mijn budget?</div>
-    <div class="checker-row" style="display:flex;gap:8px;margin-bottom:8px;">
+    <div class="checker-row" style="display:flex;gap:8px;margin-bottom:8px;overflow:hidden;">
       <input type="text" id="chk-naam" placeholder="Wat wil je kopen?" style="flex:1;" />
-      <input type="number" id="chk-bedrag" placeholder="€" min="0" step="0.01" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" />
+      <input type="number" id="chk-bedrag" placeholder="€" min="0" step="0.01" inputmode="decimal" style="max-width:85px;flex:0 0 85px;min-width:0;" />
     </div>
     <button class="btn-check" onclick="checkBudget()">Bereken →</button>
     <div class="checker-result" id="chk-result"></div>
@@ -527,7 +527,7 @@ async function addEntry() {
     document.getElementById('inp-amount').value = '';
     document.getElementById('inp-desc').value = '';
     document.getElementById('inp-cat').value = '';
-    document.getElementById('inp-date').value = '';
+    document.getElementById('inp-date').value = new Date().toLocaleDateString('nl-NL', {timeZone:'Europe/Amsterdam', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-');
     document.getElementById('cat-suggest-row').style.display = 'none';
     render();
     showToast('Uitgave opgeslagen ✓');
@@ -1067,6 +1067,8 @@ document.getElementById('chk-naam').addEventListener('keydown', e => { if(e.key=
 // Set default date to today
 const todayDefault = new Date().toLocaleDateString('nl-NL', {timeZone:'Europe/Amsterdam', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-');
 document.getElementById('inp-date').value = todayDefault;
+// Also reset date after adding entry
+const origAddEntry = addEntry;
 
 // Show install banner on iPhone Safari if not already installed
 const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
