@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Zakgeld" />
 <meta name="theme-color" content="#0f0e1a" />
 <title>Zakgeld — Ramon</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
@@ -584,25 +585,37 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <!-- Stats row -->
-  <div class="dt-stats-grid">
-    <div class="dt-stat-card">
-      <div class="dt-stat-label">Gewicht</div>
-      <div style="display:flex;align-items:baseline;gap:4px;">
-        <div class="dt-stat-value" id="dt-weight">—</div>
-        <div class="dt-stat-unit">kg</div>
+  <!-- Gewicht card -->
+  <div class="dt-stat-card" style="margin-bottom:1.25rem;cursor:pointer;" onclick="openWeightChart()">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="dt-stat-label">Gewicht</div>
+        <div style="display:flex;align-items:baseline;gap:4px;">
+          <div class="dt-stat-value" id="dt-weight">—</div>
+          <div class="dt-stat-unit">kg</div>
+        </div>
+        <div class="dt-stat-sub" id="dt-weight-sub">Tik voor grafiek</div>
       </div>
-      <div class="dt-stat-sub" id="dt-weight-sub">Nog niet ingevuld</div>
-      <button onclick="logWeight()" style="margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--purple-light);font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;">+ Invullen</button>
+      <button onclick="event.stopPropagation();logWeight()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:13px;font-weight:500;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">+ Meting</button>
     </div>
-    <div class="dt-stat-card">
-      <div class="dt-stat-label">Water</div>
-      <div style="display:flex;align-items:baseline;gap:4px;">
-        <div class="dt-stat-value" id="dt-water-val">0</div>
-        <div class="dt-stat-unit">/ 8 glazen</div>
+  </div>
+
+  <!-- Water card -->
+  <div class="dt-stat-card" style="margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div>
+        <div class="dt-stat-label">Water vandaag</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <div class="dt-stat-value" style="color:var(--cyan);" id="dt-water-ml">0</div>
+          <div class="dt-stat-unit">van <span id="dt-water-goal-label">3500</span> ml</div>
+        </div>
       </div>
-      <div class="water-track" id="water-track"></div>
+      <div style="font-size:13px;font-weight:600;color:var(--cyan);" id="dt-water-pct">0%</div>
     </div>
+    <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:14px;">
+      <div id="dt-water-bar" style="height:100%;border-radius:999px;background:linear-gradient(90deg,#06b6d4,#22d3ee);width:0%;transition:width 0.4s ease;"></div>
+    </div>
+    <div class="water-track" id="water-track"></div>
   </div>
 
   <!-- Week nav -->
@@ -721,6 +734,22 @@ select option { background: #1a1830; }
   </div>
 </div>
 </div><!-- end #page-recepten -->
+
+<!-- Weight chart modal -->
+<div class="day-modal" id="weight-modal" style="background:var(--bg);">
+  <div class="day-modal-header">
+    <button class="day-back-btn" onclick="document.getElementById('weight-modal').classList.remove('open')">←</button>
+    <div class="day-modal-title">
+      <div class="day-modal-date">Gewicht verloop</div>
+      <div class="day-modal-total" id="weight-modal-sub"></div>
+    </div>
+    <button onclick="logWeight()" style="background:var(--purple);border:none;border-radius:10px;color:white;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">+ Meting</button>
+  </div>
+  <div style="padding:0 1.25rem 3rem;">
+    <canvas id="weight-chart" style="width:100%;"></canvas>
+    <div id="weight-log-list" style="margin-top:1.5rem;"></div>
+  </div>
+</div>
 
 <!-- Manual barcode input modal -->
 <div class="page-picker-backdrop" id="manual-barcode-modal">
@@ -1553,12 +1582,98 @@ function toggleWater(idx) {
   renderWater();
 }
 
+const WATER_AMOUNTS = [200, 300, 500, 750]; // ml per glas optie
+const WATER_GOAL_ML = 3500;
+
+function getWaterHistory() {
+  return JSON.parse(localStorage.getItem('dt_water_history') || '[]');
+}
+
+function saveWaterHistory(history) {
+  localStorage.setItem('dt_water_history', JSON.stringify(history));
+}
+
+function addToWaterHistory(ml) {
+  let history = getWaterHistory();
+  // Remove if already exists, then add to front
+  history = history.filter(h => h !== ml);
+  history.unshift(ml);
+  // Keep max 6 recent
+  history = history.slice(0, 6);
+  saveWaterHistory(history);
+}
+
 function renderWater() {
   const track = document.getElementById('water-track');
-  document.getElementById('dt-water-val').textContent = dtWater;
-  track.innerHTML = Array.from({length:8},(_,i) =>
-    `<div class="water-glass ${i < dtWater ? 'filled' : ''}" onclick="toggleWater(${i})">💧</div>`
-  ).join('');
+  const mlEl = document.getElementById('dt-water-ml');
+  const pctEl = document.getElementById('dt-water-pct');
+  const barEl = document.getElementById('dt-water-bar');
+
+  const totalMl = parseInt(localStorage.getItem('dt_water_ml_' + todayKey()) || '0');
+  const pct = Math.min(Math.round((totalMl / WATER_GOAL_ML) * 100), 100);
+
+  if (mlEl) mlEl.textContent = totalMl;
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (barEl) barEl.style.width = pct + '%';
+
+  const history = getWaterHistory();
+  const recentAmounts = history.length > 0 ? history : WATER_AMOUNTS;
+
+  track.innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+      ${recentAmounts.map(ml => `
+        <button onclick="addWaterMl(${ml})" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid rgba(34,211,238,0.2);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+          <span style="font-size:22px;">🥤</span>
+          <span style="font-size:12px;font-weight:600;color:var(--cyan);">${ml} ml</span>
+        </button>
+      `).join('')}
+      <button onclick="addCustomWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+        <span style="font-size:22px;">✏️</span>
+        <span style="font-size:12px;color:var(--muted);">Eigen ml</span>
+      </button>
+      ${totalMl > 0 ? `<button onclick="undoWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+        <span style="font-size:22px;">↩️</span>
+        <span style="font-size:12px;color:var(--muted);">Ongedaan</span>
+      </button>` : ''}
+    </div>`;
+}
+
+function addWaterMl(ml) {
+  const key = 'dt_water_ml_' + todayKey();
+  const current = parseInt(localStorage.getItem(key) || '0');
+  localStorage.setItem(key, current + ml);
+  addToWaterHistory(ml);
+  renderWater();
+  showToast('+' + ml + ' ml water 💧');
+}
+
+function addCustomWater() {
+  // Show inline custom input
+  const track = document.getElementById('water-track');
+  const inputDiv = document.createElement('div');
+  inputDiv.style.cssText = 'display:flex;gap:8px;align-items:center;margin-top:8px;';
+  inputDiv.innerHTML = `
+    <input type="number" id="custom-water-input" placeholder="ml" inputmode="decimal" style="flex:1;max-width:120px;height:42px;" />
+    <button onclick="submitCustomWater()" style="height:42px;padding:0 16px;background:var(--cyan);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">+ Toevoegen</button>
+    <button onclick="renderWater()" style="height:42px;padding:0 12px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;">✕</button>`;
+  track.appendChild(inputDiv);
+  document.getElementById('custom-water-input').focus();
+}
+
+function submitCustomWater() {
+  const val = parseInt(document.getElementById('custom-water-input')?.value);
+  if (!val || val <= 0) { showToast('Voer een geldig aantal ml in.'); return; }
+  addWaterMl(val);
+}
+
+function undoWater() {
+  const history = getWaterHistory();
+  const lastMl = history[0] || WATER_AMOUNTS[0];
+  const key = 'dt_water_ml_' + todayKey();
+  const current = parseInt(localStorage.getItem(key) || '0');
+  localStorage.setItem(key, Math.max(0, current - lastMl));
+  renderWater();
+  showToast('Laatste ' + lastMl + ' ml ongedaan gemaakt');
 }
 
 // ===== BARCODE SCANNER =====
@@ -1809,6 +1924,89 @@ function filterRecipes(filter) {
   renderRecipes();
 }
 
+function openWeightChart() {
+  document.getElementById('weight-modal').classList.add('open');
+  renderWeightChart();
+}
+
+function renderWeightChart() {
+  const logs = dtWeightLog;
+  const sub = document.getElementById('weight-modal-sub');
+  const list = document.getElementById('weight-log-list');
+
+  if (logs.length === 0) {
+    sub.textContent = 'Nog geen metingen';
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:3rem 0;font-size:14px;">Voeg je eerste meting toe via + Meting</div>';
+    return;
+  }
+
+  const first = logs[0].weight;
+  const last = logs[logs.length-1].weight;
+  const diff = (last - first).toFixed(1);
+  sub.textContent = diff < 0 ? diff + ' kg t.o.v. start 📉' : '+' + diff + ' kg t.o.v. start';
+
+  // Draw chart with Chart.js
+  const existing = Chart.getChart('weight-chart');
+  if (existing) existing.destroy();
+
+  const labels = logs.map(l => {
+    const d = new Date(l.date + 'T12:00:00');
+    return d.getDate() + ' ' + ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][d.getMonth()];
+  });
+  const data = logs.map(l => l.weight);
+  const minW = Math.min(...data) - 1;
+  const maxW = Math.max(...data) + 1;
+
+  new Chart(document.getElementById('weight-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Gewicht (kg)',
+        data,
+        borderColor: '#7c5cfc',
+        backgroundColor: 'rgba(124,92,252,0.1)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#7c5cfc',
+        pointRadius: 5,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: minW, max: maxW, ticks: { color: 'rgba(241,240,255,0.5)', callback: v => v + ' kg' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        x: { ticks: { color: 'rgba(241,240,255,0.5)', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+
+  // Log list
+  list.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Alle metingen</div>' +
+    [...logs].reverse().map((l, i) => {
+      const prev = logs[logs.length - 1 - i - 1];
+      const diff = prev ? (l.weight - prev.weight).toFixed(1) : null;
+      const diffHtml = diff !== null ? `<span style="font-size:12px;color:${diff < 0 ? '#4ade80' : diff > 0 ? '#f87171' : 'var(--muted)'};">${diff > 0 ? '+' : ''}${diff} kg</span>` : '';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:14px;">${l.date}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${diffHtml}
+          <div style="font-size:15px;font-weight:600;">${l.weight} kg</div>
+          <button onclick="deleteWeightLog('${l.date}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function deleteWeightLog(date) {
+  dtWeightLog = dtWeightLog.filter(l => l.date !== date);
+  localStorage.setItem('dt_weight', JSON.stringify(dtWeightLog));
+  renderWeightChart();
+  renderDT();
+}
+
 function openRecipeDetail(id) {
   const r = getRecipes().find(x => x.id === id);
   if (!r) return;
@@ -1934,10 +2132,15 @@ function addRecipeFromMeal(meal) {
   picker.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:55;display:flex;align-items:flex-end;justify-content:center;';
   picker.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;max-height:70vh;overflow-y:auto;">
     <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;text-align:center;">Kies een recept</div>
-    ${recipes.map(r => `<div onclick="addRecipeToMeal(${r.id},'${meal}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:14px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
-      <span style="font-size:24px;">${MEAL_ICONS[r.meal]||'🍽️'}</span>
-      <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${r.name}</div><div style="font-size:12px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g</div></div>
-    </div>`).join('')}
+    ${recipes.map(r => {
+      const imgHtml = r.image 
+        ? `<img src="${r.image}" style="width:44px;height:44px;border-radius:10px;object-fit:contain;background:var(--surface);padding:3px;flex-shrink:0;" onerror="this.style.display='none'" />`
+        : `<span style="font-size:24px;flex-shrink:0;">${MEAL_ICONS[r.meal]||'🍽️'}</span>`;
+      return `<div onclick="addRecipeToMeal(${r.id},'${meal}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-radius:14px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);">
+        ${imgHtml}
+        <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${r.name}</div><div style="font-size:12px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g</div></div>
+      </div>`;
+    }).join('')}
     <button onclick="document.getElementById('recipe-quick-picker').remove()" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px;">Annuleren</button>
   </div>`;
   document.body.appendChild(picker);
