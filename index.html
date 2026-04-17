@@ -1584,29 +1584,44 @@ async function openScanner() {
     await video.play();
 
     if (!('BarcodeDetector' in window)) {
-      showToast('Barcode scanner niet ondersteund in deze browser. Probeer Safari.');
+      showToast('BarcodeDetector niet beschikbaar — gebruik handmatige invoer');
       closeScanner();
+      // Show manual input instead
+      const code = prompt('Voer barcode handmatig in (bijv. 8718309242511):');
+      if (code && code.trim()) await lookupBarcode(code.trim());
       return;
     }
 
-    const detector = new BarcodeDetector({
-      formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf']
-    });
+    showToast('Scanner actief — richt op barcode');
+
+    let formats = ['ean_13','ean_8','upc_a','upc_e','code_128','code_39'];
+    try {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      formats = supported;
+    } catch(e) {}
+
+    const detector = new BarcodeDetector({ formats });
 
     let scanning = true;
+    let frameCount = 0;
     async function scan() {
       if (!scanning) return;
+      frameCount++;
       try {
-        const barcodes = await detector.detect(video);
-        if (barcodes.length > 0) {
-          scanning = false;
-          const code = barcodes[0].rawValue;
-          closeScanner();
-          await lookupBarcode(code);
-          return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          const barcodes = await detector.detect(video);
+          if (barcodes.length > 0) {
+            scanning = false;
+            const code = barcodes[0].rawValue;
+            closeScanner();
+            await lookupBarcode(code);
+            return;
+          }
         }
-      } catch(e) {}
-      if (scanning) requestAnimationFrame(scan);
+      } catch(e) {
+        if (frameCount === 1) showToast('Scan fout: ' + e.message);
+      }
+      if (scanning) setTimeout(() => requestAnimationFrame(scan), 200);
     }
     requestAnimationFrame(scan);
     window._stopScanning = () => { scanning = false; };
