@@ -432,14 +432,7 @@ select option { background: #1a1830; }
       </div>
       <div class="page-picker-item-check"></div>
     </div>
-    <div class="page-picker-item" id="picker-mealprep" onclick="switchPage('mealprep')">
-      <div class="page-picker-item-icon">🥗</div>
-      <div class="page-picker-item-info">
-        <div class="page-picker-item-name">Mealprep</div>
-        <div class="page-picker-item-sub">Weekplanning & boodschappenlijst</div>
-      </div>
-      <div class="page-picker-item-check"></div>
-    </div>
+
   </div>
 </div>
 
@@ -675,10 +668,19 @@ select option { background: #1a1830; }
 <div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
   <header>
     <div class="header-left">
-      <div class="header-greeting">Jouw kookboek 📖</div>
+      <div class="header-greeting">Kookboek & Mealprep 📖</div>
       <div class="header-name">Recepten</div>
     </div>
   </header>
+
+  <!-- Tab switcher -->
+  <div style="display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:1.25rem;border:1px solid var(--border);">
+    <button id="tab-recepten" onclick="switchRecepTab('recepten')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--purple);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">📖 Recepten</button>
+    <button id="tab-mealprep" onclick="switchRecepTab('mealprep')" style="flex:1;height:38px;border:none;border-radius:10px;background:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">🥗 Mealprep</button>
+  </div>
+
+  <!-- Recepten view -->
+  <div id="view-recepten">
 
   <!-- Scan knop -->
   <div style="background:linear-gradient(135deg,rgba(74,222,128,0.1),rgba(74,222,128,0.05));border:1px solid rgba(74,222,128,0.2);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
@@ -732,6 +734,40 @@ select option { background: #1a1830; }
   <div id="recipe-list" style="margin-bottom:1.25rem;"></div>
 
   <button onclick="openMealCreator()" class="btn-dt-add" style="width:100%;height:52px;font-size:16px;">+ Maaltijd aanmaken</button>
+  </div><!-- end view-recepten -->
+
+  <!-- Mealprep view -->
+  <div id="view-mealprep" style="display:none;">
+    <div class="header-left" style="margin-bottom:1.25rem;">
+      <div class="header-greeting">Zondag mealprep 🥗</div>
+    </div>
+
+    <!-- Week selector -->
+    <div class="dt-week-nav" style="margin-bottom:1.25rem;">
+      <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
+      <span class="dt-week-label" id="mp-week-label"></span>
+      <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
+    </div>
+
+    <!-- Week grid -->
+    <div class="mp-week-grid" id="mp-week-grid"></div>
+
+    <!-- Boodschappenlijst -->
+    <div class="mp-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
+        <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
+      </div>
+      <div id="mp-grocery-list"></div>
+    </div>
+
+    <!-- Mealprep schema -->
+    <div class="mp-section">
+      <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
+      <div id="mp-prep-schema"></div>
+    </div>
+  </div><!-- end view-mealprep -->
+
 </div>
 </div><!-- end #page-recepten -->
 
@@ -865,41 +901,7 @@ select option { background: #1a1830; }
 </div>
 
 <!-- Mealprep page -->
-<div class="page" id="page-mealprep">
-<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
-  <header>
-    <div class="header-left">
-      <div class="header-greeting">Zondag mealprep 🥗</div>
-      <div class="header-name">Weekplanning</div>
-    </div>
-  </header>
 
-  <!-- Week selector -->
-  <div class="dt-week-nav" style="margin-bottom:1.25rem;">
-    <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
-    <span class="dt-week-label" id="mp-week-label"></span>
-    <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
-  </div>
-
-  <!-- Week grid -->
-  <div class="mp-week-grid" id="mp-week-grid"></div>
-
-  <!-- Boodschappenlijst -->
-  <div class="mp-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
-      <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
-    </div>
-    <div id="mp-grocery-list"></div>
-  </div>
-
-  <!-- Mealprep schema -->
-  <div class="mp-section">
-    <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
-    <div id="mp-prep-schema"></div>
-  </div>
-</div>
-</div><!-- end #page-mealprep -->
 
 <!-- Meal picker for mealprep day -->
 <div class="page-picker-backdrop" id="mp-meal-picker">
@@ -1978,6 +1980,29 @@ function renderGroceryList(wk) {
   }).join('');
 }
 
+function switchRecepTab(tab) {
+  const viewR = document.getElementById('view-recepten');
+  const viewM = document.getElementById('view-mealprep');
+  const tabR = document.getElementById('tab-recepten');
+  const tabM = document.getElementById('tab-mealprep');
+  if (tab === 'recepten') {
+    viewR.style.display = 'block';
+    viewM.style.display = 'none';
+    tabR.style.background = 'var(--purple)';
+    tabR.style.color = 'white';
+    tabM.style.background = 'none';
+    tabM.style.color = 'var(--muted)';
+  } else {
+    viewR.style.display = 'none';
+    viewM.style.display = 'block';
+    tabR.style.background = 'none';
+    tabR.style.color = 'var(--muted)';
+    tabM.style.background = 'var(--purple)';
+    tabM.style.color = 'white';
+    renderMealprep();
+  }
+}
+
 function renderMealprep() {
   const wk = getMpWeekKey(mpViewDate);
   const plan = mpWeekPlan[wk] || {};
@@ -2801,8 +2826,8 @@ function renderDT() {
   }).join('');
 }
 
-const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖', mealprep: '🥗' };
-const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten', mealprep: 'Mealprep' };
+const PAGE_ICONS = { zakgeld: '💰', droogtraining: '💪', recepten: '📖' };
+const PAGE_NAMES = { zakgeld: 'Zakgeld', droogtraining: 'Droogtraining', recepten: 'Recepten' };
 
 function openPagePicker() {
   document.getElementById('page-picker').classList.add('open');
@@ -2827,7 +2852,6 @@ function switchPage(page) {
   document.getElementById('page-picker').classList.remove('open');
   if (page === 'droogtraining') renderDT();
   if (page === 'recepten') renderRecipes();
-  if (page === 'mealprep') renderMealprep();
   window.scrollTo(0, 0);
 }
 
