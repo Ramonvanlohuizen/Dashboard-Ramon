@@ -193,7 +193,8 @@ select option { background: #1a1830; }
 /* Modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
 .modal-backdrop.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 1.5rem; width: 100%; max-width: 380px; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 1.5rem; width: 100%; max-width: 380px; overflow: hidden; }
+.modal-row select, .modal-row input { width: 100%; min-width: 0; }
 .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 1rem; }
 .modal-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
@@ -250,13 +251,16 @@ select option { background: #1a1830; }
       <input type="text" id="edit-desc" placeholder="Omschrijving" />
     </div>
     <div class="modal-row">
-      <select id="edit-cat">
+      <select id="edit-cat" style="width:100%;">
         <option value="">Categorie kiezen</option>
         <option>Boodschappen</option><option>Uitgaan</option><option>Terras</option>
         <option>Voetbal</option><option>Kleding</option><option>Uitjes</option>
         <option>Vakantie</option><option>OV</option><option>Gezondheidszorg</option>
         <option>Restaurant</option><option>Cadeau</option>
       </select>
+    </div>
+    <div class="modal-row">
+      <input type="date" id="edit-date" style="width:100%;" />
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeEditModal()">Annuleren</button>
@@ -548,6 +552,7 @@ function openEditModal(id) {
   document.getElementById('edit-amount').value = e.bedrag;
   document.getElementById('edit-desc').value = e.omschrijving;
   document.getElementById('edit-cat').value = e.categorie || '';
+  document.getElementById('edit-date').value = e.datum || '';
   document.getElementById('edit-modal').classList.add('open');
 }
 function closeEditModal(evt) {
@@ -561,13 +566,15 @@ async function saveEdit() {
   const cat = document.getElementById('edit-cat').value;
   if (!amt || amt <= 0) { showToast('Voer een geldig bedrag in.'); return; }
   try {
+    const editDate = document.getElementById('edit-date').value;
     await api('PATCH', `uitgaven?id=eq.${editingId}`, {
       bedrag: Math.round(amt * 100) / 100,
       omschrijving: desc || cat || 'Uitgave',
-      categorie: cat || ''
+      categorie: cat || '',
+      ...(editDate && { datum: editDate })
     });
     const idx = entries.findIndex(x => x.id === editingId);
-    if (idx !== -1) entries[idx] = { ...entries[idx], bedrag: Math.round(amt * 100) / 100, omschrijving: desc || cat || 'Uitgave', categorie: cat || '' };
+    if (idx !== -1) entries[idx] = { ...entries[idx], bedrag: Math.round(amt * 100) / 100, omschrijving: desc || cat || 'Uitgave', categorie: cat || '', ...(editDate && { datum: editDate }) };
     document.getElementById('edit-modal').classList.remove('open');
     editingId = null;
     render();
