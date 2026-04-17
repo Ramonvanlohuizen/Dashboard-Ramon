@@ -200,6 +200,16 @@ select option { background: #1a1830; }
 .btn-save { flex: 1; height: 52px; background: linear-gradient(135deg, var(--purple), #a855f7); color: white; border: none; border-radius: 12px; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; }
 .btn-cancel { height: 52px; padding: 0 16px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); border-radius: 12px; font-family: 'Outfit', sans-serif; font-size: 16px; cursor: pointer; }
 
+/* Smart feedback */
+.feedback-block { margin-top: 1rem; display: flex; flex-direction: column; gap: 8px; }
+.feedback-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; }
+.feedback-item.ok { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.15); }
+.feedback-item.warn { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15); }
+.feedback-item.info { background: rgba(124,92,252,0.08); border: 1px solid rgba(124,92,252,0.15); }
+.feedback-item.danger { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.15); }
+.feedback-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.feedback-text { flex: 1; color: var(--text); }
+
 /* Day detail modal */
 .day-modal { position: fixed; inset: 0; background: var(--bg); z-index: 60; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); overflow-y: auto; }
 .day-modal.open { transform: translateY(0); }
@@ -310,6 +320,7 @@ select option { background: #1a1830; }
       </div>
     </div>
     <div class="smart-verdict" id="smart-verdict"></div>
+    <div class="feedback-block" id="feedback-block"></div>
     <div style="height:1px;background:var(--border);margin:1rem 0;"></div>
     <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Past dit in mijn budget?</div>
     <div class="checker-row" style="display:flex;gap:8px;margin-bottom:8px;">
@@ -879,6 +890,88 @@ async function deleteDayEntry(id, dateStr) {
   } catch(e) { showToast('Verwijderen mislukt'); }
 }
 
+function renderFeedback(spent) {
+  const block = document.getElementById('feedback-block');
+  if (!isCurrentPeriod()) { block.innerHTML = ''; return; }
+
+  const today = new Date();
+  const endDate = new Date(viewMonth === 11 ? viewYear+1 : viewYear, (viewMonth+1)%12, 22);
+  const daysLeft = Math.max(1, Math.round((endDate - today) / 86400000) + 1);
+  const moneyLeft = Math.max(0, BUDGET - spent);
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  const yesterdayD = new Date(today); yesterdayD.setDate(yesterdayD.getDate()-1);
+  const yesterdayStr = yesterdayD.getFullYear() + '-' + String(yesterdayD.getMonth()+1).padStart(2,'0') + '-' + String(yesterdayD.getDate()).padStart(2,'0');
+
+  const feedbacks = [];
+
+  // 1. Projection: if you keep this pace, you'll end with X
+  const start = new Date(viewYear, viewMonth, 23);
+  const totalDays = Math.round((endDate - start) / 86400000) + 1;
+  const daysElapsed = Math.max(1, Math.round((today - start) / 86400000) + 1);
+  if (daysElapsed > 3 && spent > 0) {
+    const dailyRate = spent / daysElapsed;
+    const projectedTotal = dailyRate * totalDays;
+    const projectedLeft = BUDGET - projectedTotal;
+    if (projectedLeft >= 30) {
+      feedbacks.push({ type: 'ok', icon: '📈', text: 'Als je zo doorgaat hou je <strong>' + fmt(Math.round(projectedLeft)) + '</strong> over aan het einde van de periode.' });
+    } else if (projectedLeft >= 0) {
+      feedbacks.push({ type: 'warn', icon: '⚡', text: 'Als je zo doorgaat hou je maar <strong>' + fmt(Math.round(projectedLeft)) + '</strong> over. Pas iets op.' });
+    } else {
+      feedbacks.push({ type: 'danger', icon: '⚠️', text: 'Als je zo doorgaat kom je <strong>' + fmt(Math.round(Math.abs(projectedLeft))) + '</strong> tekort. Rem even af.' });
+    }
+  }
+
+  // 2. Days left + money left
+  const perDay = Math.round(moneyLeft / daysLeft);
+  feedbacks.push({ type: perDay >= 15 ? 'ok' : perDay >= 8 ? 'warn' : 'danger', icon: '📅', text: 'Nog <strong>' + daysLeft + ' dagen</strong> tot loon — je hebt <strong>' + fmt(moneyLeft) + '</strong> over (<strong>€' + perDay + '/dag</strong>).' });
+
+  // 3. Weekend budget warning
+  const dayOfWeek = today.getDay();
+  if (dayOfWeek === 4 || dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0) {
+    const weekendSpent = entries.filter(e => { const d = new Date(e.datum).getDay(); return d===5||d===6||d===0; }).reduce((s,e) => s+parseFloat(e.bedrag), 0);
+    const weekendLeft = Math.max(0, 250 - weekendSpent);
+    if (weekendLeft < 50) {
+      feedbacks.push({ type: 'danger', icon: '🍻', text: 'Pas op: je weekendbudget is bijna op — nog <strong>' + fmt(weekendLeft) + '</strong> over.' });
+    } else if (weekendSpent > 0) {
+      feedbacks.push({ type: 'info', icon: '🎉', text: 'Je hebt dit weekend al <strong>' + fmt(weekendSpent) + '</strong> uitgegeven, nog <strong>' + fmt(weekendLeft) + '</strong> over.' });
+    }
+  }
+
+  // 4. Yesterday pattern
+  const yesterdayEntries = entries.filter(e => e.datum === yesterdayStr);
+  if (yesterdayEntries.length >= 2) {
+    const yesterdayTotal = yesterdayEntries.reduce((s,e) => s+parseFloat(e.bedrag), 0);
+    const catCount = {};
+    yesterdayEntries.forEach(e => { const c = e.categorie||'Overig'; catCount[c] = (catCount[c]||0)+1; });
+    const topCat = Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0];
+    if (topCat && topCat[1] >= 2) {
+      feedbacks.push({ type: 'info', icon: '👀', text: 'Gisteren gaf je <strong>' + topCat[1] + 'x</strong> geld uit aan <strong>' + topCat[0] + '</strong> (totaal ' + fmt(yesterdayTotal) + ').' });
+    } else {
+      feedbacks.push({ type: 'info', icon: '👀', text: 'Gisteren gaf je <strong>' + yesterdayEntries.length + 'x</strong> geld uit — totaal <strong>' + fmt(yesterdayTotal) + '</strong>.' });
+    }
+  }
+
+  // 5. Best/worst day this period
+  const dayMap = {};
+  entries.forEach(e => { dayMap[e.datum] = (dayMap[e.datum]||0) + parseFloat(e.bedrag); });
+  const dayEntries = Object.entries(dayMap).filter(([d]) => d !== todayStr);
+  if (dayEntries.length >= 5) {
+    const sorted = dayEntries.sort((a,b) => b[1]-a[1]);
+    const worst = sorted[0];
+    const worstDate = new Date(worst[0] + 'T12:00:00');
+    const worstDay = ['Zo','Ma','Di','Wo','Do','Vr','Za'][worstDate.getDay()];
+    feedbacks.push({ type: 'info', icon: '📊', text: 'Je duurste dag deze periode was <strong>' + worstDay + ' ' + worstDate.getDate() + '</strong> met <strong>' + fmt(worst[1]) + '</strong>.' });
+  }
+
+  // Render max 3 most relevant feedbacks
+  block.innerHTML = feedbacks.slice(0, 3).map(f =>
+    '<div class="feedback-item ' + f.type + '">' +
+    '<span class="feedback-icon">' + f.icon + '</span>' +
+    '<span class="feedback-text">' + f.text + '</span>' +
+    '</div>'
+  ).join('');
+}
+
 function render() {
   document.getElementById('month-label').textContent = periodLabel();
   const spent = entries.reduce((s,e) => s+parseFloat(e.bedrag), 0);
@@ -898,6 +991,7 @@ function render() {
   loonEl.className = 'balance-stat-value'+(daysToLoon<=3?' good':daysToLoon<=7?' warn':'');
 
   renderDagbudget(spent);
+  renderFeedback(spent);
   renderCalendar();
 
   // Potjes
