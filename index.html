@@ -1603,28 +1603,38 @@ async function openScanner() {
     const detector = new BarcodeDetector({ formats });
 
     let scanning = true;
-    let frameCount = 0;
+    let found = false;
+
+    // Auto fallback after 6 seconds
+    const fallbackTimer = setTimeout(() => {
+      if (!found) {
+        scanning = false;
+        closeScanner();
+        const code = prompt('Niet herkend. Voer barcode handmatig in:');
+        if (code && code.trim()) lookupBarcode(code.trim());
+      }
+    }, 6000);
+
     async function scan() {
       if (!scanning) return;
-      frameCount++;
       try {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
           const barcodes = await detector.detect(video);
           if (barcodes.length > 0) {
+            found = true;
             scanning = false;
+            clearTimeout(fallbackTimer);
             const code = barcodes[0].rawValue;
             closeScanner();
             await lookupBarcode(code);
             return;
           }
         }
-      } catch(e) {
-        if (frameCount === 1) showToast('Scan fout: ' + e.message);
-      }
+      } catch(e) {}
       if (scanning) setTimeout(() => requestAnimationFrame(scan), 200);
     }
     requestAnimationFrame(scan);
-    window._stopScanning = () => { scanning = false; };
+    window._stopScanning = () => { scanning = false; clearTimeout(fallbackTimer); };
 
   } catch(e) {
     showToast('Camera toegang geweigerd. Geef toestemming in Instellingen → Safari.');
