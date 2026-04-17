@@ -1554,8 +1554,7 @@ function openRecipeDetail(id) {
     const ingDiv = document.createElement('div');
     ingDiv.style.cssText = 'margin-bottom:1.25rem;';
     ingDiv.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Ingrediënten</div>';
-    const lines = r.ingredients.split('
-').filter(l => l.trim());
+    const lines = r.ingredients.split('\n').filter(l => l.trim());
     lines.forEach(line => {
       const item = document.createElement('div');
       item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;';
@@ -1570,8 +1569,7 @@ function openRecipeDetail(id) {
     const instDiv = document.createElement('div');
     instDiv.style.cssText = 'margin-bottom:1.25rem;';
     instDiv.innerHTML = '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Bereidingswijze</div>' +
-      '<div style="font-size:14px;line-height:1.7;color:var(--text);">' + r.instructions.replace(/
-/g, '<br>') + '</div>';
+      '<div style="font-size:14px;line-height:1.7;color:var(--text);">' + r.instructions.replace(/\n/g, '<br>') + '</div>';
     body.appendChild(instDiv);
   }
 
