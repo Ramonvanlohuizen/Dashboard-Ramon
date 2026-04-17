@@ -619,39 +619,15 @@ select option { background: #1a1830; }
     <!-- Maaltijden -->
     <div id="dt-meals-wrap"></div>
 
-    <!-- Voeding toevoegen -->
-    <div class="dt-add-food">
-      <div class="dt-add-title">Voeding toevoegen</div>
-      <div class="dt-add-row">
-        <input type="text" id="dt-food-name" placeholder="Naam (bijv. Kipfilet)" autocomplete="off" />
-      </div>
-      <div class="dt-add-row">
-        <input type="number" id="dt-food-kcal" placeholder="kcal" inputmode="decimal" style="max-width:80px;flex:0 0 80px;" />
-        <input type="number" id="dt-food-protein" placeholder="Eiwit (g)" inputmode="decimal" />
-        <input type="number" id="dt-food-carbs" placeholder="Koolh. (g)" inputmode="decimal" />
-        <input type="number" id="dt-food-fat" placeholder="Vet (g)" inputmode="decimal" />
-      </div>
-      <div class="dt-add-row">
-        <select id="dt-food-meal" style="flex:1;">
-          <option value="ontbijt">🌅 Ontbijt</option>
-          <option value="lunch">🥗 Lunch</option>
-          <option value="middagsnack">🍌 Middagsnack</option>
-          <option value="diner">🍽️ Diner</option>
-          <option value="avondsnack">🌙 Avondsnack</option>
-        </select>
-        <button class="btn-dt-add" onclick="addFood()">+ Toevoegen</button>
-      </div>
-    </div>
-
-    <!-- Doelen instellen -->
-    <div class="dt-add-food">
-      <div class="dt-add-title">Dagdoelen instellen</div>
-      <div class="dt-add-row">
-        <input type="number" id="dt-goal-kcal" placeholder="Caloriedoel (kcal)" inputmode="decimal" />
-        <input type="number" id="dt-goal-protein" placeholder="Eiwit doel (g)" inputmode="decimal" />
-      </div>
-      <button class="btn-dt-add" onclick="saveGoals()" style="width:100%;margin-top:4px;">Opslaan</button>
-    </div>
+    <!-- Dagdoelen instellen (verborgen, alleen via instellingen) -->
+    <input type="number" id="dt-food-name" style="display:none;" />
+    <input type="number" id="dt-food-kcal" style="display:none;" />
+    <input type="number" id="dt-food-protein" style="display:none;" />
+    <input type="number" id="dt-food-carbs" style="display:none;" />
+    <input type="number" id="dt-food-fat" style="display:none;" />
+    <select id="dt-food-meal" style="display:none;"><option value="ontbijt">Ontbijt</option><option value="lunch">Lunch</option><option value="middagsnack">Middagsnack</option><option value="diner">Diner</option><option value="avondsnack">Avondsnack</option></select>
+    <input type="number" id="dt-goal-kcal" style="display:none;" />
+    <input type="number" id="dt-goal-protein" style="display:none;" />
   </div>
 </div>
 </div><!-- end #page-droogtraining -->
