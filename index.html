@@ -706,34 +706,92 @@ select option { background: #1a1830; }
 
   <div id="recipe-list" style="margin-bottom:1.25rem;"></div>
 
-  <div class="dt-add-food">
-    <div class="dt-add-title">Nieuw recept toevoegen</div>
-    <div class="dt-add-row"><input type="text" id="rec-name" placeholder="Naam recept" autocomplete="off" /></div>
-    <div class="dt-add-row">
-      <select id="rec-meal" style="flex:1;">
+  <button onclick="openMealCreator()" class="btn-dt-add" style="width:100%;height:52px;font-size:16px;">+ Maaltijd aanmaken</button>
+</div>
+</div><!-- end #page-recepten -->
+
+<!-- Meal creator modal -->
+<div class="day-modal" id="meal-creator-modal" style="background:var(--bg);">
+  <div class="day-modal-header">
+    <button class="day-back-btn" onclick="closeMealCreator()">×</button>
+    <div class="day-modal-title">
+      <div class="day-modal-date">Maaltijd aanmaken</div>
+    </div>
+    <button onclick="saveMeal()" style="background:var(--green);border:none;border-radius:10px;color:#0f0e1a;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">Sla op</button>
+  </div>
+  <div style="padding:0 1.25rem 3rem;">
+
+    <!-- AI gegenereerde foto -->
+    <div style="position:relative;margin-bottom:1.25rem;">
+      <div id="meal-image-wrap" style="width:100%;height:200px;background:var(--surface2);border-radius:20px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;" onclick="generateMealImage()">
+        <div id="meal-image-placeholder" style="text-align:center;color:var(--muted);">
+          <div style="font-size:36px;margin-bottom:8px;">🖼️</div>
+          <div style="font-size:13px;">Tik om AI foto te genereren</div>
+        </div>
+        <img id="meal-generated-image" style="width:100%;height:100%;object-fit:cover;display:none;" />
+      </div>
+      <div id="meal-image-loading" style="display:none;position:absolute;inset:0;background:rgba(15,14,26,0.8);border-radius:20px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+        <div class="spinner" style="width:28px;height:28px;border-width:3px;border-top-color:var(--green);"></div>
+        <div style="font-size:13px;color:var(--text);">Foto genereren...</div>
+      </div>
+    </div>
+
+    <!-- Naam en maaltijdtype -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;">
+      <input type="text" id="meal-name" placeholder="Naam maaltijd" autocomplete="off" style="width:100%;" />
+      <select id="meal-type" style="width:100%;">
         <option value="ontbijt">🌅 Ontbijt</option>
         <option value="lunch">🥗 Lunch</option>
         <option value="middagsnack">🍌 Middagsnack</option>
-        <option value="diner">🍽️ Diner</option>
+        <option value="diner" selected>🍽️ Diner</option>
         <option value="avondsnack">🌙 Avondsnack</option>
       </select>
+      <textarea id="meal-instructions" placeholder="Bereidingswijze (optioneel)" style="resize:none;min-height:70px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;outline:none;line-height:1.5;width:100%;"></textarea>
     </div>
-    <div class="dt-add-row">
-      <input type="number" id="rec-kcal" placeholder="kcal" inputmode="decimal" style="max-width:80px;flex:0 0 80px;" />
-      <input type="number" id="rec-protein" placeholder="Eiwit (g)" inputmode="decimal" />
-      <input type="number" id="rec-carbs" placeholder="Koolh. (g)" inputmode="decimal" />
-      <input type="number" id="rec-fat" placeholder="Vet (g)" inputmode="decimal" />
+
+    <!-- Macros totaal -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;">
+      <div style="background:var(--surface2);border-radius:12px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Kcal</div>
+        <div style="font-size:16px;font-weight:700;" id="meal-total-kcal">0</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Eiwit</div>
+        <div style="font-size:16px;font-weight:700;color:var(--green);" id="meal-total-protein">0g</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Koolh.</div>
+        <div style="font-size:16px;font-weight:700;color:var(--yellow);" id="meal-total-carbs">0g</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:10px;text-align:center;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Vet</div>
+        <div style="font-size:16px;font-weight:700;color:var(--pink);" id="meal-total-fat">0g</div>
+      </div>
     </div>
-    <div class="dt-add-row">
-      <textarea id="rec-ingredients" placeholder="Ingrediënten (één per regel)" style="flex:1;min-height:80px;resize:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;outline:none;line-height:1.5;"></textarea>
-    </div>
-    <div class="dt-add-row">
-      <textarea id="rec-instructions" placeholder="Bereidingswijze" style="flex:1;min-height:80px;resize:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:12px 14px;outline:none;line-height:1.5;"></textarea>
-    </div>
-    <button class="btn-dt-add" onclick="addRecipe()" style="width:100%;margin-top:4px;">+ Recept opslaan</button>
+
+    <!-- Producten lijst -->
+    <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Voedingsproducten</div>
+    <div id="meal-products-list" style="margin-bottom:1rem;"></div>
+
+    <!-- Product toevoegen -->
+    <button onclick="openMealProductSearch()" style="width:100%;height:48px;background:var(--surface2);border:1px dashed rgba(74,222,128,0.3);border-radius:14px;color:var(--green);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Product toevoegen</button>
   </div>
 </div>
-</div><!-- end #page-recepten -->
+
+<!-- Product zoeken voor maaltijd -->
+<div class="page-picker-backdrop" id="meal-product-search">
+  <div class="page-picker">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="page-picker-title" style="margin-bottom:0;">Product toevoegen</div>
+      <button onclick="document.getElementById('meal-product-search').classList.remove('open')" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="number" id="meal-barcode-input" placeholder="Barcode" inputmode="numeric" style="flex:1;" />
+      <button onclick="searchMealProduct()" style="height:52px;padding:0 16px;background:var(--green);color:#0f0e1a;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">Zoeken</button>
+    </div>
+    <div id="meal-product-result" style="margin-bottom:12px;"></div>
+  </div>
+</div>
 
 <!-- Weight chart modal -->
 <div class="day-modal" id="weight-modal" style="background:var(--bg);">
@@ -1889,6 +1947,186 @@ let recipeFilter = 'alle';
 
 function getRecipes() { return JSON.parse(localStorage.getItem('dt_recipes') || '[]'); }
 function saveRecipes(r) { localStorage.setItem('dt_recipes', JSON.stringify(r)); }
+
+// ===== MAALTIJD AANMAKEN =====
+let mealProducts = []; // producten in huidige maaltijd
+
+function openMealCreator() {
+  mealProducts = [];
+  document.getElementById('meal-name').value = '';
+  document.getElementById('meal-instructions').value = '';
+  document.getElementById('meal-generated-image').style.display = 'none';
+  document.getElementById('meal-image-placeholder').style.display = 'block';
+  updateMealTotals();
+  renderMealProducts();
+  document.getElementById('meal-creator-modal').classList.add('open');
+}
+
+function closeMealCreator() {
+  document.getElementById('meal-creator-modal').classList.remove('open');
+}
+
+function updateMealTotals() {
+  const kcal = mealProducts.reduce((s,p) => s+p.kcal, 0);
+  const protein = mealProducts.reduce((s,p) => s+p.protein, 0);
+  const carbs = mealProducts.reduce((s,p) => s+p.carbs, 0);
+  const fat = mealProducts.reduce((s,p) => s+p.fat, 0);
+  document.getElementById('meal-total-kcal').textContent = Math.round(kcal);
+  document.getElementById('meal-total-protein').textContent = Math.round(protein*10)/10 + 'g';
+  document.getElementById('meal-total-carbs').textContent = Math.round(carbs*10)/10 + 'g';
+  document.getElementById('meal-total-fat').textContent = Math.round(fat*10)/10 + 'g';
+}
+
+function renderMealProducts() {
+  const list = document.getElementById('meal-products-list');
+  if (mealProducts.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem 0;font-size:14px;">Nog geen producten toegevoegd</div>';
+    return;
+  }
+  list.innerHTML = mealProducts.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:12px;margin-bottom:6px;">
+      ${p.image ? `<img src="${p.image}" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:var(--surface);padding:3px;flex-shrink:0;" />` : '<span style="font-size:20px;">🥗</span>'}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${p.grams}g · ${Math.round(p.kcal)} kcal · E: ${p.protein}g</div>
+      </div>
+      <button onclick="removeMealProduct(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px;">×</button>
+    </div>`).join('');
+}
+
+function removeMealProduct(idx) {
+  mealProducts.splice(idx, 1);
+  updateMealTotals();
+  renderMealProducts();
+}
+
+function openMealProductSearch() {
+  document.getElementById('meal-product-search').classList.add('open');
+  document.getElementById('meal-barcode-input').value = '';
+  document.getElementById('meal-product-result').innerHTML = '';
+}
+
+async function searchMealProduct() {
+  const code = document.getElementById('meal-barcode-input').value.trim();
+  if (!code) { showToast('Voer een barcode in.'); return; }
+  const resultDiv = document.getElementById('meal-product-result');
+  resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;">Zoeken...</div>';
+  try {
+    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/' + code + '.json?fields=product_name,product_name_nl,brands,nutriments,image_front_small_url');
+    const data = await res.json();
+    if (data.status === 1 && data.product) {
+      const p = data.product;
+      const n = p.nutriments || {};
+      const kcal = n['energy-kcal_100g'] || Math.round((n['energy_100g']||0)/4.184);
+      const product = {
+        name: p.product_name_nl || p.product_name || 'Onbekend',
+        brand: p.brands || '',
+        kcal_per100: Math.round(kcal||0),
+        protein_per100: Math.round((n['proteins_100g']||0)*10)/10,
+        carbs_per100: Math.round((n['carbohydrates_100g']||0)*10)/10,
+        fat_per100: Math.round((n['fat_100g']||0)*10)/10,
+        image: p.image_front_small_url || null
+      };
+      resultDiv.innerHTML = `
+        <div style="background:var(--surface2);border-radius:14px;padding:12px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            ${product.image ? `<img src="${product.image}" style="width:48px;height:48px;border-radius:10px;object-fit:contain;background:var(--surface);padding:3px;" />` : ''}
+            <div>
+              <div style="font-size:14px;font-weight:600;">${product.name}</div>
+              <div style="font-size:12px;color:var(--muted);">${product.kcal_per100} kcal/100g · E: ${product.protein_per100}g</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" id="meal-product-grams" placeholder="Gram" value="100" inputmode="decimal" style="max-width:100px;flex:0 0 100px;" />
+            <button onclick="addProductToMeal(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:1;height:42px;background:var(--green);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">+ Toevoegen</button>
+          </div>
+        </div>`;
+    } else {
+      resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;">Product niet gevonden.</div>';
+    }
+  } catch(e) {
+    resultDiv.innerHTML = '<div style="text-align:center;color:var(--danger);padding:1rem;">Fout bij zoeken.</div>';
+  }
+}
+
+function addProductToMeal(productStr) {
+  const product = typeof productStr === 'string' ? JSON.parse(productStr.replace(/&quot;/g,'"')) : productStr;
+  const grams = parseFloat(document.getElementById('meal-product-grams').value) || 100;
+  const factor = grams / 100;
+  mealProducts.push({
+    name: product.name,
+    grams,
+    kcal: Math.round(product.kcal_per100 * factor),
+    protein: Math.round(product.protein_per100 * factor * 10) / 10,
+    carbs: Math.round(product.carbs_per100 * factor * 10) / 10,
+    fat: Math.round(product.fat_per100 * factor * 10) / 10,
+    image: product.image || null
+  });
+  document.getElementById('meal-product-search').classList.remove('open');
+  updateMealTotals();
+  renderMealProducts();
+  showToast(product.name + ' toegevoegd ✓');
+}
+
+async function generateMealImage() {
+  if (mealProducts.length === 0) { showToast('Voeg eerst producten toe.'); return; }
+  const loading = document.getElementById('meal-image-loading');
+  const placeholder = document.getElementById('meal-image-placeholder');
+  const img = document.getElementById('meal-generated-image');
+  loading.style.display = 'flex';
+  placeholder.style.display = 'none';
+  img.style.display = 'none';
+
+  const productNames = mealProducts.map(p => p.name).join(', ');
+  const mealName = document.getElementById('meal-name').value || 'maaltijd';
+  const prompt = encodeURIComponent(`healthy meal photo, ${mealName}, with ${productNames}, food photography, top view, clean plate, professional food photography, appetizing`);
+  const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=600&height=400&nologo=true&seed=${Date.now()}`;
+
+  img.onload = () => {
+    loading.style.display = 'none';
+    img.style.display = 'block';
+  };
+  img.onerror = () => {
+    loading.style.display = 'none';
+    placeholder.style.display = 'block';
+    showToast('Foto genereren mislukt, probeer opnieuw.');
+  };
+  img.src = imageUrl;
+}
+
+function saveMeal() {
+  const name = document.getElementById('meal-name').value.trim();
+  const meal = document.getElementById('meal-type').value;
+  const instructions = document.getElementById('meal-instructions').value.trim();
+  const img = document.getElementById('meal-generated-image');
+  if (!name) { showToast('Geef de maaltijd een naam.'); return; }
+  if (mealProducts.length === 0) { showToast('Voeg minimaal één product toe.'); return; }
+
+  const kcal = mealProducts.reduce((s,p) => s+p.kcal, 0);
+  const protein = mealProducts.reduce((s,p) => s+p.protein, 0);
+  const carbs = mealProducts.reduce((s,p) => s+p.carbs, 0);
+  const fat = mealProducts.reduce((s,p) => s+p.fat, 0);
+  const ingredients = mealProducts.map(p => p.name + ': ' + p.grams + 'g').join('\n');
+
+  const recipes = getRecipes();
+  recipes.push({
+    id: Date.now(),
+    name,
+    meal,
+    kcal: Math.round(kcal),
+    protein: Math.round(protein*10)/10,
+    carbs: Math.round(carbs*10)/10,
+    fat: Math.round(fat*10)/10,
+    ingredients,
+    instructions,
+    image: img.style.display !== 'none' ? img.src : null,
+    products: mealProducts
+  });
+  saveRecipes(recipes);
+  closeMealCreator();
+  renderRecipes();
+  showToast(name + ' opgeslagen als recept ✓');
+}
 
 function addRecipe() {
   const name = document.getElementById('rec-name').value.trim();
