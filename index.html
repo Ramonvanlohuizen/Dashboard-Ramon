@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0f0e1a" />
 <title>Zakgeld — Ramon</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
 <style>
 :root {
   --bg: #0f0e1a;
@@ -1572,63 +1572,54 @@ let scannerStream = null;
 let scannerInterval = null;
 let scannedProduct = null;
 
-function openScanner() {
+async function openScanner() {
   const modal = document.getElementById('scanner-modal');
   modal.classList.add('open');
-  // Replace video element with quagga container
-  const videoWrap = document.querySelector('.scanner-video-wrap');
-  videoWrap.innerHTML = '<div id="quagga-container" style="width:100%;height:100%;"></div><div class="scanner-overlay"><div class="scanner-frame"><div class="scanner-line"></div></div></div><div class="scanner-hint">Richt de camera op een barcode</div>';
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+    const video = document.getElementById('scanner-video');
+    video.srcObject = scannerStream;
+    await video.play();
 
-  setTimeout(() => {
-    Quagga.init({
-      inputStream: {
-        name: 'Live',
-        type: 'LiveStream',
-        target: document.getElementById('quagga-container'),
-        constraints: {
-          facingMode: 'environment',
-          width: { min: 640 },
-          height: { min: 480 }
-        }
-      },
-      decoder: {
-        readers: ['ean_reader','ean_8_reader','upc_reader','upc_e_reader','code_128_reader']
-      },
-      locate: true
-    }, function(err) {
-      if (err) {
-        showToast('Camera toegang geweigerd.');
-        closeScanner();
-        return;
-      }
-      Quagga.start();
+    if (!('BarcodeDetector' in window)) {
+      showToast('Barcode scanner niet ondersteund in deze browser. Probeer Safari.');
+      closeScanner();
+      return;
+    }
+
+    const detector = new BarcodeDetector({
+      formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','itf']
     });
 
-    let lastCode = null;
-    let codeCount = 0;
-    Quagga.onDetected(async function(result) {
-      const code = result.codeResult.code;
-      if (code === lastCode) {
-        codeCount++;
-        if (codeCount >= 2) {
-          Quagga.stop();
+    let scanning = true;
+    async function scan() {
+      if (!scanning) return;
+      try {
+        const barcodes = await detector.detect(video);
+        if (barcodes.length > 0) {
+          scanning = false;
+          const code = barcodes[0].rawValue;
           closeScanner();
           await lookupBarcode(code);
+          return;
         }
-      } else {
-        lastCode = code;
-        codeCount = 1;
-      }
-    });
-  }, 300);
+      } catch(e) {}
+      if (scanning) requestAnimationFrame(scan);
+    }
+    requestAnimationFrame(scan);
+    window._stopScanning = () => { scanning = false; };
+
+  } catch(e) {
+    showToast('Camera toegang geweigerd. Geef toestemming in Instellingen → Safari.');
+    closeScanner();
+  }
 }
 
 function closeScanner() {
-  try { Quagga.stop(); } catch(e) {}
+  if (window._stopScanning) { window._stopScanning(); window._stopScanning = null; }
   document.getElementById('scanner-modal').classList.remove('open');
-  // Reset video wrap
-  const videoWrap = document.querySelector('.scanner-video-wrap');
-  videoWrap.innerHTML = '<video id="scanner-video" autoplay playsinline muted></video><div class="scanner-overlay"><div class="scanner-frame"><div class="scanner-line"></div></div></div><div class="scanner-hint">Richt de camera op een barcode</div>';
   if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
 }
 
