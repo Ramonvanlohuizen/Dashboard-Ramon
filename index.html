@@ -43,8 +43,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .top-nav-btn { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
 .top-nav-btn span { font-size: 12px; color: var(--muted); }
 
-.page-picker-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
-.page-picker-backdrop.open { display: flex; }
+.page-picker-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 70; display: none; align-items: flex-end; justify-content: center; }
+.page-picker-backdrop.open { display: flex !important; }
 .page-picker { background: var(--surface); border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem); width: 100%; max-width: 480px; }
 .page-picker-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; text-align: center; }
 .page-picker-item { display: flex; align-items: center; gap: 14px; padding: 1rem 1.25rem; border-radius: 16px; cursor: pointer; margin-bottom: 8px; border: 1px solid var(--border); background: var(--surface2); transition: border-color 0.2s; }
@@ -813,7 +813,7 @@ select option { background: #1a1830; }
 </div>
 
 <!-- Manual barcode input modal -->
-<div class="page-picker-backdrop" id="manual-barcode-modal" style="z-index:80;">
+<div class="page-picker-backdrop" id="manual-barcode-modal">
   <div class="page-picker" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1.5rem);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <div class="page-picker-title" style="margin-bottom:0;">Barcode invoeren</div>
@@ -2185,6 +2185,7 @@ function showManualBarcodeInput() {
   if (scb) scb.style.display = 'flex';
   if (mbi) mbi.value = '';
   modal.classList.add('open');
+  modal.style.display = 'flex';
 }
 
 async function submitManualBarcode() {
