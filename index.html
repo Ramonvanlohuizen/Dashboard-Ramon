@@ -2173,7 +2173,7 @@ async function captureBarcode() {
 
   try {
     status.textContent = '🔍 Barcode herkennen...';
-    const response = await fetch('https://rxdhgbjkgaikonlzaqil.supabase.co/functions/v1/Barcode-scan', {
+    const response = await fetch('https://rxdhgbjkgaikonlzaqil.supabase.co/functions/v1/Barcode-scan?t=' + Date.now(), {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
