@@ -9,19 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Inject API key into index.html
+
+      - name: Inject API key
         run: |
-          sed -i "s/ANTHROPIC_API_KEY_PLACEHOLDER/${{ secrets.ANTHROPIC_API_KEY }}/g" index.html
-      
-      - name: Commit updated index.html
+          python3 -c "
+          content = open('index.html').read()
+          content = content.replace('ANTHROPIC_API_KEY_PLACEHOLDER', '${{ secrets.ANTHROPIC_API_KEY }}')
+          open('index.html', 'w').write(content)
+          print('Done, replaced:', content.count('sk-ant') > 0)
+          "
+
+      - name: Push updated file
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add index.html
-          git diff --staged --quiet || git commit -m "Inject API key [skip ci]"
-          git push origin main
+          git diff --cached --quiet && echo "No changes" || (git commit -m "Deploy [skip ci]" && git push)
