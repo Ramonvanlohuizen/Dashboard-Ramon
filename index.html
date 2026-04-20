@@ -2936,7 +2936,7 @@ function confirmRecipeGrams(id, meal) {
 }
 
 
-// ── Meal barcode scanner (uses existing manual-barcode-modal flow) ──────────
+// == Meal barcode scanner ==
 let mealScanTarget = false; // true = result goes to meal creator
 
 function openMealBarcodeScanner() {
@@ -3054,7 +3054,7 @@ function confirmMealGrams(productStr) {
   showToast(product.name + ' (' + grams + 'g) toegevoegd ✓');
 }
 
-// ── URL Recipe Import ─────────────────────────────────────────────────────────
+// // URL Recipe Import
 function openUrlImport() {
   document.getElementById('url-import-modal').classList.add('open');
   document.getElementById('recipe-url-input').value = '';
@@ -3098,9 +3098,7 @@ async function importRecipeFromUrl() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: 'Je bent een voedingsassistent. Extraheer uit de tekst de receptnaam en ingrediënten met grammen. Geef ALLEEN een JSON terug, geen uitleg, geen markdown, geen backticks. Format: {"name":"...","ingredients":[{"name":"...","grams":100}]}. Als je geen recept kunt vinden, geef: {"error":"Geen recept gevonden"}',
-        messages: [{ role: 'user', content: 'Extraheer het recept uit deze pagina:
-
-' + trimmed }]
+        messages: [{ role: 'user', content: 'Extraheer het recept uit deze pagina:\n\n' + trimmed }]
       })
     });
     const aiData = await aiRes.json();
