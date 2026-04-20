@@ -2179,18 +2179,20 @@ async function captureBarcode() {
       body: JSON.stringify({ image: base64 })
     });
     const data = await response.json();
+    console.log('Edge function response:', JSON.stringify(data));
     const code = data.code || '';
     const cleanCode = code.replace(/\D/g, '');
+    status.textContent = 'Antwoord: ' + (code || 'leeg');
     if (cleanCode && cleanCode.length >= 6 && code !== 'NOT_FOUND') {
-      status.textContent = '✓ Barcode gevonden: ' + cleanCode;
-      closeBarcodeModal();
-      await lookupBarcode(cleanCode);
+      setTimeout(() => {
+        closeBarcodeModal();
+        lookupBarcode(cleanCode);
+      }, 1000);
     } else {
-      status.textContent = 'Barcode niet herkend. Voer handmatig in.';
       document.getElementById('scan-camera-btn').style.display = 'flex';
     }
   } catch(e) {
-    status.textContent = 'Fout: ' + (e.message || 'Probeer handmatig invoeren.');
+    status.textContent = 'Fout: ' + (e.message || 'Onbekend');
   }
 }
 
