@@ -2171,6 +2171,7 @@ async function captureBarcode() {
   status.textContent = '🔍 Barcode herkennen...';
 
   try {
+    status.textContent = '📡 Verbinding maken met API...';
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
@@ -2186,8 +2187,15 @@ async function captureBarcode() {
         }]
       })
     });
+    if (!response.ok) {
+      const err = await response.text();
+      status.textContent = 'API fout ' + response.status + ': ' + err.slice(0,80);
+      return;
+    }
     const data = await response.json();
+    console.log('API response:', JSON.stringify(data));
     const code = data.content?.[0]?.text?.trim();
+    status.textContent = 'Claude zegt: ' + code;
     
     const cleanCode = code ? code.replace(/\D/g, '') : '';
     if (cleanCode && cleanCode.length >= 6) {
