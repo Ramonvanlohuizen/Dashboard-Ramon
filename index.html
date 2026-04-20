@@ -3074,35 +3074,24 @@ async function importRecipeFromUrl() {
   const resultDiv = document.getElementById('url-import-result');
   btn.disabled = true;
   btn.textContent = '⏳ Ophalen...';
-  status.textContent = 'Pagina ophalen en analyseren...';
+  status.textContent = 'AI haalt recept op...';
   resultDiv.innerHTML = '';
   try {
-    // Fetch page via CORS proxy
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const html = data.contents || '';
-    // Strip to text
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    // Remove scripts/styles
-    tmp.querySelectorAll('script,style,nav,footer,header,aside').forEach(el => el.remove());
-    const text = tmp.innerText || tmp.textContent || '';
-    const trimmed = text.slice(0, 6000);
-    status.textContent = 'AI analyseert recept...';
-    // Ask Claude to extract recipe
+    // Use Claude with web_search tool to fetch and parse the recipe URL directly
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: 'Je bent een voedingsassistent. Extraheer uit de tekst de receptnaam en ingrediënten met grammen. Geef ALLEEN een JSON terug, geen uitleg, geen markdown, geen backticks. Format: {"name":"...","ingredients":[{"name":"...","grams":100}]}. Als je geen recept kunt vinden, geef: {"error":"Geen recept gevonden"}',
-        messages: [{ role: 'user', content: 'Extraheer het recept uit deze pagina:\n\n' + trimmed }]
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        system: 'Je bent een voedingsassistent. Haal het recept op van de opgegeven URL en extraheer de naam en ingrediënten met grammen. Geef ALLEEN een JSON terug als tekst, geen uitleg, geen markdown, geen backticks. Format: {"name":"...","ingredients":[{"name":"...","grams":100}]}. Als je geen recept kunt vinden, geef: {"error":"Geen recept gevonden"}. Schat grammen als ze niet vermeld zijn (bijv. 1 ui = 100g, 1 el = 15g, 1 tl = 5g).',
+        messages: [{ role: 'user', content: 'Haal dit recept op en geef de ingrediënten met grammen als JSON: ' + url }]
       })
     });
     const aiData = await aiRes.json();
-    const raw = aiData.content?.[0]?.text || '{}';
+    // Extract text from response (may include tool use blocks)
+    const raw = (aiData.content || []).filter(b => b.type === 'text').map(b => b.text).join('') || '{}';
     let recipe;
     try { recipe = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { recipe = { error: 'Parsefout' }; }
     if (recipe.error || !recipe.ingredients?.length) {
