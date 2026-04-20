@@ -3092,16 +3092,12 @@ async function importRecipeFromUrl() {
     const html = proxyData.html || '';
     if (!html || html.length < 200) throw new Error('Lege pagina ontvangen');
 
-    // Parse with DOMParser
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    // Try JSON-LD structured data first (works on AH, Jumbo, 24Kitchen etc)
+    // Extract JSON-LD with regex (works without DOMParser innerText on mobile)
     let recipe = null;
-    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-    for (const s of scripts) {
+    const jsonLdMatches = html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+    for (const match of jsonLdMatches) {
       try {
-        const data = JSON.parse(s.textContent);
+        const data = JSON.parse(match[1]);
         const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
         for (const item of items) {
           const type = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
@@ -3117,25 +3113,24 @@ async function importRecipeFromUrl() {
       if (recipe) break;
     }
 
-    // Fallback: look for common ingredient HTML patterns
+    // Fallback: DOMParser for other sites
     if (!recipe) {
-      const titleEl = doc.querySelector('h1');
-      const name = titleEl ? titleEl.textContent.trim() : 'Recept';
-      // Try common ingredient selectors
-      const selectors = [
-        '[class*="ingredient"]', '[class*="Ingredient"]',
-        '[itemprop="recipeIngredient"]', '[data-testid*="ingredient"]',
-        'li[class*="ingredient"]', '.ingredient-list li',
-      ];
-      let ingEls = [];
-      for (const sel of selectors) {
-        ingEls = [...doc.querySelectorAll(sel)];
-        if (ingEls.length > 2) break;
-      }
-      if (ingEls.length > 2) {
-        const ings = ingEls.map(el => parseIngredientText(el.textContent.trim())).filter(Boolean);
-        if (ings.length > 0) recipe = { name, ingredients: ings };
-      }
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const titleEl = doc.querySelector('h1');
+        const name = titleEl ? titleEl.textContent.trim() : 'Recept';
+        const selectors = ['[itemprop="recipeIngredient"]','[class*="ingredient"]','[data-testid*="ingredient"]'];
+        let ingEls = [];
+        for (const sel of selectors) {
+          ingEls = [...doc.querySelectorAll(sel)];
+          if (ingEls.length > 2) break;
+        }
+        if (ingEls.length > 2) {
+          const ings = ingEls.map(el => parseIngredientText(el.textContent.trim())).filter(Boolean);
+          if (ings.length > 0) recipe = { name, ingredients: ings };
+        }
+      } catch(e) {}
     }
 
     status.textContent = '';
