@@ -2181,7 +2181,7 @@ async function captureBarcode() {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-            { type: 'text', text: 'What is the barcode number in this image? Return ONLY the number, nothing else. If you cannot find a barcode, return "NOT_FOUND".' }
+            { type: 'text', text: 'Look at this image carefully. Find the barcode (EAN/UPC barcode with numbers underneath). Read the digits printed under or near the barcode stripes. Return ONLY those digits, nothing else - no spaces, no text, just the number. If no barcode visible, return NOT_FOUND.' }
           ]
         }]
       })
@@ -2189,16 +2189,18 @@ async function captureBarcode() {
     const data = await response.json();
     const code = data.content?.[0]?.text?.trim();
     
-    if (code && code !== 'NOT_FOUND' && /^\d{8,14}$/.test(code)) {
-      status.textContent = '✓ Barcode gevonden: ' + code;
+    const cleanCode = code ? code.replace(/\D/g, '') : '';
+    if (cleanCode && cleanCode.length >= 6) {
+      status.textContent = '✓ Barcode gevonden: ' + cleanCode;
       closeBarcodeModal();
-      await lookupBarcode(code);
+      await lookupBarcode(cleanCode);
     } else {
       status.textContent = 'Barcode niet herkend. Probeer opnieuw of voer handmatig in.';
       document.getElementById('scan-camera-btn').style.display = 'flex';
     }
   } catch(e) {
-    status.textContent = 'Fout bij herkennen. Voer handmatig in.';
+    console.error('Barcode scan error:', e);
+    status.textContent = 'Fout: ' + (e.message || 'Onbekend. Voer handmatig in.');
   }
 }
 
