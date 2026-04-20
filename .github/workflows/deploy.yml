@@ -7,15 +7,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Inject API key
+      - name: Inject API key into index.html
         run: |
           sed -i "s/ANTHROPIC_API_KEY_PLACEHOLDER/${{ secrets.ANTHROPIC_API_KEY }}/g" index.html
       
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+      - name: Commit updated index.html
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "Inject API key [skip ci]"
+          git push origin main
