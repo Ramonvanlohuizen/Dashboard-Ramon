@@ -630,6 +630,7 @@ select option { background: #1a1830; }
     <select id="dt-food-meal" style="display:none;"><option value="ontbijt">Ontbijt</option><option value="lunch">Lunch</option><option value="middagsnack">Middagsnack</option><option value="diner">Diner</option><option value="avondsnack">Avondsnack</option></select>
     <input type="number" id="dt-goal-kcal" style="display:none;" />
     <input type="number" id="dt-goal-protein" style="display:none;" />
+  </div><!-- end dt-section -->
   </div><!-- end vk-view-voeding -->
 
   <!-- KEUKEN TAB -->
@@ -2791,7 +2792,7 @@ function switchPage(page) {
   document.getElementById('top-nav-icon').textContent = PAGE_ICONS[page];
   document.getElementById('top-nav-label').textContent = PAGE_NAMES[page];
   document.getElementById('page-picker').classList.remove('open');
-  if (page === 'droogtraining') { renderDT(); }
+  if (page === 'droogtraining') { renderDT(); renderRecipes(); renderMealprep(); }
 
   window.scrollTo(0, 0);
 }
