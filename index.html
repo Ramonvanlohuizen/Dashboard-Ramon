@@ -424,14 +424,7 @@ select option { background: #1a1830; }
       </div>
       <div class="page-picker-item-check"></div>
     </div>
-    <div class="page-picker-item" id="picker-recepten" onclick="switchPage('recepten')">
-      <div class="page-picker-item-icon">🍳</div>
-      <div class="page-picker-item-info">
-        <div class="page-picker-item-name">Keuken</div>
-        <div class="page-picker-item-sub">Recepten & mealprep</div>
-      </div>
-      <div class="page-picker-item-check"></div>
-    </div>
+
 
   </div>
 </div>
@@ -569,15 +562,24 @@ select option { background: #1a1830; }
 
 </div><!-- end #page-zakgeld -->
 
-<!-- Droogtraining page -->
+<!-- Voeding & Keuken page (combined) -->
 <div class="page" id="page-droogtraining">
 <div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
   <header>
     <div class="header-left">
-      <div class="header-greeting">Voeding & Training 🥗</div>
+      <div class="header-greeting">Voeding & Keuken 🥗</div>
       <div class="header-name">Voeding</div>
     </div>
   </header>
+
+  <!-- Tab switcher -->
+  <div style="display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:1.25rem;border:1px solid var(--border);">
+    <button id="vk-tab-voeding" onclick="switchVKTab('voeding')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--purple);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">🥗 Voeding</button>
+    <button id="vk-tab-keuken" onclick="switchVKTab('keuken')" style="flex:1;height:38px;border:none;border-radius:10px;background:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">🍳 Keuken</button>
+  </div>
+
+  <!-- VOEDING TAB -->
+  <div id="vk-view-voeding">
 
   <!-- Kcal hero -->
   <div class="dt-hero">
@@ -603,38 +605,7 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <!-- Gewicht card -->
-  <div class="dt-stat-card" style="margin-bottom:1.25rem;cursor:pointer;" onclick="openWeightChart()">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div class="dt-stat-label">Gewicht</div>
-        <div style="display:flex;align-items:baseline;gap:4px;">
-          <div class="dt-stat-value" id="dt-weight">—</div>
-          <div class="dt-stat-unit">kg</div>
-        </div>
-        <div class="dt-stat-sub" id="dt-weight-sub">Tik voor grafiek</div>
-      </div>
-      <button onclick="event.stopPropagation();logWeight()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:13px;font-weight:500;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">+ Meting</button>
-    </div>
-  </div>
 
-  <!-- Water card -->
-  <div class="dt-stat-card" style="margin-bottom:1.25rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div>
-        <div class="dt-stat-label">Water vandaag</div>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-          <div class="dt-stat-value" style="color:var(--cyan);" id="dt-water-ml">0</div>
-          <div class="dt-stat-unit">van <span id="dt-water-goal-label">3500</span> ml</div>
-        </div>
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--cyan);" id="dt-water-pct">0%</div>
-    </div>
-    <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:14px;">
-      <div id="dt-water-bar" style="height:100%;border-radius:999px;background:linear-gradient(90deg,#06b6d4,#22d3ee);width:0%;transition:width 0.4s ease;"></div>
-    </div>
-    <div class="water-track" id="water-track"></div>
-  </div>
 
   <!-- Week nav -->
   <div class="dt-section">
@@ -659,97 +630,90 @@ select option { background: #1a1830; }
     <select id="dt-food-meal" style="display:none;"><option value="ontbijt">Ontbijt</option><option value="lunch">Lunch</option><option value="middagsnack">Middagsnack</option><option value="diner">Diner</option><option value="avondsnack">Avondsnack</option></select>
     <input type="number" id="dt-goal-kcal" style="display:none;" />
     <input type="number" id="dt-goal-protein" style="display:none;" />
-  </div>
+  </div><!-- end vk-view-voeding -->
+
+  <!-- KEUKEN TAB -->
+  <div id="vk-view-keuken" style="display:none;">
+
+    <!-- Week planning -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Deze week</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
+          <span style="font-size:13px;color:var(--text);" id="mp-week-label"></span>
+          <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
+        </div>
+      </div>
+      <div class="mp-week-grid" id="mp-week-grid"></div>
+    </div>
+
+    <!-- Boodschappenlijst -->
+    <div class="mp-section" style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
+        <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
+      </div>
+      <div id="mp-grocery-list"></div>
+    </div>
+
+    <!-- Mealprep schema -->
+    <div class="mp-section" style="margin-bottom:1.5rem;">
+      <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
+      <div id="mp-prep-schema"></div>
+    </div>
+
+    <!-- Recepten bibliotheek -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">📖 Mijn recepten</div>
+      <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1rem;">
+        <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
+        <div class="dt-day-tab" onclick="filterRecipes('ontbijt')" data-filter="ontbijt">🌅 Ontbijt</div>
+        <div class="dt-day-tab" onclick="filterRecipes('lunch')" data-filter="lunch">🥗 Lunch</div>
+        <div class="dt-day-tab" onclick="filterRecipes('middagsnack')" data-filter="middagsnack">🍌 Snack</div>
+        <div class="dt-day-tab" onclick="filterRecipes('diner')" data-filter="diner">🍽️ Diner</div>
+        <div class="dt-day-tab" onclick="filterRecipes('avondsnack')" data-filter="avondsnack">🌙 Avond</div>
+      </div>
+      <div id="recipe-list" style="margin-bottom:1rem;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="openMealCreator()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Recept aanmaken</button>
+        <button onclick="showManualBarcodeInput()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">🔢 Barcode</button>
+      </div>
+    </div>
+
+    <!-- Product result na barcode -->
+    <div class="product-card" id="product-card" style="margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img id="product-image" src="" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:var(--surface2);padding:6px;display:none;flex-shrink:0;border:1px solid var(--border);" />
+        <div>
+          <div class="product-name" id="product-name"></div>
+          <div class="product-brand" id="product-brand"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+        <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
+        <span style="font-size:13px;color:var(--muted);">gram</span>
+      </div>
+      <div class="product-macros" id="product-macros"></div>
+      <div class="dt-add-row" style="margin-bottom:8px;">
+        <select id="product-meal" style="flex:1;">
+          <option value="ontbijt">🌅 Ontbijt</option>
+          <option value="lunch">🥗 Lunch</option>
+          <option value="middagsnack">🍌 Middagsnack</option>
+          <option value="diner">🍽️ Diner</option>
+          <option value="avondsnack">🌙 Avondsnack</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveScannedAsRecipe()" class="btn-dt-add" style="flex:1;">📖 Opslaan als recept</button>
+        <button onclick="addScannedProduct()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Aan dag</button>
+      </div>
+    </div>
+
+  </div><!-- end vk-view-keuken -->
+
 </div>
 </div><!-- end #page-droogtraining -->
-
-<!-- Keuken page -->
-<div class="page" id="page-recepten">
-<div class="app" style="padding-top:calc(env(safe-area-inset-top, 0px) + 64px);">
-  <header>
-    <div class="header-left">
-      <div class="header-greeting">Wat eten we deze week? 🍳</div>
-      <div class="header-name">Keuken</div>
-    </div>
-  </header>
-
-  <!-- BLOK 1: WEEK PLANNING -->
-  <div style="margin-bottom:1.5rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Deze week</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
-        <span style="font-size:13px;color:var(--text);" id="mp-week-label"></span>
-        <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
-      </div>
-    </div>
-    <div class="mp-week-grid" id="mp-week-grid"></div>
-  </div>
-
-  <!-- BLOK 2: BOODSCHAPPENLIJST -->
-  <div class="mp-section" style="margin-bottom:1.5rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
-      <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
-    </div>
-    <div id="mp-grocery-list"></div>
-  </div>
-
-  <!-- BLOK 3: MEALPREP SCHEMA -->
-  <div class="mp-section" style="margin-bottom:1.5rem;">
-    <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
-    <div id="mp-prep-schema"></div>
-  </div>
-
-  <!-- BLOK 4: RECEPTEN BIBLIOTHEEK -->
-  <div style="margin-bottom:1.5rem;">
-    <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">📖 Mijn recepten</div>
-    <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1rem;">
-      <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
-      <div class="dt-day-tab" onclick="filterRecipes('ontbijt')" data-filter="ontbijt">🌅 Ontbijt</div>
-      <div class="dt-day-tab" onclick="filterRecipes('lunch')" data-filter="lunch">🥗 Lunch</div>
-      <div class="dt-day-tab" onclick="filterRecipes('middagsnack')" data-filter="middagsnack">🍌 Snack</div>
-      <div class="dt-day-tab" onclick="filterRecipes('diner')" data-filter="diner">🍽️ Diner</div>
-      <div class="dt-day-tab" onclick="filterRecipes('avondsnack')" data-filter="avondsnack">🌙 Avond</div>
-    </div>
-    <div id="recipe-list" style="margin-bottom:1rem;"></div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="openMealCreator()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Recept aanmaken</button>
-      <button onclick="showManualBarcodeInput()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">🔢 Barcode</button>
-    </div>
-  </div>
-
-  <!-- Product result after barcode (hidden by default) -->
-  <div class="product-card" id="product-card" style="margin-bottom:1.5rem;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-      <img id="product-image" src="" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:var(--surface2);padding:6px;display:none;flex-shrink:0;border:1px solid var(--border);" />
-      <div>
-        <div class="product-name" id="product-name"></div>
-        <div class="product-brand" id="product-brand"></div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-      <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
-      <span style="font-size:13px;color:var(--muted);">gram</span>
-    </div>
-    <div class="product-macros" id="product-macros"></div>
-    <div class="dt-add-row" style="margin-bottom:8px;">
-      <select id="product-meal" style="flex:1;">
-        <option value="ontbijt">🌅 Ontbijt</option>
-        <option value="lunch">🥗 Lunch</option>
-        <option value="middagsnack">🍌 Middagsnack</option>
-        <option value="diner">🍽️ Diner</option>
-        <option value="avondsnack">🌙 Avondsnack</option>
-      </select>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="saveScannedAsRecipe()" class="btn-dt-add" style="flex:1;">📖 Opslaan als recept</button>
-      <button onclick="addScannedProduct()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Aan dag</button>
-    </div>
-  </div>
-
-</div>
-</div><!-- end #page-recepten -->
 
 <!-- Meal creator modal -->
 <div class="day-modal" id="meal-creator-modal" style="background:var(--bg);z-index:61;">
@@ -1960,6 +1924,26 @@ function renderGroceryList(wk) {
   }).join('');
 }
 
+function switchVKTab(tab) {
+  const voeding = document.getElementById('vk-view-voeding');
+  const keuken = document.getElementById('vk-view-keuken');
+  const tabV = document.getElementById('vk-tab-voeding');
+  const tabK = document.getElementById('vk-tab-keuken');
+  if (tab === 'voeding') {
+    voeding.style.display = 'block';
+    keuken.style.display = 'none';
+    tabV.style.background = 'var(--purple)'; tabV.style.color = 'white';
+    tabK.style.background = 'none'; tabK.style.color = 'var(--muted)';
+  } else {
+    voeding.style.display = 'none';
+    keuken.style.display = 'block';
+    tabV.style.background = 'none'; tabV.style.color = 'var(--muted)';
+    tabK.style.background = 'var(--purple)'; tabK.style.color = 'white';
+    renderRecipes();
+    renderMealprep();
+  }
+}
+
 function renderMealprep() {
   const wk = getMpWeekKey(mpViewDate);
   const plan = mpWeekPlan[wk] || {};
@@ -2807,8 +2791,8 @@ function switchPage(page) {
   document.getElementById('top-nav-icon').textContent = PAGE_ICONS[page];
   document.getElementById('top-nav-label').textContent = PAGE_NAMES[page];
   document.getElementById('page-picker').classList.remove('open');
-  if (page === 'droogtraining') renderDT();
-  if (page === 'recepten') { renderRecipes(); renderMealprep(); }
+  if (page === 'droogtraining') { renderDT(); }
+
   window.scrollTo(0, 0);
 }
 
