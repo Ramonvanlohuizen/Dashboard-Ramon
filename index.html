@@ -3077,23 +3077,20 @@ async function importRecipeFromUrl() {
   status.textContent = 'Recept ophalen...';
   resultDiv.innerHTML = '';
   try {
-    // Try multiple CORS proxies
-    let html = '';
-    const proxies = [
-      'https://corsproxy.io/?' + encodeURIComponent(url),
-      'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
-      'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
-    ];
-    for (const proxy of proxies) {
-      try {
-        const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-        if (!r.ok) continue;
-        const d = await r.json().catch(() => null);
-        html = d ? (d.contents || d.body || '') : await r.text();
-        if (html && html.length > 500) break;
-      } catch(e) { continue; }
-    }
-    if (!html || html.length < 200) throw new Error('niet bereikbaar');
+    // Fetch via Supabase Edge Function (server-side, bypasses CORS)
+    const proxyRes = await fetch('https://rxdhgbjkgaikonlzaqil.supabase.co/functions/v1/recipe-fetch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZGhnYmprZ2Fpa29ubHphcWlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMzM1NDQsImV4cCI6MjA5MTkwOTU0NH0.Qmp98FmxwnMyZFZBkAcQeC6RAV8gVt3iHgbk-5EhN6I'
+      },
+      body: JSON.stringify({ url })
+    });
+    if (!proxyRes.ok) throw new Error('Edge function fout: ' + proxyRes.status);
+    const proxyData = await proxyRes.json();
+    if (proxyData.error) throw new Error(proxyData.error);
+    const html = proxyData.html || '';
+    if (!html || html.length < 200) throw new Error('Lege pagina ontvangen');
 
     // Parse with DOMParser
     const parser = new DOMParser();
