@@ -3074,44 +3074,78 @@ async function importRecipeFromUrl() {
   const resultDiv = document.getElementById('url-import-result');
   btn.disabled = true;
   btn.textContent = '⏳ Ophalen...';
-  status.textContent = 'AI haalt recept op...';
+  status.textContent = 'Recept ophalen...';
   resultDiv.innerHTML = '';
   try {
-    // Use Claude with web_search tool to fetch and parse the recipe URL directly
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        system: 'Je bent een voedingsassistent. Haal het recept op van de opgegeven URL en extraheer de naam en ingrediënten met grammen. Geef ALLEEN een JSON terug als tekst, geen uitleg, geen markdown, geen backticks. Format: {"name":"...","ingredients":[{"name":"...","grams":100}]}. Als je geen recept kunt vinden, geef: {"error":"Geen recept gevonden"}. Schat grammen als ze niet vermeld zijn (bijv. 1 ui = 100g, 1 el = 15g, 1 tl = 5g).',
-        messages: [{ role: 'user', content: 'Haal dit recept op en geef de ingrediënten met grammen als JSON: ' + url }]
-      })
-    });
-    const aiData = await aiRes.json();
-    // Extract text from response (may include tool use blocks)
-    const raw = (aiData.content || []).filter(b => b.type === 'text').map(b => b.text).join('') || '{}';
-    let recipe;
-    try { recipe = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { recipe = { error: 'Parsefout' }; }
-    if (recipe.error || !recipe.ingredients?.length) {
-      status.textContent = '';
-      resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;font-size:13px;">Geen recept gevonden op deze pagina. Probeer een andere link.</div>';
+    // Try multiple CORS proxies
+    let html = '';
+    const proxies = [
+      'https://corsproxy.io/?' + encodeURIComponent(url),
+      'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+      'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+    ];
+    for (const proxy of proxies) {
+      try {
+        const r = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+        if (!r.ok) continue;
+        const d = await r.json().catch(() => null);
+        html = d ? (d.contents || d.body || '') : await r.text();
+        if (html && html.length > 500) break;
+      } catch(e) { continue; }
+    }
+    if (!html || html.length < 200) throw new Error('niet bereikbaar');
+
+    // Parse with DOMParser
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Try JSON-LD structured data first (works on AH, Jumbo, 24Kitchen etc)
+    let recipe = null;
+    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+    for (const s of scripts) {
+      try {
+        const data = JSON.parse(s.textContent);
+        const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
+        for (const item of items) {
+          const type = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
+          if (type.includes('Recipe')) {
+            const ings = (item.recipeIngredient || []).map(i => parseIngredientText(i)).filter(Boolean);
+            if (ings.length > 0) {
+              recipe = { name: item.name || 'Recept', ingredients: ings };
+              break;
+            }
+          }
+        }
+      } catch(e) {}
+      if (recipe) break;
+    }
+
+    // Fallback: look for common ingredient HTML patterns
+    if (!recipe) {
+      const titleEl = doc.querySelector('h1');
+      const name = titleEl ? titleEl.textContent.trim() : 'Recept';
+      // Try common ingredient selectors
+      const selectors = [
+        '[class*="ingredient"]', '[class*="Ingredient"]',
+        '[itemprop="recipeIngredient"]', '[data-testid*="ingredient"]',
+        'li[class*="ingredient"]', '.ingredient-list li',
+      ];
+      let ingEls = [];
+      for (const sel of selectors) {
+        ingEls = [...doc.querySelectorAll(sel)];
+        if (ingEls.length > 2) break;
+      }
+      if (ingEls.length > 2) {
+        const ings = ingEls.map(el => parseIngredientText(el.textContent.trim())).filter(Boolean);
+        if (ings.length > 0) recipe = { name, ingredients: ings };
+      }
+    }
+
+    status.textContent = '';
+    if (!recipe || !recipe.ingredients?.length) {
+      resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;font-size:13px;">Geen recept gevonden. Probeer een directe receptpagina (bijv. ah.nl/allerhande/recept/...).</div>';
     } else {
-      status.textContent = '';
-      // Show result for confirmation
-      resultDiv.innerHTML = `
-        <div style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border);">
-          <div style="font-size:15px;font-weight:700;margin-bottom:10px;">${recipe.name}</div>
-          ${recipe.ingredients.map((ing, i) => `
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="flex:1;font-size:13px;">${ing.name}</span>
-              <input type="number" value="${ing.grams||100}" min="0" inputmode="decimal"
-                id="url-ing-${i}" style="width:72px;font-size:13px;text-align:center;padding:6px;" />
-              <span style="font-size:12px;color:var(--muted);width:24px;">g</span>
-            </div>`).join('')}
-        </div>
-        <button onclick="addUrlIngredientsToMeal(${JSON.stringify(recipe).replace(/"/g,'&quot;')})" style="width:100%;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">+ Alle ingrediënten toevoegen</button>`;
+      resultDiv.innerHTML = '<div style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border);"><div style="font-size:15px;font-weight:700;margin-bottom:10px;">' + recipe.name + '</div>' + recipe.ingredients.map((ing, i) => '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="flex:1;font-size:13px;">' + ing.name + '</span><input type="number" value="' + (ing.grams||100) + '" min="0" inputmode="decimal" id="url-ing-' + i + '" style="width:72px;font-size:13px;text-align:center;padding:6px;" /><span style="font-size:12px;color:var(--muted);width:24px;">g</span></div>').join('') + '</div><button onclick="addUrlIngredientsToMeal(' + JSON.stringify(recipe).replace(/"/g,'&quot;') + ')" style="width:100%;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">+ Alle ingredienten toevoegen</button>';
     }
   } catch(e) {
     status.textContent = '';
@@ -3119,6 +3153,38 @@ async function importRecipeFromUrl() {
   }
   btn.disabled = false;
   btn.textContent = '🔍 Ophalen';
+}
+
+function parseIngredientText(text) {
+  if (!text || text.length < 2) return null;
+  text = text.replace(/\s+/g, ' ').trim();
+  // Try to extract grams
+  const patterns = [
+    /^(\d+[.,]?\d*)\s*gram\b/i,
+    /^(\d+[.,]?\d*)\s*g\b/i,
+    /^(\d+[.,]?\d*)\s*kg\b/i,
+    /^(\d+[.,]?\d*)\s*ml\b/i,
+    /^(\d+[.,]?\d*)\s*el\b/i,
+    /^(\d+[.,]?\d*)\s*eetl/i,
+    /^(\d+[.,]?\d*)\s*tl\b/i,
+    /^(\d+[.,]?\d*)\s*theel/i,
+  ];
+  const multipliers = { gram: 1, g: 1, kg: 1000, ml: 1, el: 15, eetl: 15, tl: 5, theel: 5 };
+  for (const pat of patterns) {
+    const m = text.match(pat);
+    if (m) {
+      const unit = pat.source.match(/\\s\*([a-z]+)/i)?.[1]?.replace(/\\/g,'') || 'g';
+      const num = parseFloat(m[1].replace(',','.'));
+      const mult = multipliers[unit.toLowerCase()] || 1;
+      const grams = Math.round(num * mult);
+      const name = text.replace(m[0], '').replace(/^[,\s]+/, '').trim() || text;
+      return { name: name || text, grams: Math.max(1, grams) };
+    }
+  }
+  // No unit found - return with estimated 100g
+  const numMatch = text.match(/^(\d+[.,]?\d*)/);
+  const grams = numMatch ? Math.min(500, Math.round(parseFloat(numMatch[1].replace(',','.')) * 80)) : 100;
+  return { name: text, grams };
 }
 
 async function addUrlIngredientsToMeal(recipeStr) {
