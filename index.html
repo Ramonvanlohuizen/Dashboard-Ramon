@@ -2121,16 +2121,7 @@ function closeScanner() {
 let cameraStream = null;
 
 function closeBarcodeModal() {
-  stopCamera();
-  const modal = document.getElementById('manual-barcode-modal');
-  modal.classList.remove('open');
-  modal.style.display = 'none';
-  const cpw = document.getElementById('camera-preview-wrap');
-  const cs = document.getElementById('camera-status');
-  const scb = document.getElementById('scan-camera-btn');
-  if (cpw) cpw.style.display = 'none';
-  if (cs) cs.textContent = '';
-  if (scb) scb.style.display = 'flex';
+  hideBarcodeModal();
 }
 
 async function scanWithCamera() {
@@ -2213,8 +2204,29 @@ function showManualBarcodeInput() {
   if (cs) cs.textContent = '';
   if (scb) scb.style.display = 'flex';
   if (mbi) mbi.value = '';
-  modal.classList.add('open');
   modal.style.display = 'flex';
+  modal.classList.add('open');
+}
+
+function hideBarcodeModal() {
+  const modal = document.getElementById('manual-barcode-modal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.classList.remove('open');
+  stopCamera();
+  const cpw = document.getElementById('camera-preview-wrap');
+  const cs = document.getElementById('camera-status');
+  const scb = document.getElementById('scan-camera-btn');
+  if (cpw) cpw.style.display = 'none';
+  if (cs) cs.textContent = '';
+  if (scb) scb.style.display = 'flex';
+  // Scroll to product card if product was found
+  if (scannedProduct) {
+    setTimeout(() => {
+      const card = document.getElementById('product-card');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
 }
 
 async function submitManualBarcode() {
@@ -2272,8 +2284,10 @@ function showProductCard() {
 
   updateProductMacros();
   card.classList.add('show');
+  card.style.display = 'block';
   document.getElementById('product-grams').addEventListener('input', updateProductMacros);
-  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+  showToast('Product gevonden! Sla op als recept of voeg toe aan dag.');
 }
 
 function updateProductMacros() {
@@ -2339,6 +2353,7 @@ function saveScannedAsRecipe() {
   saveRecipes(recipes);
   document.getElementById('product-card').classList.remove('show');
   scannedProduct = null;
+  renderRecipes();
   showToast('Opgeslagen als recept ✓');
 }
 
