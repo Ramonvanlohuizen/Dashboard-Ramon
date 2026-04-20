@@ -740,7 +740,10 @@ select option { background: #1a1830; }
     <div style="margin-bottom:1.5rem;">
       <div style="font-size:11px;font-weight:600;color:#14b8a6;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">② Ingrediënten</div>
       <div id="meal-products-list" style="margin-bottom:10px;"></div>
-      <button onclick="openMealProductSearch()" style="width:100%;height:50px;background:var(--surface2);border:1px dashed rgba(20,184,166,0.4);border-radius:12px;color:#14b8a6;font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;touch-action:manipulation;">+ Ingrediënt toevoegen via barcode</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button onclick="openMealBarcodeScanner()" style="height:50px;background:var(--surface2);border:1px dashed rgba(20,184,166,0.4);border-radius:12px;color:#14b8a6;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:6px;">📷 Scan barcode</button>
+        <button onclick="openUrlImport()" style="height:50px;background:var(--surface2);border:1px dashed rgba(124,92,252,0.4);border-radius:12px;color:var(--purple-light);font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:6px;">🔗 Recept van URL</button>
+      </div>
     </div>
 
     <!-- Macros -->
@@ -809,6 +812,23 @@ select option { background: #1a1830; }
   <div style="padding:0 1.25rem 3rem;">
     <canvas id="weight-chart" style="width:100%;"></canvas>
     <div id="weight-log-list" style="margin-top:1.5rem;"></div>
+  </div>
+</div>
+
+<!-- URL Recipe Import Modal -->
+<div class="page-picker-backdrop" id="url-import-modal" style="z-index:65;">
+  <div class="page-picker" style="padding-bottom:calc(env(safe-area-inset-bottom,0px) + 1.5rem);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="page-picker-title" style="margin-bottom:0;">Recept van website</div>
+      <button onclick="closeUrlImport()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;position:relative;z-index:10;padding:8px;min-width:36px;min-height:36px;">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Plak een link van een receptensite (bijv. AH, Allerhande, Jumbo, 24Kitchen).</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="url" id="recipe-url-input" placeholder="https://www.ah.nl/allerhande/recept/..." inputmode="url" style="flex:1;font-size:14px;" />
+    </div>
+    <button onclick="importRecipeFromUrl()" id="url-import-btn" style="width:100%;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">🔍 Ophalen</button>
+    <div id="url-import-status" style="font-size:13px;color:var(--muted);text-align:center;min-height:18px;margin-bottom:10px;"></div>
+    <div id="url-import-result" style=""></div>
   </div>
 </div>
 
@@ -2234,7 +2254,12 @@ async function submitManualBarcode() {
   if (!code) { showToast('Voer een barcode in.'); return; }
   document.getElementById('manual-barcode-modal').classList.remove('open');
   document.getElementById('manual-barcode-input').value = '';
-  await lookupBarcode(code);
+  if (mealScanTarget) {
+    mealScanTarget = false;
+    await lookupAndAddToMeal(code);
+  } else {
+    await lookupBarcode(code);
+  }
 }
 
 async function lookupBarcode(barcode) {
@@ -2908,6 +2933,249 @@ function confirmRecipeGrams(id, meal) {
   document.getElementById('recipe-gram-picker').remove();
   renderDT();
   showToast(r.name + ' (' + Math.round(grams) + 'g) toegevoegd ✓');
+}
+
+
+// ── Meal barcode scanner (uses existing manual-barcode-modal flow) ──────────
+let mealScanTarget = false; // true = result goes to meal creator
+
+function openMealBarcodeScanner() {
+  mealScanTarget = true;
+  // Reuse the existing barcode modal
+  const modal = document.getElementById('manual-barcode-modal');
+  modal.classList.add('open');
+  document.getElementById('manual-barcode-input').value = '';
+  document.getElementById('camera-status').textContent = '';
+  document.getElementById('camera-preview-wrap').style.display = 'none';
+  document.getElementById('scan-camera-btn').style.display = 'flex';
+  // Override submit to go to meal
+  document.getElementById('manual-barcode-input').onkeydown = e => { if(e.key==='Enter') submitMealBarcode(); };
+}
+
+async function submitMealBarcode() {
+  const code = document.getElementById('manual-barcode-input').value.trim();
+  if (!code) { showToast('Voer een barcode in.'); return; }
+  closeBarcodeModal();
+  mealScanTarget = false;
+  await lookupAndAddToMeal(code);
+}
+
+async function lookupAndAddToMeal(code) {
+  showToast('Zoeken...');
+  try {
+    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/' + code + '.json?fields=product_name,product_name_nl,brands,nutriments,image_front_small_url');
+    const data = await res.json();
+    if (data.status === 1 && data.product) {
+      const p = data.product;
+      const n = p.nutriments || {};
+      const kcal = n['energy-kcal_100g'] || Math.round((n['energy_100g']||0)/4.184);
+      const product = {
+        name: p.product_name_nl || p.product_name || 'Onbekend',
+        brand: p.brands || '',
+        kcal_per100: Math.round(kcal||0),
+        protein_per100: Math.round((n['proteins_100g']||0)*10)/10,
+        carbs_per100: Math.round((n['carbohydrates_100g']||0)*10)/10,
+        fat_per100: Math.round((n['fat_100g']||0)*10)/10,
+        image: p.image_front_small_url || null
+      };
+      showMealProductGramPicker(product);
+    } else {
+      showToast('Product niet gevonden.');
+    }
+  } catch(e) {
+    showToast('Fout bij zoeken.');
+  }
+}
+
+function showMealProductGramPicker(product) {
+  const existing = document.getElementById('meal-gram-picker');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'meal-gram-picker';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:70;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
+    <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;text-align:center;">Hoeveel gram?</div>
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:14px;margin-bottom:1rem;border:1px solid var(--border);">
+      ${product.image ? `<img src="${product.image}" style="width:48px;height:48px;border-radius:10px;object-fit:contain;background:var(--surface);padding:3px;flex-shrink:0;" onerror="this.style.display='none'" />` : '<span style="font-size:28px;">🏷️</span>'}
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${product.name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">${product.kcal_per100} kcal · E: ${product.protein_per100}g per 100g</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+      <input type="number" id="meal-gram-picker-input" value="100" inputmode="decimal" min="1"
+        style="flex:1;font-size:22px;font-weight:700;text-align:center;height:56px;border-radius:14px;border:2px solid var(--purple);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;"
+        oninput="updateMealGramPreview(${product.kcal_per100},${product.protein_per100},${product.carbs_per100},${product.fat_per100})" />
+      <span style="font-size:16px;color:var(--muted);font-weight:500;">gram</span>
+    </div>
+    <div id="meal-gram-preview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('meal-gram-picker').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
+      <button onclick="confirmMealGrams(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:2;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">+ Toevoegen ✓</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  updateMealGramPreview(product.kcal_per100, product.protein_per100, product.carbs_per100, product.fat_per100);
+}
+
+function updateMealGramPreview(k,p,c,f) {
+  const grams = parseFloat(document.getElementById('meal-gram-picker-input')?.value) || 100;
+  const factor = grams / 100;
+  const preview = document.getElementById('meal-gram-preview');
+  if (!preview) return;
+  preview.innerHTML = [
+    { label:'Kcal', val: Math.round(k*factor), color:'var(--green)' },
+    { label:'Eiwit', val: Math.round(p*factor*10)/10+'g', color:'var(--cyan)' },
+    { label:'Koolh.', val: Math.round(c*factor*10)/10+'g', color:'var(--yellow)' },
+    { label:'Vet', val: Math.round(f*factor*10)/10+'g', color:'var(--orange)' },
+  ].map(i => `<div style="background:var(--surface2);border-radius:10px;padding:8px;text-align:center;border:1px solid var(--border);">
+    <div style="font-size:15px;font-weight:700;color:${i.color};">${i.val}</div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">${i.label}</div>
+  </div>`).join('');
+}
+
+function confirmMealGrams(productStr) {
+  const product = typeof productStr === 'string' ? JSON.parse(productStr.replace(/&quot;/g,'"')) : productStr;
+  const grams = parseFloat(document.getElementById('meal-gram-picker-input')?.value) || 100;
+  const factor = grams / 100;
+  mealProducts.push({
+    name: product.name,
+    grams,
+    kcal: Math.round(product.kcal_per100 * factor),
+    protein: Math.round(product.protein_per100 * factor * 10) / 10,
+    carbs: Math.round(product.carbs_per100 * factor * 10) / 10,
+    fat: Math.round(product.fat_per100 * factor * 10) / 10,
+    image: product.image || null
+  });
+  document.getElementById('meal-gram-picker').remove();
+  updateMealTotals();
+  renderMealProducts();
+  showToast(product.name + ' (' + grams + 'g) toegevoegd ✓');
+}
+
+// ── URL Recipe Import ─────────────────────────────────────────────────────────
+function openUrlImport() {
+  document.getElementById('url-import-modal').classList.add('open');
+  document.getElementById('recipe-url-input').value = '';
+  document.getElementById('url-import-status').textContent = '';
+  document.getElementById('url-import-result').innerHTML = '';
+}
+
+function closeUrlImport() {
+  document.getElementById('url-import-modal').classList.remove('open');
+}
+
+async function importRecipeFromUrl() {
+  const url = document.getElementById('recipe-url-input').value.trim();
+  if (!url || !url.startsWith('http')) { showToast('Voer een geldige URL in.'); return; }
+  const btn = document.getElementById('url-import-btn');
+  const status = document.getElementById('url-import-status');
+  const resultDiv = document.getElementById('url-import-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Ophalen...';
+  status.textContent = 'Pagina ophalen en analyseren...';
+  resultDiv.innerHTML = '';
+  try {
+    // Fetch page via CORS proxy
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const html = data.contents || '';
+    // Strip to text
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    // Remove scripts/styles
+    tmp.querySelectorAll('script,style,nav,footer,header,aside').forEach(el => el.remove());
+    const text = tmp.innerText || tmp.textContent || '';
+    const trimmed = text.slice(0, 6000);
+    status.textContent = 'AI analyseert recept...';
+    // Ask Claude to extract recipe
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'Je bent een voedingsassistent. Extraheer uit de tekst de receptnaam en ingrediënten met grammen. Geef ALLEEN een JSON terug, geen uitleg, geen markdown, geen backticks. Format: {"name":"...","ingredients":[{"name":"...","grams":100}]}. Als je geen recept kunt vinden, geef: {"error":"Geen recept gevonden"}',
+        messages: [{ role: 'user', content: 'Extraheer het recept uit deze pagina:
+
+' + trimmed }]
+      })
+    });
+    const aiData = await aiRes.json();
+    const raw = aiData.content?.[0]?.text || '{}';
+    let recipe;
+    try { recipe = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { recipe = { error: 'Parsefout' }; }
+    if (recipe.error || !recipe.ingredients?.length) {
+      status.textContent = '';
+      resultDiv.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1rem;font-size:13px;">Geen recept gevonden op deze pagina. Probeer een andere link.</div>';
+    } else {
+      status.textContent = '';
+      // Show result for confirmation
+      resultDiv.innerHTML = `
+        <div style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border);">
+          <div style="font-size:15px;font-weight:700;margin-bottom:10px;">${recipe.name}</div>
+          ${recipe.ingredients.map((ing, i) => `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="flex:1;font-size:13px;">${ing.name}</span>
+              <input type="number" value="${ing.grams||100}" min="0" inputmode="decimal"
+                id="url-ing-${i}" style="width:72px;font-size:13px;text-align:center;padding:6px;" />
+              <span style="font-size:12px;color:var(--muted);width:24px;">g</span>
+            </div>`).join('')}
+        </div>
+        <button onclick="addUrlIngredientsToMeal(${JSON.stringify(recipe).replace(/"/g,'&quot;')})" style="width:100%;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">+ Alle ingrediënten toevoegen</button>`;
+    }
+  } catch(e) {
+    status.textContent = '';
+    resultDiv.innerHTML = '<div style="text-align:center;color:var(--danger);padding:1rem;font-size:13px;">Fout bij ophalen. Controleer de URL en probeer opnieuw.</div>';
+  }
+  btn.disabled = false;
+  btn.textContent = '🔍 Ophalen';
+}
+
+async function addUrlIngredientsToMeal(recipeStr) {
+  const recipe = typeof recipeStr === 'string' ? JSON.parse(recipeStr.replace(/&quot;/g,'"')) : recipeStr;
+  // Read edited gram values
+  const ingredients = recipe.ingredients.map((ing, i) => ({
+    ...ing,
+    grams: parseFloat(document.getElementById('url-ing-' + i)?.value) || ing.grams || 100
+  }));
+  // For each ingredient, try to get macros from OpenFoodFacts by name search
+  showToast('Macros opzoeken...');
+  for (const ing of ingredients) {
+    try {
+      const res = await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(ing.name) + '&search_simple=1&action=process&json=1&page_size=1&fields=product_name,nutriments');
+      const data = await res.json();
+      const p = data.products?.[0];
+      if (p) {
+        const n = p.nutriments || {};
+        const kcal_per100 = n['energy-kcal_100g'] || Math.round((n['energy_100g']||0)/4.184) || 50;
+        const factor = ing.grams / 100;
+        mealProducts.push({
+          name: ing.name,
+          grams: ing.grams,
+          kcal: Math.round(kcal_per100 * factor),
+          protein: Math.round((n['proteins_100g']||0) * factor * 10) / 10,
+          carbs: Math.round((n['carbohydrates_100g']||0) * factor * 10) / 10,
+          fat: Math.round((n['fat_100g']||0) * factor * 10) / 10,
+          image: null
+        });
+      } else {
+        // Add with 0 macros if not found
+        mealProducts.push({ name: ing.name, grams: ing.grams, kcal: 0, protein: 0, carbs: 0, fat: 0, image: null });
+      }
+    } catch(e) {
+      mealProducts.push({ name: ing.name, grams: ing.grams, kcal: 0, protein: 0, carbs: 0, fat: 0, image: null });
+    }
+  }
+  // Set recipe name if empty
+  const nameInput = document.getElementById('meal-name');
+  if (!nameInput.value.trim() && recipe.name) nameInput.value = recipe.name;
+  closeUrlImport();
+  updateMealTotals();
+  renderMealProducts();
+  showToast(ingredients.length + ' ingrediënten toegevoegd ✓');
 }
 
 function renderDT() {
