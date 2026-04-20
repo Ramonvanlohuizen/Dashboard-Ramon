@@ -2698,21 +2698,6 @@ function renderDT() {
   document.getElementById('dt-goal-kcal').placeholder = 'Caloriedoel: ' + dtGoals.kcal;
   document.getElementById('dt-goal-protein').placeholder = 'Eiwit doel: ' + dtGoals.protein + 'g';
 
-  // Weight
-  const lastWeight = dtWeightLog.length > 0 ? dtWeightLog[dtWeightLog.length-1] : null;
-  document.getElementById('dt-weight').textContent = lastWeight ? lastWeight.weight : '—';
-  if (lastWeight && dtWeightLog.length > 1) {
-    const prev = dtWeightLog[dtWeightLog.length-2];
-    const diff = (lastWeight.weight - prev.weight).toFixed(1);
-    document.getElementById('dt-weight-sub').textContent = diff > 0 ? '+' + diff + 'kg vs vorige meting' : diff + 'kg vs vorige meting';
-  } else if (lastWeight) {
-    document.getElementById('dt-weight-sub').textContent = 'Gemeten op ' + lastWeight.date;
-  }
-
-  // Water
-  dtWater = parseInt(localStorage.getItem('dt_water_' + todayKey()) || '0');
-  renderWater();
-
   // Week nav
   const weekStart = getWeekStart(dtViewDate);
   const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
