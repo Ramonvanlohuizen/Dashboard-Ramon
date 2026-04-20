@@ -110,11 +110,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #1a7a52, #22c55e); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
 /* Mealprep */
-.mp-week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 1.25rem; }
-.mp-day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 4px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
-.mp-day-card.has-meal { border-color: rgba(124,92,252,0.4); background: rgba(124,92,252,0.08); }
-.mp-day-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-.mp-day-meal { font-size: 9px; color: var(--purple-light); line-height: 1.2; min-height: 20px; }
+.mp-week-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
+.mp-day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; display: flex; align-items: center; gap: 12px; }
+.mp-day-card.has-meal { border-color: rgba(124,92,252,0.4); background: rgba(124,92,252,0.05); }
+.mp-day-label { font-size: 12px; font-weight: 700; color: var(--text); min-width: 28px; }
+.mp-day-meal { font-size: 13px; color: var(--purple-light); flex: 1; }
+.mp-day-meal.empty { color: var(--muted); font-size: 12px; }
+.mp-day-img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
 .mp-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; }
 .mp-section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
 .mp-grocery-cat { font-size: 13px; font-weight: 600; color: var(--text); margin: 10px 0 6px; }
@@ -636,17 +638,22 @@ select option { background: #1a1830; }
   <!-- KEUKEN TAB -->
   <div id="vk-view-keuken" style="display:none;">
 
-    <!-- Week planning -->
+    <!-- Snelle actie knop -->
+    <button onclick="document.getElementById('mp-week-grid').scrollIntoView({behavior:'smooth'})" style="width:100%;height:52px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:16px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+      📅 Plan deze week
+    </button>
+
+    <!-- Week planning met grote kaartjes -->
     <div style="margin-bottom:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Deze week</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:15px;font-weight:700;">Deze week</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button class="dt-week-btn" onclick="changeMpWeek(-1)">&#8592;</button>
           <span style="font-size:13px;color:var(--text);" id="mp-week-label"></span>
           <button class="dt-week-btn" onclick="changeMpWeek(1)">&#8594;</button>
         </div>
       </div>
-      <div class="mp-week-grid" id="mp-week-grid"></div>
+      <div id="mp-week-grid"></div>
     </div>
 
     <!-- Boodschappenlijst -->
@@ -658,57 +665,13 @@ select option { background: #1a1830; }
       <div id="mp-grocery-list"></div>
     </div>
 
-    <!-- Mealprep schema -->
+    <!-- Mealprep schema inklapbaar -->
     <div class="mp-section" style="margin-bottom:1.5rem;">
-      <div class="mp-section-title">👨‍🍳 Mealprep schema zondag</div>
-      <div id="mp-prep-schema"></div>
-    </div>
-
-    <!-- Recepten bibliotheek -->
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">📖 Mijn recepten</div>
-      <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1rem;">
-        <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
-        <div class="dt-day-tab" onclick="filterRecipes('ontbijt')" data-filter="ontbijt">🌅 Ontbijt</div>
-        <div class="dt-day-tab" onclick="filterRecipes('lunch')" data-filter="lunch">🥗 Lunch</div>
-        <div class="dt-day-tab" onclick="filterRecipes('middagsnack')" data-filter="middagsnack">🍌 Snack</div>
-        <div class="dt-day-tab" onclick="filterRecipes('diner')" data-filter="diner">🍽️ Diner</div>
-        <div class="dt-day-tab" onclick="filterRecipes('avondsnack')" data-filter="avondsnack">🌙 Avond</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="togglePrepSchema()">
+        <div class="mp-section-title" style="margin-bottom:0;">👨‍🍳 Mealprep schema zondag</div>
+        <span id="prep-schema-toggle" style="font-size:18px;color:var(--muted);">▾</span>
       </div>
-      <div id="recipe-list" style="margin-bottom:1rem;"></div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="openMealCreator()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Recept aanmaken</button>
-        <button onclick="showManualBarcodeInput()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">🔢 Barcode</button>
-      </div>
-    </div>
-
-    <!-- Product result na barcode -->
-    <div class="product-card" id="product-card" style="margin-bottom:1.5rem;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <img id="product-image" src="" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:var(--surface2);padding:6px;display:none;flex-shrink:0;border:1px solid var(--border);" />
-        <div>
-          <div class="product-name" id="product-name"></div>
-          <div class="product-brand" id="product-brand"></div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
-        <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
-        <span style="font-size:13px;color:var(--muted);">gram</span>
-      </div>
-      <div class="product-macros" id="product-macros"></div>
-      <div class="dt-add-row" style="margin-bottom:8px;">
-        <select id="product-meal" style="flex:1;">
-          <option value="ontbijt">🌅 Ontbijt</option>
-          <option value="lunch">🥗 Lunch</option>
-          <option value="middagsnack">🍌 Middagsnack</option>
-          <option value="diner">🍽️ Diner</option>
-          <option value="avondsnack">🌙 Avondsnack</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="saveScannedAsRecipe()" class="btn-dt-add" style="flex:1;">📖 Opslaan als recept</button>
-        <button onclick="addScannedProduct()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Aan dag</button>
-      </div>
+      <div id="mp-prep-schema" style="display:none;margin-top:1rem;"></div>
     </div>
 
   </div><!-- end vk-view-keuken -->
@@ -1899,6 +1862,7 @@ function renderGroceryList(wk) {
 
   // Categorize
   const categorized = {};
+  const CAT_ICONS = { 'Vlees & Vis': '🥩', 'Groente': '🥦', 'Koolhydraten': '🍚', 'Zuivel & Eieren': '🥛', 'Overig': '🛒' };
   Object.keys(GROCERY_CATS).forEach(cat => categorized[cat] = []);
   
   allIngredients.forEach(item => {
@@ -1916,11 +1880,12 @@ function renderGroceryList(wk) {
 
   groceryDiv.innerHTML = Object.entries(categorized).map(([cat, items]) => {
     if (items.length === 0) return '';
-    return `<div class="mp-grocery-cat">${cat}</div>` +
+    const icon = CAT_ICONS[cat] || '🛒';
+    return `<div style="font-size:13px;font-weight:700;color:var(--text);margin:12px 0 8px;display:flex;align-items:center;gap:6px;">${icon} ${cat}</div>` +
       items.map(item => `
-        <div class="mp-grocery-item ${checked[item] ? 'checked' : ''}" onclick="toggleGrocery('${wk}','${item.replace(/'/g,'\'')}')" style="cursor:pointer;">
+        <div class="mp-grocery-item ${checked[item] ? 'checked' : ''}" onclick="toggleGrocery('${wk}','${item.replace(/'/g,'\'')}')" style="cursor:pointer;padding:10px 0;">
           <input type="checkbox" ${checked[item] ? 'checked' : ''} onclick="event.stopPropagation();toggleGrocery('${wk}','${item.replace(/'/g,'\'')}')" />
-          <span style="font-size:14px;">${item}</span>
+          <span style="font-size:15px;${checked[item] ? 'text-decoration:line-through;color:var(--muted);' : ''}">${item}</span>
         </div>`).join('');
   }).join('');
 }
@@ -1945,6 +1910,16 @@ function switchVKTab(tab) {
   }
 }
 
+function togglePrepSchema() {
+  const schema = document.getElementById('mp-prep-schema');
+  const toggle = document.getElementById('prep-schema-toggle');
+  if (!schema) return;
+  const isOpen = schema.style.display !== 'none';
+  schema.style.display = isOpen ? 'none' : 'block';
+  if (toggle) toggle.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (!isOpen) renderMealprep();
+}
+
 function renderMealprep() {
   const wk = getMpWeekKey(mpViewDate);
   const plan = mpWeekPlan[wk] || {};
@@ -1953,16 +1928,29 @@ function renderMealprep() {
   const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   document.getElementById('mp-week-label').textContent = ws.getDate() + ' ' + months[ws.getMonth()] + ' – ' + we.getDate() + ' ' + months[we.getMonth()];
 
-  // Week grid
+  // Week grid - big cards with images
   const DAYS = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+  const DAYS_FULL = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
   const grid = document.getElementById('mp-week-grid');
   grid.innerHTML = DAYS.map((d, i) => {
     const date = new Date(ws); date.setDate(date.getDate() + i);
     const dStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
     const recipe = plan[dStr] ? getRecipeById(plan[dStr]) : null;
-    return `<div class="mp-day-card ${recipe ? 'has-meal' : ''}" onclick="openMpMealPicker('${dStr}')">
-      <div class="mp-day-label">${d}</div>
-      <div class="mp-day-meal">${recipe ? recipe.name.split(' ').slice(0,2).join(' ') : '+'}</div>
+    const isToday = dStr === dateKey(new Date());
+    const imgHtml = recipe && recipe.image
+      ? `<img class="mp-day-img" src="${recipe.image}" onerror="this.style.display='none'" />`
+      : recipe ? `<div class="mp-day-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🍽️</div>`
+      : `<div class="mp-day-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;border:1px dashed var(--border);">+</div>`;
+    return `<div class="mp-day-card ${recipe ? 'has-meal' : ''}" onclick="openMpMealPicker('${dStr}')" style="${isToday ? 'border-color:var(--purple);' : ''}">
+      <div style="min-width:36px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;">${d}</div>
+        <div style="font-size:13px;font-weight:700;color:${isToday ? 'var(--purple-light)' : 'var(--text)'};">${date.getDate()}</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="mp-day-meal ${recipe ? '' : 'empty'}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${recipe ? recipe.name : 'Tik om diner te kiezen'}</div>
+        ${recipe ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${recipe.kcal} kcal · E: ${recipe.protein}g</div>` : ''}
+      </div>
+      ${imgHtml}
     </div>`;
   }).join('');
 
