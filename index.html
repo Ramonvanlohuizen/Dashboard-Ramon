@@ -57,7 +57,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .page-picker-item.active .page-picker-item-check { background: var(--purple); border-color: var(--purple); color: white; }
 
 /* Droogtraining */
-.dt-hero { background: linear-gradient(135deg, #0f4c35 0%, #1a7a52 50%, #22c55e 100%); border-radius: 24px; padding: 1.75rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; }
+.dt-hero { background: linear-gradient(135deg, #0c3d4a 0%, #0e6b6b 50%, #14b8a6 100%); border-radius: 24px; padding: 1.75rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; }
 .dt-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: rgba(255,255,255,0.06); border-radius: 50%; }
 .dt-hero-label { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
 .dt-hero-kcal { font-size: 42px; font-weight: 700; color: white; line-height: 1; margin-bottom: 4px; }
@@ -107,14 +107,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-se
 .dt-add-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
 .dt-add-row { display: flex; gap: 8px; margin-bottom: 8px; overflow: hidden; }
 .dt-add-row input, .dt-add-row select { min-width: 0; flex: 1; }
-.btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #1a7a52, #22c55e); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-dt-add { height: 42px; padding: 0 16px; background: linear-gradient(135deg, #0e6b6b, #14b8a6); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 
 /* Mealprep */
 .mp-week-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.25rem; }
 .mp-day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; display: flex; align-items: center; gap: 12px; }
-.mp-day-card.has-meal { border-color: rgba(124,92,252,0.4); background: rgba(124,92,252,0.05); }
+.mp-day-card.has-meal { border-color: rgba(20,184,166,0.4); background: rgba(20,184,166,0.05); }
 .mp-day-label { font-size: 12px; font-weight: 700; color: var(--text); min-width: 28px; }
-.mp-day-meal { font-size: 13px; color: var(--purple-light); flex: 1; }
+.mp-day-meal { font-size: 13px; color: #14b8a6; flex: 1; }
 .mp-day-meal.empty { color: var(--muted); font-size: 12px; }
 .mp-day-img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
 .mp-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; }
@@ -576,7 +576,7 @@ select option { background: #1a1830; }
 
   <!-- Tab switcher -->
   <div style="display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:1.25rem;border:1px solid var(--border);">
-    <button id="vk-tab-voeding" onclick="switchVKTab('voeding')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--purple);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">🥗 Voeding</button>
+    <button id="vk-tab-voeding" onclick="switchVKTab('voeding')" style="flex:1;height:38px;border:none;border-radius:10px;background:#0e6b6b;color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">🥗 Voeding</button>
     <button id="vk-tab-keuken" onclick="switchVKTab('keuken')" style="flex:1;height:38px;border:none;border-radius:10px;background:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">🍳 Keuken</button>
   </div>
 
@@ -638,11 +638,6 @@ select option { background: #1a1830; }
   <!-- KEUKEN TAB -->
   <div id="vk-view-keuken" style="display:none;">
 
-    <!-- Snelle actie knop -->
-    <button onclick="document.getElementById('mp-week-grid').scrollIntoView({behavior:'smooth'})" style="width:100%;height:52px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:16px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-      📅 Plan deze week
-    </button>
-
     <!-- Week planning met grote kaartjes -->
     <div style="margin-bottom:1.5rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -656,15 +651,6 @@ select option { background: #1a1830; }
       <div id="mp-week-grid"></div>
     </div>
 
-    <!-- Boodschappenlijst -->
-    <div class="mp-section" style="margin-bottom:1.5rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <div class="mp-section-title" style="margin-bottom:0;">🛒 Boodschappenlijst</div>
-        <button onclick="clearGroceries()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;">Wis alles</button>
-      </div>
-      <div id="mp-grocery-list"></div>
-    </div>
-
     <!-- Mealprep schema inklapbaar -->
     <div class="mp-section" style="margin-bottom:1.5rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="togglePrepSchema()">
@@ -672,6 +658,53 @@ select option { background: #1a1830; }
         <span id="prep-schema-toggle" style="font-size:18px;color:var(--muted);">▾</span>
       </div>
       <div id="mp-prep-schema" style="display:none;margin-top:1rem;"></div>
+    </div>
+
+    <!-- Recepten bibliotheek -->
+    <div style="margin-top:1.5rem;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px;">📖 Mijn recepten</div>
+      <div class="dt-day-tabs" id="recipe-filter-tabs" style="margin-bottom:1rem;">
+        <div class="dt-day-tab active" onclick="filterRecipes('alle')" data-filter="alle">Alle</div>
+        <div class="dt-day-tab" onclick="filterRecipes('diner')" data-filter="diner">🍽️ Diner</div>
+        <div class="dt-day-tab" onclick="filterRecipes('ontbijt')" data-filter="ontbijt">🌅 Ontbijt</div>
+        <div class="dt-day-tab" onclick="filterRecipes('lunch')" data-filter="lunch">🥗 Lunch</div>
+        <div class="dt-day-tab" onclick="filterRecipes('middagsnack')" data-filter="middagsnack">🍌 Snack</div>
+        <div class="dt-day-tab" onclick="filterRecipes('avondsnack')" data-filter="avondsnack">🌙 Avond</div>
+      </div>
+      <div id="recipe-list" style="margin-bottom:1rem;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="openMealCreator()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Recept aanmaken</button>
+        <button onclick="showManualBarcodeInput()" style="flex:1;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">🔢 Barcode</button>
+      </div>
+    </div>
+
+    <!-- Product result na barcode -->
+    <div class="product-card" id="product-card" style="margin-top:1rem;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <img id="product-image" src="" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:var(--surface2);padding:6px;display:none;flex-shrink:0;border:1px solid var(--border);" />
+        <div>
+          <div class="product-name" id="product-name"></div>
+          <div class="product-brand" id="product-brand"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+        <input type="number" id="product-grams" placeholder="Hoeveel gram?" inputmode="decimal" style="flex:1;max-width:150px;" />
+        <span style="font-size:13px;color:var(--muted);">gram</span>
+      </div>
+      <div class="product-macros" id="product-macros"></div>
+      <div class="dt-add-row" style="margin-bottom:8px;">
+        <select id="product-meal" style="flex:1;">
+          <option value="ontbijt">🌅 Ontbijt</option>
+          <option value="lunch">🥗 Lunch</option>
+          <option value="middagsnack">🍌 Middagsnack</option>
+          <option value="diner">🍽️ Diner</option>
+          <option value="avondsnack">🌙 Avondsnack</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveScannedAsRecipe()" class="btn-dt-add" style="flex:1;">📖 Opslaan als recept</button>
+        <button onclick="addScannedProduct()" style="flex:1;height:42px;background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:10px;color:var(--purple-light);font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Aan dag</button>
+      </div>
     </div>
 
   </div><!-- end vk-view-keuken -->
@@ -787,7 +820,7 @@ select option { background: #1a1830; }
     </div>
     <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.5;">Voer het barcodenummer in van het product. Dit staat onder de streepjescode op de verpakking.</p>
     <input type="number" id="manual-barcode-input" placeholder="Bijv. 8723400940074" inputmode="numeric" style="width:100%;margin-bottom:12px;font-size:16px;" />
-    <button onclick="submitManualBarcode()" style="width:100%;height:52px;background:linear-gradient(135deg,var(--purple),#a855f7);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;">Product zoeken →</button>
+    <button onclick="submitManualBarcode()" style="width:100%;height:52px;background:linear-gradient(135deg,#0e6b6b,#14b8a6);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;">Product zoeken →</button>
   </div>
 </div>
 
@@ -1722,23 +1755,7 @@ function pollinationsImg(prompt) {
   return 'https://image.pollinations.ai/prompt/' + encodeURIComponent('professional food photography, ' + prompt + ', top view, clean plate, appetizing, high quality') + '?width=400&height=300&nologo=true';
 }
 
-const BUILTIN_RECIPES = [
-  { id:'b1', name:'Kipfilet met rijst & broccoli', meal:'diner', kcal:480, protein:48, carbs:52, fat:6, time:25, ingredients:'200g kipfilet\n150g rijst (droog)\n200g broccoli\n1 el olijfolie\nKnoflook, zout, peper', prepSteps:['Kook rijst volgens verpakking (±15 min).','Bestrooi kipfilet met knoflook, zout en peper.','Bak kip op middelhoog vuur 6-7 min per kant tot gaar.','Stoom of kook broccoli 5 min tot beetgaar.','Verdeel alles over bakjes.'], category:'Kip', image: pollinationsImg('grilled chicken breast with white rice and broccoli') },
-  { id:'b2', name:'Zalm met zoete aardappel', meal:'diner', kcal:520, protein:42, carbs:45, fat:14, time:25, ingredients:'180g zalmmoot\n250g zoete aardappel\n100g sperziebonen\n1 el olijfolie\nCitroensap, dille', prepSteps:['Verwarm oven op 200°C.','Schil zoete aardappel, snij in blokjes, besprenkel met olie. Rooster 20 min.','Kook sperziebonen 5 min.','Bak zalm 4 min per kant op middelhoog vuur.','Serveer met citroensap en verse dille.'], category:'Vis', image: pollinationsImg('salmon fillet with sweet potato and green beans') },
-  { id:'b3', name:'Gehakt met pasta & tomatensaus', meal:'diner', kcal:560, protein:44, carbs:58, fat:12, time:25, ingredients:'150g mager rundergehakt\n100g volkoren pasta\n200ml passata\n1 ui\nKnoflook, Italiaanse kruiden', prepSteps:['Kook pasta volgens verpakking.','Snipper ui en knoflook fijn.','Fruit ui 3 min, voeg knoflook toe.','Bak gehakt rul ±5 min.','Voeg passata en kruiden toe, laat 10 min sudderen.','Meng met pasta.'], category:'Rood vlees', image: pollinationsImg('pasta bolognese with ground beef tomato sauce') },
-  { id:'b4', name:'Tonijn pasta', meal:'diner', kcal:440, protein:40, carbs:55, fat:6, time:15, ingredients:'1 blik tonijn (150g)\n100g volkoren pasta\n50g maïs\n100ml passata\nKnoflook, basilicum', prepSteps:['Kook pasta al dente.','Verwarm passata met knoflook 3 min.','Voeg tonijn en maïs toe.','Verwarm nog 2 min.','Meng met pasta en garneer met basilicum.'], category:'Vis', image: pollinationsImg('tuna pasta with tomato sauce and corn') },
-  { id:'b5', name:'Kipshoarma bowl', meal:'diner', kcal:490, protein:46, carbs:48, fat:10, time:20, ingredients:'200g kipfilet\n150g rijst\n50g komkommer\n50g tomaat\nShoarma kruidenmix, Griekse yoghurt', prepSteps:['Kook rijst.','Snij kip in reepjes, bestrooi met shoarma kruidenmix.','Bak kip op hoog vuur 8-10 min tot gaar.','Snij komkommer en tomaat.','Serveer als bowl: rijst, kip, groenten en yoghurt.'], category:'Kip', image: pollinationsImg('chicken shawarma bowl with rice cucumber tomato yogurt') },
-  { id:'b6', name:'Biefstuk met aardappelen & spinazie', meal:'diner', kcal:530, protein:50, carbs:35, fat:16, time:25, ingredients:'180g biefstuk\n200g aardappelen\n150g spinazie\n1 el olijfolie\nRozemarijn, knoflook', prepSteps:['Schil en kook aardappelen 15 min.','Laat biefstuk op kamertemperatuur komen.','Bak biefstuk 3 min per kant op hoog vuur.','Laat 5 min rusten onder folie.','Roerbak spinazie met knoflook 2 min.'], category:'Rood vlees', image: pollinationsImg('beef steak with potatoes and wilted spinach') },
-  { id:'b7', name:'Tilapia met quinoa & groenten', meal:'diner', kcal:420, protein:44, carbs:40, fat:8, time:25, ingredients:'180g tilapia\n80g quinoa\n150g paprika en courgette\n1 el olijfolie\nCitroensap, peterselie', prepSteps:['Kook quinoa 15 min.','Verwarm oven op 200°C.','Snij paprika en courgette, besprenkel met olie, rooster 15 min.','Bak tilapia 3-4 min per kant.','Serveer met citroensap en peterselie.'], category:'Vis', image: pollinationsImg('tilapia fish with quinoa and roasted vegetables') },
-  { id:'b8', name:'Kippensoep met rijst', meal:'diner', kcal:380, protein:38, carbs:42, fat:6, time:30, ingredients:'200g kipfilet\n100g rijst\n2 wortelen\n2 stengels bleekselderij\n1 ui\nKippenbouillon, peterselie', prepSteps:['Snij alle groenten in stukken.','Doe kip, groenten en bouillon in pan.','Kook 20 min op middelhoog vuur.','Voeg rijst toe, kook nog 10 min.','Haal kip eruit, scheur fijn en doe terug.'], category:'Kip', image: pollinationsImg('chicken soup with rice carrots celery') },
-  { id:'b9', name:'Wrap met kip & avocado', meal:'diner', kcal:460, protein:40, carbs:38, fat:14, time:15, ingredients:'180g kipfilet\n2 volkoren wraps\n1 avocado\n50g ijsbergsla\n50g tomaat\nLimoen, koriander', prepSteps:['Bak kipfilet gaar, snij in reepjes.','Prak avocado met limoensap en zout.','Snij tomaat en sla.','Beleg wraps met avocado, kip, sla en tomaat.','Rol strak op en snij doormidden.'], category:'Kip', image: pollinationsImg('chicken avocado wrap with lettuce tomato lime') },
-  { id:'b10', name:'Gehakt met rijst & peultjes', meal:'diner', kcal:510, protein:42, carbs:50, fat:12, time:20, ingredients:'150g rundergehakt\n150g rijst\n150g peultjes\nSojasaus, gember, knoflook\n1 el sesamolie', prepSteps:['Kook rijst.','Rasp gember, pers knoflook.','Bak gehakt rul in sesamolie met gember en knoflook.','Voeg peultjes toe, bak 3 min.','Breng op smaak met sojasaus.'], category:'Rood vlees', image: pollinationsImg('minced beef with rice and snow peas asian style') },
-  { id:'b11', name:'Kabeljauw met aardappelpuree', meal:'diner', kcal:400, protein:40, carbs:38, fat:8, time:25, ingredients:'200g kabeljauw\n250g aardappelen\n100ml magere melk\n150g spinazie\nMosterd, citroen', prepSteps:['Schil en kook aardappelen 15 min.','Pureer met warme melk en breng op smaak.','Bak kabeljauw 4 min per kant.','Roerbak spinazie 2 min met knoflook.','Serveer met schepje mosterd en citroen.'], category:'Vis', image: pollinationsImg('cod fish with mashed potato and spinach') },
-  { id:'b12', name:'Kipburger met zoete aardappelfriet', meal:'diner', kcal:500, protein:44, carbs:48, fat:10, time:30, ingredients:'180g kipgehakt\n300g zoete aardappel\n1 volkoren broodje\nSla, tomaat\nKruiden naar smaak', prepSteps:['Verwarm oven op 200°C.','Snij zoete aardappel in frietjes, besprenkel met olie. Rooster 20-25 min.','Meng kipgehakt met kruiden, vorm een burger.','Bak kipburger 5 min per kant.','Beleg broodje met sla, tomaat en burger.'], category:'Kip', image: pollinationsImg('chicken burger with sweet potato fries') },
-  { id:'b13', name:'Pasta carbonara light', meal:'diner', kcal:490, protein:38, carbs:54, fat:12, time:20, ingredients:'100g volkoren pasta\n100g kipfilet\n2 eieren\n30g Parmezaan\nZwarte peper, peterselie', prepSteps:['Kook pasta al dente, bewaar wat kookwater.','Bak kipfilet gaar, snij in blokjes.','Klop eieren met Parmezaan en peper.','Meng hete pasta met eimix (geen vuur), voeg lepel kookwater toe.','Voeg kip toe en garneer met peterselie.'], category:'Kip', image: pollinationsImg('pasta carbonara with chicken parmesan') },
-  { id:'b14', name:'Zalmburger met aardappelsalade', meal:'diner', kcal:480, protein:40, carbs:36, fat:16, time:25, ingredients:'180g zalmfilet\n200g aardappelen\n50g komkommer\n2 el Griekse yoghurt\nDille, mosterd, citroen', prepSteps:['Kook aardappelen 15 min, laat afkoelen.','Snij aardappelen en komkommer in blokjes.','Meng yoghurt, mosterd en dille tot dressing.','Bak zalm 4 min per kant.','Meng aardappel en komkommer met dressing.'], category:'Vis', image: pollinationsImg('salmon burger with potato salad cucumber dill') },
-  { id:'b15', name:'Rundvlees wokschotel', meal:'diner', kcal:520, protein:46, carbs:44, fat:14, time:20, ingredients:'180g runderreepjes\n150g rijst\n200g wokvgroenten mix\nOestersaus, sojasaus\nGember, knoflook, sesamolie', prepSteps:['Kook rijst.','Snij vlees in dunne reepjes, marineer 5 min in sojasaus.','Verhit wok op hoogste stand met sesamolie.','Bak vlees 3 min op hoog vuur.','Voeg groenten, gember en knoflook toe, bak 3 min.','Blus af met oestersaus.'], category:'Rood vlees', image: pollinationsImg('beef stir fry with wok vegetables rice asian') }
-];
+const BUILTIN_RECIPES = [];
 
 // ===== MEALPREP =====
 let mpViewDate = new Date();
@@ -1898,13 +1915,13 @@ function switchVKTab(tab) {
   if (tab === 'voeding') {
     voeding.style.display = 'block';
     keuken.style.display = 'none';
-    tabV.style.background = 'var(--purple)'; tabV.style.color = 'white';
+    tabV.style.background = '#0e6b6b'; tabV.style.color = 'white';
     tabK.style.background = 'none'; tabK.style.color = 'var(--muted)';
   } else {
     voeding.style.display = 'none';
     keuken.style.display = 'block';
     tabV.style.background = 'none'; tabV.style.color = 'var(--muted)';
-    tabK.style.background = 'var(--purple)'; tabK.style.color = 'white';
+    tabK.style.background = '#0e6b6b'; tabK.style.color = 'white';
     renderRecipes();
     renderMealprep();
   }
@@ -2723,7 +2740,7 @@ function renderDT() {
             <div class="meal-kcal">${mealKcal > 0 ? Math.round(mealKcal) + ' kcal' : 'Leeg'}</div>
           </div>
         </div>
-        <button onclick="addRecipeFromMeal('${meal}')" style="background:rgba(124,92,252,0.15);border:1px solid rgba(124,92,252,0.3);border-radius:8px;color:var(--purple-light);font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📖 Recept</button>
+        <button onclick="addRecipeFromMeal('${meal}')" style="background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.3);border-radius:8px;color:#14b8a6;font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📖 Recept</button>
       </div>
       ${items.length > 0 ? `<div class="meal-items">${items.map(f =>
         `<div class="meal-item">
