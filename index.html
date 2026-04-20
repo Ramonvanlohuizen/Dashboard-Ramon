@@ -2122,10 +2122,15 @@ let cameraStream = null;
 
 function closeBarcodeModal() {
   stopCamera();
-  document.getElementById('manual-barcode-modal').classList.remove('open');
-  document.getElementById('camera-preview-wrap').style.display = 'none';
-  document.getElementById('camera-status').textContent = '';
-  document.getElementById('scan-camera-btn').style.display = 'flex';
+  const modal = document.getElementById('manual-barcode-modal');
+  modal.classList.remove('open');
+  modal.style.display = 'none';
+  const cpw = document.getElementById('camera-preview-wrap');
+  const cs = document.getElementById('camera-status');
+  const scb = document.getElementById('scan-camera-btn');
+  if (cpw) cpw.style.display = 'none';
+  if (cs) cs.textContent = '';
+  if (scb) scb.style.display = 'flex';
 }
 
 async function scanWithCamera() {
@@ -2182,10 +2187,8 @@ async function captureBarcode() {
       body: JSON.stringify({ image: base64 })
     });
     const data = await response.json();
-    console.log('Edge function response:', JSON.stringify(data));
     const code = data.code || '';
     const cleanCode = code.replace(/\D/g, '');
-    status.textContent = 'Antwoord: ' + (code || 'leeg');
     if (cleanCode && cleanCode.length >= 6 && code !== 'NOT_FOUND') {
       setTimeout(() => {
         closeBarcodeModal();
