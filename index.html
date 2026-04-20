@@ -2175,10 +2175,15 @@ async function captureBarcode() {
 
 function showManualBarcodeInput() {
   const modal = document.getElementById('manual-barcode-modal');
-  document.getElementById('camera-preview-wrap').style.display = 'none';
-  document.getElementById('camera-status').textContent = '';
-  document.getElementById('scan-camera-btn').style.display = 'flex';
-  document.getElementById('manual-barcode-input').value = '';
+  if (!modal) return;
+  const cpw = document.getElementById('camera-preview-wrap');
+  const cs = document.getElementById('camera-status');
+  const scb = document.getElementById('scan-camera-btn');
+  const mbi = document.getElementById('manual-barcode-input');
+  if (cpw) cpw.style.display = 'none';
+  if (cs) cs.textContent = '';
+  if (scb) scb.style.display = 'flex';
+  if (mbi) mbi.value = '';
   modal.classList.add('open');
 }
 
