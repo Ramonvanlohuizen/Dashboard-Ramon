@@ -598,40 +598,7 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <!-- Buffer pot (apart, telt niet mee in vermogen) -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-      <div>
-        <div style="font-size:16px;font-weight:700;">🛡️ Buffer</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Noodfonds & aanvulling tekort • niet in vermogen</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:22px;font-weight:700;color:var(--cyan);" id="sp-buffer-val">€0</div>
-        <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-buffer-doel">1000</span></div>
-      </div>
-    </div>
-    <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
-      <div id="sp-buffer-bar" style="height:100%;background:var(--cyan);border-radius:999px;transition:width 0.6s ease;width:0%;"></div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <input type="number" id="sp-buffer-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-buffer-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" />
-      <button onclick="saveSpaarpot('buffer')" style="height:42px;padding:0 14px;background:var(--cyan);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
-    </div>
-  </div>
 
-  <!-- Spaarcentrum: vaste potten, geen invoervelden -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div>
-        <div style="font-size:16px;font-weight:700;">🎯 Spaarcentrum</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">€300/maand verdeeld over doelen</div>
-      </div>
-      <div style="font-size:20px;font-weight:700;color:var(--green);" id="sp-spaar-val">€0</div>
-    </div>
-    <div id="sp-doelen-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
-    <button onclick="openSpaardoel()" style="width:100%;height:42px;background:var(--surface2);border:1px dashed rgba(74,222,128,0.4);border-radius:12px;color:var(--green);font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Spaardoel toevoegen</button>
-  </div>
 
   <!-- Lange termijn -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
