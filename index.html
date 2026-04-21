@@ -365,9 +365,15 @@ select option { background: #1a1830; }
 </style>
 <meta name="version" content="1776771770">
 <script>
-// Clear all old spaar keys so fresh start
 (function() {
+  // Wipe old keys
   ['spaar_data','spaar_data_v2','spaar_data_v3'].forEach(function(k){localStorage.removeItem(k);});
+  // Wipe service worker caches
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      names.forEach(function(name) { caches.delete(name); });
+    });
+  }
 })();
 </script>
 </head>
@@ -583,75 +589,100 @@ select option { background: #1a1830; }
   <!-- SPAREN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- Hero -->
-  <div style="background:linear-gradient(135deg,#1a3a5c,#2563a8);border-radius:24px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
-    <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Totaal vermogen</div>
-    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="sp-totaal">€0</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.7);">Spaarcentrum + lange termijn + beleggingen</div>
+  <!-- HERO: Totaal vermogen -->
+  <div style="background:linear-gradient(145deg,#1e1060 0%,#3730a3 50%,#6d28d9 100%);border-radius:28px;padding:2rem 1.5rem 1.5rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-40px;left:-30px;width:140px;height:140px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.55);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Totaal vermogen</div>
+    <div style="font-size:48px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;margin-bottom:2px;" id="sp-totaal">€0</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;">lange termijn + beleggingen</div>
+    <!-- Mini stat row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.1);">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">🏠 Lange termijn</div>
+        <div style="font-size:18px;font-weight:700;color:white;" id="sp-lt-mini">€0</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">€915/mnd inleg</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.1);">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">📈 Beleggingen</div>
+        <div style="font-size:18px;font-weight:700;color:white;" id="sp-beleg-mini">€0</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">€150/mnd inleg</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Lange termijn -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-      <div>
-        <div style="font-size:16px;font-weight:700;">🏠 Lange termijn</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Toekomst, huis, grote doelen • €915/mnd</div>
+  <!-- Potten bewerken -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
+
+    <!-- Lange termijn pot -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;" onclick="spToggleEdit('lt')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;">🏠 Lange termijn</div>
+        <div style="font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:999px;">bewerk</div>
       </div>
-      <div style="text-align:right;">
-        <div style="font-size:22px;font-weight:700;color:var(--purple-light);" id="sp-lt-val">€0</div>
-        <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50.000</span></div>
+      <div style="font-size:24px;font-weight:700;color:var(--purple-light);margin-bottom:4px;" id="sp-lt-val">€0</div>
+      <div style="height:4px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;">
+        <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;width:0%;transition:width 0.8s ease;"></div>
       </div>
+      <div style="font-size:10px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50.000</span></div>
     </div>
-    <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
-      <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;width:0%;transition:width 0.6s;"></div>
+
+    <!-- Beleggingen pot -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;" onclick="spToggleEdit('beleg')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:13px;font-weight:600;">📈 Beleggingen</div>
+        <div style="font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:999px;">bewerk</div>
+      </div>
+      <div style="font-size:24px;font-weight:700;color:var(--yellow);margin-bottom:4px;" id="sp-beleg-val">€0</div>
+      <div style="font-size:10px;color:var(--muted);" id="sp-beleg-prognose-label">10jr prognose: —</div>
     </div>
+  </div>
+
+  <!-- Edit panels (hidden by default) -->
+  <div id="sp-edit-lt" style="display:none;background:var(--surface);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
+    <div style="font-size:13px;font-weight:600;color:var(--purple-light);margin-bottom:10px;">🏠 Saldo bijwerken</div>
     <div style="display:flex;gap:8px;">
-      <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="width:90px;flex:0 0 90px;" />
-      <button onclick="spSave('lt')" style="height:42px;padding:0 14px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
+      <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;"/>
+      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="width:90px;flex:0 0 90px;"/>
+      <button onclick="spSave('lt')" style="height:42px;padding:0 16px;background:var(--purple-light);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
   </div>
 
-  <!-- Beleggingen -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-      <div>
-        <div style="font-size:16px;font-weight:700;">📈 Beleggingen</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Vermogensgroei • €150/mnd</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:22px;font-weight:700;color:var(--yellow);" id="sp-beleg-val">€0</div>
-        <div style="font-size:11px;color:var(--muted);">portfolio waarde</div>
-      </div>
-    </div>
+  <div id="sp-edit-beleg" style="display:none;background:var(--surface);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
+    <div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:10px;">📈 Portfolio bijwerken</div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <input type="number" id="sp-beleg-input" placeholder="Huidig portfolio €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="width:90px;flex:0 0 90px;" />
-      <button onclick="spSave('beleg')" style="height:42px;padding:0 14px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
+      <input type="number" id="sp-beleg-input" placeholder="Portfolio waarde €" inputmode="decimal" style="flex:1;"/>
+      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="width:80px;flex:0 0 80px;"/>
+      <button onclick="spSave('beleg')" style="height:42px;padding:0 16px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
-    <div style="font-size:12px;color:var(--muted);padding:8px 12px;background:rgba(251,191,36,0.08);border-radius:10px;border:1px solid rgba(251,191,36,0.15);">
+    <div style="font-size:11px;color:var(--muted);padding:8px 10px;background:rgba(251,191,36,0.07);border-radius:8px;">
       Bij 7% rendement over 10 jaar: <strong style="color:var(--yellow);" id="sp-beleg-prognose">—</strong>
     </div>
   </div>
 
-  <!-- Automatische regels -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+  <!-- Automatische inleg -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:1.25rem;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:14px;font-weight:600;">📅 Automatische inleg (elke 23e)</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Worden automatisch bijgehouden op de 23e</div>
+        <div style="font-size:14px;font-weight:700;">Automatische inleg</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Elke 23e van de maand</div>
       </div>
-      <button onclick="spOpenRegel()" style="height:34px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Regel</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:13px;font-weight:700;color:var(--green);" id="sp-totaal-inleg">€0/mnd</div>
+        <button onclick="spOpenRegel()" style="width:32px;height:32px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+      </div>
     </div>
-    <div id="sp-regels-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div id="sp-regels-list" style="padding:0 0.5rem;"></div>
   </div>
 
   <!-- Logboek -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:2rem;">
-    <div style="font-size:14px;font-weight:600;margin-bottom:1rem;">📓 Inleg logboek</div>
-    <div id="sp-log-list"></div>
-    <div id="sp-log-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem;">Nog geen inleg geregistreerd</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:14px;font-weight:700;">Inleg logboek</div>
+      <div style="font-size:11px;color:var(--muted);">automatisch bijgehouden</div>
+    </div>
+    <div id="sp-log-list" style="padding:0 1.25rem;"></div>
+    <div id="sp-log-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem;">Nog geen inleg geregistreerd</div>
   </div>
 
   </div><!-- end bud-view-sparen -->
@@ -3508,36 +3539,45 @@ function spRender() {
   const d = spGet();
   const fmt = n => '€' + Math.round(n).toLocaleString('nl-NL');
 
-  // Lange termijn
-  const ltPct = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0);
+  // Hero
+  const totaal = d.lt.saldo + d.beleg.saldo;
+  document.getElementById('sp-totaal').textContent = fmt(totaal);
+  document.getElementById('sp-lt-mini').textContent = fmt(d.lt.saldo);
+  document.getElementById('sp-beleg-mini').textContent = fmt(d.beleg.saldo);
+
+  // Lange termijn card
   document.getElementById('sp-lt-val').textContent = fmt(d.lt.saldo);
   document.getElementById('sp-lt-doel-label').textContent = d.lt.doel.toLocaleString('nl-NL');
-  document.getElementById('sp-lt-bar').style.width = ltPct + '%';
+  document.getElementById('sp-lt-bar').style.width = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0) + '%';
   document.getElementById('sp-lt-input').value = d.lt.saldo || '';
   document.getElementById('sp-lt-doel-input').value = d.lt.doel || '';
 
-  // Beleggingen
+  // Beleggingen card
   document.getElementById('sp-beleg-val').textContent = fmt(d.beleg.saldo);
   document.getElementById('sp-beleg-input').value = d.beleg.saldo || '';
   document.getElementById('sp-beleg-inleg-input').value = d.beleg.inleg || 150;
   let prog = d.beleg.saldo;
   for (let i = 0; i < 10; i++) prog = prog * 1.07 + (d.beleg.inleg || 150) * 12;
   document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prog));
+  document.getElementById('sp-beleg-prognose-label').textContent = '10jr prognose: ' + fmt(Math.round(prog));
 
-  // Totaal
-  document.getElementById('sp-totaal').textContent = fmt(d.lt.saldo + d.beleg.saldo);
+  // Regels totaal
+  const totaalInleg = (d.regels || []).reduce((s, r) => s + r.bedrag, 0);
+  document.getElementById('sp-totaal-inleg').textContent = '€' + totaalInleg + '/mnd';
 
-  // Regels
+  // Regels list
   const rl = document.getElementById('sp-regels-list');
   if (!d.regels || d.regels.length === 0) {
-    rl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.5rem;">Geen regels</div>';
+    rl.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:13px;">Geen regels — tik + om toe te voegen</div>';
   } else {
-    rl.innerHTML = d.regels.map(r => `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);">
-        <div style="width:8px;height:8px;border-radius:50%;background:${r.kleur};flex-shrink:0;"></div>
-        <div style="flex:1;font-size:13px;font-weight:500;">${r.naam}</div>
-        <div style="font-size:14px;font-weight:700;color:${r.kleur};">€${r.bedrag}</div>
-        <button onclick="spRegelMenu(${r.id}, this)" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 6px;line-height:1;letter-spacing:1px;">⋯</button>
+    rl.innerHTML = d.regels.map((r, i) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0.75rem;${i < d.regels.length-1 ? 'border-bottom:1px solid var(--border);' : ''}">
+        <div style="width:10px;height:10px;border-radius:50%;background:${r.kleur};flex-shrink:0;box-shadow:0 0 8px ${r.kleur};"></div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:500;">${r.naam}</div>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:${r.kleur};">€${r.bedrag}</div>
+        <button onclick="spRegelMenu(${r.id},this)" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;letter-spacing:1px;line-height:1;">⋯</button>
       </div>`).join('');
   }
 
@@ -3548,21 +3588,22 @@ function spRender() {
     ll.innerHTML = ''; le.style.display = 'block';
   } else {
     le.style.display = 'none';
-    ll.innerHTML = d.log.slice(0, 12).map(l => `
-      <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+    ll.innerHTML = d.log.slice(0, 12).map((l, i) => `
+      <div style="padding:12px 0;${i < Math.min(d.log.length,12)-1 ? 'border-bottom:1px solid var(--border);' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <div>
-            <span style="font-size:13px;font-weight:500;">${l.maand}</span>
-            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 6px;border-radius:6px;margin-left:6px;">auto</span>' : ''}
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:600;">${l.maand}</span>
+            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 7px;border-radius:6px;font-weight:500;">auto</span>' : ''}
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--green);">€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--green);">+€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">
-          ${(l.regels||[]).map(r=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:6px;">${r.naam} €${r.bedrag}</span>`).join('')}
+          ${(l.regels||[]).map(r=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 9px;border-radius:8px;">${r.naam} €${r.bedrag}</span>`).join('')}
         </div>
       </div>`).join('');
   }
 }
+
 
 function renderDT() {
   const dk = dateKey(dtViewDate);
