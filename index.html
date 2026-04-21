@@ -589,91 +589,98 @@ select option { background: #1a1830; }
   <!-- SPAREN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- Hero -->
-  <div style="background:linear-gradient(145deg,#1e1060,#3730a3,#6d28d9);border-radius:28px;padding:1.75rem 1.5rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
-    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Totaal spaargeld</div>
-    <div style="font-size:46px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;margin-bottom:1.5rem;" id="sp-totaal">€0</div>
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Lange termijn</div>
-        <div style="font-size:16px;font-weight:700;color:white;" id="sp-lt-mini">€0</div>
+  <!-- Hero — zelfde stijl als .balance-card -->
+  <div style="background:linear-gradient(135deg,#4f35c2 0%,#3730a3 50%,#6d28d9 100%);border-radius:24px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-60px;left:-20px;width:220px;height:220px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.55);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Totaal spaargeld</div>
+    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="sp-totaal">€0</div>
+    <div style="display:flex;gap:8px;margin-top:1.25rem;">
+      <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Lange termijn</div>
+        <div style="font-size:15px;font-weight:700;color:white;" id="sp-lt-mini">€0</div>
       </div>
-      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Beleggingen</div>
-        <div style="font-size:16px;font-weight:700;color:white;" id="sp-beleg-mini">€0</div>
+      <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Beleggingen</div>
+        <div style="font-size:15px;font-weight:700;color:white;" id="sp-beleg-mini">€0</div>
       </div>
-      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Spaarpotjes</div>
-        <div style="font-size:16px;font-weight:700;color:white;" id="sp-potjes-mini">€0</div>
+      <div style="flex:1;background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Spaarpotjes</div>
+        <div style="font-size:15px;font-weight:700;color:white;" id="sp-potjes-mini">€0</div>
       </div>
     </div>
   </div>
 
-  <!-- Spaarpotjes sectie (Buut-stijl) -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-    <div>
-      <div style="font-size:17px;font-weight:700;">Spaarpotjes</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:1px;" id="sp-potjes-totaal-label">€0 totaal gespaard</div>
+  <!-- Spaarpotjes sectie -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div class="section-title" style="margin-bottom:0;">Spaarpotjes</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:12px;color:var(--muted);" id="sp-potjes-totaal-label">€0 gespaard</span>
+      <button onclick="spNieuwPotje()" style="width:30px;height:30px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">+</button>
     </div>
-    <button onclick="spNieuwPotje()" style="width:36px;height:36px;background:var(--purple);color:white;border:none;border-radius:12px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
   </div>
 
   <!-- Potjes grid -->
-  <div id="sp-potjes-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;"></div>
+  <div id="sp-potjes-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;"></div>
 
-  <!-- Lange termijn & Beleggingen bewerken -->
-  <div style="font-size:17px;font-weight:700;margin-bottom:1rem;">Grote potten</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;">
+  <!-- Grote potten -->
+  <div class="section-title">Grote potten</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
 
     <!-- Lange termijn -->
-    <div onclick="spToggleEdit('lt')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;position:relative;overflow:hidden;">
+    <div onclick="spToggleEdit('lt')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;cursor:pointer;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
-        <!-- Potje illustratie -->
-        <div style="flex-shrink:0;width:48px;height:60px;position:relative;">
-          <div style="width:40px;height:52px;background:linear-gradient(180deg,rgba(167,139,250,0.15) 0%,rgba(167,139,250,0.35) 100%);border-radius:6px 6px 8px 8px;border:1.5px solid rgba(167,139,250,0.4);position:relative;overflow:hidden;margin:0 auto;">
-            <div id="sp-lt-fill" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(167,139,250,0.5),rgba(124,92,252,0.8));border-radius:0 0 6px 6px;transition:height 0.8s ease;height:0%;"></div>
-            <div style="position:absolute;top:0;left:0;right:0;height:8px;background:rgba(255,255,255,0.06);border-radius:6px 6px 0 0;"></div>
-          </div>
-          <div style="width:46px;height:6px;background:rgba(167,139,250,0.3);border-radius:3px;border:1px solid rgba(167,139,250,0.4);margin:-1px auto 0;"></div>
+        <div style="flex-shrink:0;">
+          <svg width="44" height="58" viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="2" width="32" height="7" rx="3.5" fill="#a78bfa" opacity="0.7"/>
+            <rect x="4" y="8" width="36" height="46" rx="7" fill="#a78bfa" opacity="0.12"/>
+            <rect x="4" y="8" width="36" height="46" rx="7" stroke="#a78bfa" stroke-width="1.5" opacity="0.45"/>
+            <clipPath id="clt"><rect x="5" y="9" width="34" height="44" rx="6"/></clipPath>
+            <rect id="sp-lt-fill-rect" x="5" y="53" width="34" height="0" rx="0" fill="#a78bfa" opacity="0.6" clip-path="url(#clt)"/>
+            <rect x="10" y="12" width="5" height="16" rx="2.5" fill="white" opacity="0.1"/>
+            <text x="22" y="36" text-anchor="middle" font-size="16" dominant-baseline="middle">🏠</text>
+          </svg>
         </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:16px;font-weight:700;color:var(--purple-light);margin-bottom:2px;" id="sp-lt-val">€0</div>
-          <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Lange termijn</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">doel €<span id="sp-lt-doel-label">50.000</span></div>
+        <div style="flex:1;min-width:0;padding-top:4px;">
+          <div style="font-size:18px;font-weight:700;color:var(--purple-light);" id="sp-lt-val">€0</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Lange termijn</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;">doel €<span id="sp-lt-doel-label">50.000</span></div>
         </div>
-        <!-- Verticale voortgangsbalk -->
-        <div style="width:6px;height:60px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;">
-          <div id="sp-lt-bar" style="width:100%;background:var(--purple-light);border-radius:999px;position:relative;bottom:0;transition:height 0.8s ease;height:0%;margin-top:auto;"></div>
+        <div style="width:6px;height:58px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div id="sp-lt-bar" style="width:100%;background:var(--purple-light);border-radius:999px;height:0%;transition:height 0.8s;"></div>
         </div>
       </div>
     </div>
 
     <!-- Beleggingen -->
-    <div onclick="spToggleEdit('beleg')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;position:relative;overflow:hidden;">
+    <div onclick="spToggleEdit('beleg')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;cursor:pointer;">
       <div style="display:flex;gap:10px;align-items:flex-start;">
-        <div style="flex-shrink:0;width:48px;height:60px;position:relative;">
-          <div style="width:40px;height:52px;background:linear-gradient(180deg,rgba(251,191,36,0.1) 0%,rgba(251,191,36,0.3) 100%);border-radius:6px 6px 8px 8px;border:1.5px solid rgba(251,191,36,0.35);position:relative;overflow:hidden;margin:0 auto;">
-            <div id="sp-beleg-fill" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(251,191,36,0.5),rgba(251,191,36,0.85));border-radius:0 0 6px 6px;transition:height 0.8s ease;height:0%;"></div>
-            <div style="position:absolute;top:0;left:0;right:0;height:8px;background:rgba(255,255,255,0.06);border-radius:6px 6px 0 0;"></div>
-          </div>
-          <div style="width:46px;height:6px;background:rgba(251,191,36,0.25);border-radius:3px;border:1px solid rgba(251,191,36,0.35);margin:-1px auto 0;"></div>
+        <div style="flex-shrink:0;">
+          <svg width="44" height="58" viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="2" width="32" height="7" rx="3.5" fill="#fbbf24" opacity="0.7"/>
+            <rect x="4" y="8" width="36" height="46" rx="7" fill="#fbbf24" opacity="0.12"/>
+            <rect x="4" y="8" width="36" height="46" rx="7" stroke="#fbbf24" stroke-width="1.5" opacity="0.45"/>
+            <clipPath id="cbel"><rect x="5" y="9" width="34" height="44" rx="6"/></clipPath>
+            <rect id="sp-beleg-fill-rect" x="5" y="53" width="34" height="0" rx="0" fill="#fbbf24" opacity="0.6" clip-path="url(#cbel)"/>
+            <rect x="10" y="12" width="5" height="16" rx="2.5" fill="white" opacity="0.1"/>
+            <text x="22" y="36" text-anchor="middle" font-size="16" dominant-baseline="middle">📈</text>
+          </svg>
         </div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:2px;" id="sp-beleg-val">€0</div>
-          <div style="font-size:11px;color:var(--muted);">Beleggingen</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="sp-beleg-prognose-label">10jr: —</div>
+        <div style="flex:1;min-width:0;padding-top:4px;">
+          <div style="font-size:18px;font-weight:700;color:var(--yellow);" id="sp-beleg-val">€0</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Beleggingen</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:1px;" id="sp-beleg-prognose-label">10jr: —</div>
         </div>
-        <div style="width:6px;height:60px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;">
-          <div id="sp-beleg-bar" style="width:100%;background:var(--yellow);border-radius:999px;transition:height 0.8s ease;height:0%;"></div>
+        <div style="width:6px;height:58px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div id="sp-beleg-bar" style="width:100%;background:var(--yellow);border-radius:999px;height:0%;transition:height 0.8s;"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Edit panels -->
-  <div id="sp-edit-lt" style="display:none;background:var(--surface);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-1rem;">
-    <div style="font-size:13px;font-weight:600;color:var(--purple-light);margin-bottom:10px;">Lange termijn bijwerken</div>
+  <div id="sp-edit-lt" style="display:none;background:var(--surface);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-0.75rem;">
+    <div style="font-size:12px;font-weight:600;color:var(--purple-light);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Lange termijn bijwerken</div>
     <div style="display:flex;gap:8px;">
       <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;"/>
       <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="width:90px;flex:0 0 90px;"/>
@@ -681,8 +688,8 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <div id="sp-edit-beleg" style="display:none;background:var(--surface);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-1rem;">
-    <div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:10px;">Beleggingen bijwerken</div>
+  <div id="sp-edit-beleg" style="display:none;background:var(--surface);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-0.75rem;">
+    <div style="font-size:12px;font-weight:600;color:var(--yellow);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Beleggingen bijwerken</div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input type="number" id="sp-beleg-input" placeholder="Portfolio waarde €" inputmode="decimal" style="flex:1;"/>
       <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="width:80px;flex:0 0 80px;"/>
@@ -693,8 +700,8 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <!-- Automatische inleg -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:1.25rem;">
+  <!-- Alle potjes (inleg) -->
+  <div class="form-card" style="padding:0;overflow:hidden;">
     <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-size:14px;font-weight:700;">Alle potjes</div>
@@ -702,20 +709,22 @@ select option { background: #1a1830; }
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:13px;font-weight:700;color:var(--green);" id="sp-totaal-inleg">€0/mnd</div>
-        <button onclick="spOpenRegel()" style="width:32px;height:32px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+        <button onclick="spNieuwPotje()" style="width:30px;height:30px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
       </div>
     </div>
-    <div id="sp-regels-list" style="padding:0 0.5rem;"></div>
+    <div id="sp-regels-list" style="padding:0 0.75rem;"></div>
   </div>
 
   <!-- Logboek -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem;">
+  <div class="form-card" style="padding:0;overflow:hidden;margin-top:1.25rem;">
     <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);">
       <div style="font-size:14px;font-weight:700;">Inleg logboek</div>
     </div>
     <div id="sp-log-list" style="padding:0 1.25rem;"></div>
     <div id="sp-log-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem;">Nog geen inleg geregistreerd</div>
   </div>
+
+  <div style="height:1.5rem;"></div>
 
   </div><!-- end bud-view-sparen -->
 
@@ -3721,8 +3730,6 @@ function spRegelMenu(id, btn) {
 function spRender() {
   const d = spGet();
   const fmt = n => '€' + Math.round(n).toLocaleString('nl-NL');
-
-  // Potjes totaal
   const potjesTotaal = (d.potjes || []).reduce((s, p) => s + p.huidig, 0);
 
   // Hero
@@ -3730,94 +3737,83 @@ function spRender() {
   document.getElementById('sp-lt-mini').textContent = fmt(d.lt.saldo);
   document.getElementById('sp-beleg-mini').textContent = fmt(d.beleg.saldo);
   document.getElementById('sp-potjes-mini').textContent = fmt(potjesTotaal);
-  document.getElementById('sp-potjes-totaal-label').textContent = fmt(potjesTotaal) + ' totaal gespaard';
+  document.getElementById('sp-potjes-totaal-label').textContent = fmt(potjesTotaal) + ' gespaard';
 
   // Lange termijn
   const ltPct = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0);
   document.getElementById('sp-lt-val').textContent = fmt(d.lt.saldo);
   document.getElementById('sp-lt-doel-label').textContent = d.lt.doel.toLocaleString('nl-NL');
   document.getElementById('sp-lt-bar').style.height = ltPct + '%';
-  document.getElementById('sp-lt-fill').style.height = ltPct + '%';
+  const ltRect = document.getElementById('sp-lt-fill-rect');
+  if (ltRect) { const h = Math.round(44 * ltPct / 100); ltRect.setAttribute('y', 53 - h); ltRect.setAttribute('height', h); }
   document.getElementById('sp-lt-input').value = d.lt.saldo || '';
   document.getElementById('sp-lt-doel-input').value = d.lt.doel || '';
 
   // Beleggingen
-  document.getElementById('sp-beleg-val').textContent = fmt(d.beleg.saldo);
-  document.getElementById('sp-beleg-input').value = d.beleg.saldo || '';
-  document.getElementById('sp-beleg-inleg-input').value = d.beleg.inleg || 150;
   let prog = d.beleg.saldo;
   for (let i = 0; i < 10; i++) prog = prog * 1.07 + (d.beleg.inleg || 150) * 12;
+  const belegPct = Math.min(100, prog > 0 ? d.beleg.saldo / prog * 100 : 0);
+  document.getElementById('sp-beleg-val').textContent = fmt(d.beleg.saldo);
+  document.getElementById('sp-beleg-bar').style.height = belegPct + '%';
+  const bRect = document.getElementById('sp-beleg-fill-rect');
+  if (bRect) { const h = Math.round(44 * belegPct / 100); bRect.setAttribute('y', 53 - h); bRect.setAttribute('height', h); }
+  document.getElementById('sp-beleg-input').value = d.beleg.saldo || '';
+  document.getElementById('sp-beleg-inleg-input').value = d.beleg.inleg || 150;
   document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prog));
   document.getElementById('sp-beleg-prognose-label').textContent = '10jr: ' + fmt(Math.round(prog));
-  // beleg bar based on 10yr goal
-  const belegPct = Math.min(100, prog > 0 ? d.beleg.saldo / prog * 100 : 0);
-  document.getElementById('sp-beleg-bar').style.height = belegPct + '%';
-  document.getElementById('sp-beleg-fill').style.height = belegPct + '%';
 
-  // Spaarpotjes grid (Buut-stijl)
+  // Spaarpotjes grid
   const grid = document.getElementById('sp-potjes-grid');
   if (!d.potjes || d.potjes.length === 0) {
     grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:var(--muted);font-size:13px;padding:1.5rem 0;">Geen spaarpotjes — tik + om te beginnen</div>';
   } else {
-    grid.innerHTML = d.potjes.map(p => {
+    grid.innerHTML = d.potjes.map(function(p) {
       const pct = Math.min(100, p.doel > 0 ? p.huidig / p.doel * 100 : 0);
-      const kleur = p.kleur || 'var(--green)';
-      // Parse kleur for rgba
-      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;position:relative;">
-        <!-- Menu knop -->
-        <button onclick="spPotjeMenu(${p.id},this)" style="position:absolute;top:10px;right:10px;width:28px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;z-index:2;">⋯</button>
-        <!-- Potje + balk layout -->
-        <div style="display:flex;gap:10px;align-items:flex-end;">
-          <!-- Glazen potje SVG -->
-          <div style="flex-shrink:0;position:relative;width:54px;">
-            <svg width="54" height="68" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Deksel -->
-              <rect x="8" y="2" width="38" height="9" rx="4" fill="${kleur}" opacity="0.7"/>
-              <!-- Potje body -->
-              <rect x="6" y="10" width="42" height="52" rx="8" fill="${kleur}" opacity="0.13"/>
-              <rect x="6" y="10" width="42" height="52" rx="8" stroke="${kleur}" stroke-width="1.5" opacity="0.5"/>
-              <!-- Vulling -->
-              <clipPath id="clip${p.id}">
-                <rect x="7" y="11" width="40" height="50" rx="7"/>
-              </clipPath>
-              <rect x="7" y="${11 + 50 * (1 - pct/100)}" width="40" height="${50 * pct/100}" rx="0" fill="${kleur}" opacity="0.55" clip-path="url(#clip${p.id})"/>
-              <!-- Glans -->
-              <rect x="12" y="14" width="6" height="20" rx="3" fill="white" opacity="0.12"/>
-              <!-- Emoji -->
-              <text x="27" y="44" text-anchor="middle" font-size="20" dominant-baseline="middle">${p.emoji}</text>
-            </svg>
-          </div>
-          <!-- Info + verticale balk -->
-          <div style="flex:1;min-width:0;padding-bottom:4px;">
-            <div style="font-size:18px;font-weight:700;color:var(--text);line-height:1;">${fmt(p.huidig)}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.naam}</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px;">${Math.round(pct)}% van ${fmt(p.doel)}</div>
-          </div>
-          <!-- Verticale voortgangsbalk -->
-          <div style="width:7px;height:64px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;align-self:flex-end;">
-            <div style="width:100%;height:${pct}%;background:${kleur};border-radius:999px;margin-top:${100-pct}%;transition:height 0.8s ease;"></div>
-          </div>
-        </div>
-      </div>`;
+      const kleur = p.kleur || '#4ade80';
+      const fillH = Math.round(44 * pct / 100);
+      const fillY = 53 - fillH;
+      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;position:relative;">' +
+        '<button onclick="spPotjeMenu(' + p.id + ',this)" style="position:absolute;top:10px;right:10px;width:26px;height:26px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;z-index:2;line-height:1;">⋯</button>' +
+        '<div style="display:flex;gap:10px;align-items:flex-start;">' +
+          '<svg width="44" height="58" viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">' +
+            '<rect x="6" y="2" width="32" height="7" rx="3.5" fill="' + kleur + '" opacity="0.7"/>' +
+            '<rect x="4" y="8" width="36" height="46" rx="7" fill="' + kleur + '" opacity="0.12"/>' +
+            '<rect x="4" y="8" width="36" height="46" rx="7" stroke="' + kleur + '" stroke-width="1.5" opacity="0.45"/>' +
+            '<clipPath id="cp' + p.id + '"><rect x="5" y="9" width="34" height="44" rx="6"/></clipPath>' +
+            '<rect x="5" y="' + fillY + '" width="34" height="' + fillH + '" fill="' + kleur + '" opacity="0.6" clip-path="url(#cp' + p.id + ')"/>' +
+            '<rect x="10" y="12" width="5" height="16" rx="2.5" fill="white" opacity="0.1"/>' +
+            '<text x="22" y="36" text-anchor="middle" font-size="16" dominant-baseline="middle">' + p.emoji + '</text>' +
+          '</svg>' +
+          '<div style="flex:1;min-width:0;padding-top:4px;">' +
+            '<div style="font-size:18px;font-weight:700;color:var(--text);line-height:1;">' + fmt(p.huidig) + '</div>' +
+            '<div style="font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + p.naam + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);margin-top:2px;">' + Math.round(pct) + '% van ' + fmt(p.doel) + '</div>' +
+          '</div>' +
+          '<div style="width:6px;height:58px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;display:flex;flex-direction:column;justify-content:flex-end;">' +
+            '<div style="width:100%;background:' + kleur + ';border-radius:999px;height:' + pct + '%;"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }).join('');
   }
 
-  // Automatische regels totaal
+  // Totaal inleg
   const totaalInleg = (d.regels || []).reduce((s, r) => s + r.bedrag, 0);
   document.getElementById('sp-totaal-inleg').textContent = '€' + totaalInleg + '/mnd';
 
-  // Regels list
+  // Regels
   const rl = document.getElementById('sp-regels-list');
   if (!d.regels || d.regels.length === 0) {
-    rl.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:13px;">Geen regels</div>';
+    rl.innerHTML = '<div style="padding:1rem 0.5rem;text-align:center;color:var(--muted);font-size:13px;">Geen potjes — tik + om toe te voegen</div>';
   } else {
-    rl.innerHTML = d.regels.map((r, i) => `
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 0.75rem;${i < d.regels.length-1 ? 'border-bottom:1px solid var(--border);' : ''}">
-        <div style="width:10px;height:10px;border-radius:50%;background:${r.kleur};flex-shrink:0;box-shadow:0 0 6px ${r.kleur};"></div>
-        <div style="flex:1;font-size:14px;font-weight:500;">${r.naam}</div>
-        <div style="font-size:15px;font-weight:700;color:${r.kleur};">€${r.bedrag}</div>
-        <button onclick="spRegelMenu(${r.id},this)" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;letter-spacing:1px;">⋯</button>
-      </div>`).join('');
+    rl.innerHTML = d.regels.map(function(r, i) {
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0.5rem;' + (i < d.regels.length - 1 ? 'border-bottom:1px solid var(--border);' : '') + '">' +
+        '<div style="width:8px;height:8px;border-radius:50%;background:' + r.kleur + ';flex-shrink:0;box-shadow:0 0 6px ' + r.kleur + ';"></div>' +
+        '<div style="flex:1;font-size:14px;font-weight:500;">' + r.naam + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:' + r.kleur + ';">€' + r.bedrag + '</div>' +
+        '<button onclick="spRegelMenu(' + r.id + ',this)" style="width:28px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;letter-spacing:1px;line-height:1;">⋯</button>' +
+      '</div>';
+    }).join('');
   }
 
   // Log
@@ -3827,19 +3823,20 @@ function spRender() {
     ll.innerHTML = ''; le.style.display = 'block';
   } else {
     le.style.display = 'none';
-    ll.innerHTML = d.log.slice(0, 12).map((l, i) => `
-      <div style="padding:12px 0;${i < Math.min(d.log.length,12)-1 ? 'border-bottom:1px solid var(--border);' : ''}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:13px;font-weight:600;">${l.maand}</span>
-            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 7px;border-radius:6px;">auto</span>' : ''}
-          </div>
-          <span style="font-size:14px;font-weight:700;color:var(--green);">+€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</span>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">
-          ${(l.regels||[]).map(r=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 9px;border-radius:8px;">${r.naam} €${r.bedrag}</span>`).join('')}
-        </div>
-      </div>`).join('');
+    ll.innerHTML = d.log.slice(0, 12).map(function(l, i) {
+      return '<div style="padding:12px 0;' + (i < Math.min(d.log.length, 12) - 1 ? 'border-bottom:1px solid var(--border);' : '') + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:13px;font-weight:600;">' + l.maand + '</span>' +
+            (l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 7px;border-radius:6px;">auto</span>' : '') +
+          '</div>' +
+          '<span style="font-size:13px;font-weight:700;color:var(--green);">+€' + (l.regels || []).reduce(function(s, r) { return s + r.bedrag; }, 0) + '</span>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;">' +
+          (l.regels || []).map(function(r) { return '<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:8px;">' + r.naam + ' €' + r.bedrag + '</span>'; }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('');
   }
 }
 
