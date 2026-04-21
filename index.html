@@ -589,68 +589,101 @@ select option { background: #1a1830; }
   <!-- SPAREN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- HERO: Totaal vermogen -->
-  <div style="background:linear-gradient(145deg,#1e1060 0%,#3730a3 50%,#6d28d9 100%);border-radius:28px;padding:2rem 1.5rem 1.5rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
-    <div style="position:absolute;bottom:-40px;left:-30px;width:140px;height:140px;background:rgba(255,255,255,0.04);border-radius:50%;pointer-events:none;"></div>
-    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.55);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Totaal vermogen</div>
-    <div style="font-size:48px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;margin-bottom:2px;" id="sp-totaal">€0</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:1.5rem;">lange termijn + beleggingen</div>
-    <!-- Mini stat row -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.1);">
-        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">🏠 Lange termijn</div>
-        <div style="font-size:18px;font-weight:700;color:white;" id="sp-lt-mini">€0</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">€915/mnd inleg</div>
+  <!-- Hero -->
+  <div style="background:linear-gradient(145deg,#1e1060,#3730a3,#6d28d9);border-radius:28px;padding:1.75rem 1.5rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none;"></div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Totaal spaargeld</div>
+    <div style="font-size:46px;font-weight:700;color:white;line-height:1;letter-spacing:-1px;margin-bottom:1.5rem;" id="sp-totaal">€0</div>
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Lange termijn</div>
+        <div style="font-size:16px;font-weight:700;color:white;" id="sp-lt-mini">€0</div>
       </div>
-      <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:14px;padding:12px 14px;border:1px solid rgba(255,255,255,0.1);">
-        <div style="font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">📈 Beleggingen</div>
-        <div style="font-size:18px;font-weight:700;color:white;" id="sp-beleg-mini">€0</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">€150/mnd inleg</div>
+      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Beleggingen</div>
+        <div style="font-size:16px;font-weight:700;color:white;" id="sp-beleg-mini">€0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.12);border-radius:14px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:2px;">Spaarpotjes</div>
+        <div style="font-size:16px;font-weight:700;color:white;" id="sp-potjes-mini">€0</div>
       </div>
     </div>
   </div>
 
-  <!-- Potten bewerken -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
+  <!-- Spaarpotjes sectie (Buut-stijl) -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <div>
+      <div style="font-size:17px;font-weight:700;">Spaarpotjes</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:1px;" id="sp-potjes-totaal-label">€0 totaal gespaard</div>
+    </div>
+    <button onclick="spNieuwPotje()" style="width:36px;height:36px;background:var(--purple);color:white;border:none;border-radius:12px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">+</button>
+  </div>
 
-    <!-- Lange termijn pot -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;" onclick="spToggleEdit('lt')">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:13px;font-weight:600;">🏠 Lange termijn</div>
-        <div style="font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:999px;">bewerk</div>
+  <!-- Potjes grid -->
+  <div id="sp-potjes-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;"></div>
+
+  <!-- Lange termijn & Beleggingen bewerken -->
+  <div style="font-size:17px;font-weight:700;margin-bottom:1rem;">Grote potten</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;">
+
+    <!-- Lange termijn -->
+    <div onclick="spToggleEdit('lt')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;position:relative;overflow:hidden;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <!-- Potje illustratie -->
+        <div style="flex-shrink:0;width:48px;height:60px;position:relative;">
+          <div style="width:40px;height:52px;background:linear-gradient(180deg,rgba(167,139,250,0.15) 0%,rgba(167,139,250,0.35) 100%);border-radius:6px 6px 8px 8px;border:1.5px solid rgba(167,139,250,0.4);position:relative;overflow:hidden;margin:0 auto;">
+            <div id="sp-lt-fill" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(167,139,250,0.5),rgba(124,92,252,0.8));border-radius:0 0 6px 6px;transition:height 0.8s ease;height:0%;"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:8px;background:rgba(255,255,255,0.06);border-radius:6px 6px 0 0;"></div>
+          </div>
+          <div style="width:46px;height:6px;background:rgba(167,139,250,0.3);border-radius:3px;border:1px solid rgba(167,139,250,0.4);margin:-1px auto 0;"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:16px;font-weight:700;color:var(--purple-light);margin-bottom:2px;" id="sp-lt-val">€0</div>
+          <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Lange termijn</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">doel €<span id="sp-lt-doel-label">50.000</span></div>
+        </div>
+        <!-- Verticale voortgangsbalk -->
+        <div style="width:6px;height:60px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;">
+          <div id="sp-lt-bar" style="width:100%;background:var(--purple-light);border-radius:999px;position:relative;bottom:0;transition:height 0.8s ease;height:0%;margin-top:auto;"></div>
+        </div>
       </div>
-      <div style="font-size:24px;font-weight:700;color:var(--purple-light);margin-bottom:4px;" id="sp-lt-val">€0</div>
-      <div style="height:4px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;">
-        <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;width:0%;transition:width 0.8s ease;"></div>
-      </div>
-      <div style="font-size:10px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50.000</span></div>
     </div>
 
-    <!-- Beleggingen pot -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;" onclick="spToggleEdit('beleg')">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:13px;font-weight:600;">📈 Beleggingen</div>
-        <div style="font-size:10px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:999px;">bewerk</div>
+    <!-- Beleggingen -->
+    <div onclick="spToggleEdit('beleg')" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;cursor:pointer;position:relative;overflow:hidden;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="flex-shrink:0;width:48px;height:60px;position:relative;">
+          <div style="width:40px;height:52px;background:linear-gradient(180deg,rgba(251,191,36,0.1) 0%,rgba(251,191,36,0.3) 100%);border-radius:6px 6px 8px 8px;border:1.5px solid rgba(251,191,36,0.35);position:relative;overflow:hidden;margin:0 auto;">
+            <div id="sp-beleg-fill" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(251,191,36,0.5),rgba(251,191,36,0.85));border-radius:0 0 6px 6px;transition:height 0.8s ease;height:0%;"></div>
+            <div style="position:absolute;top:0;left:0;right:0;height:8px;background:rgba(255,255,255,0.06);border-radius:6px 6px 0 0;"></div>
+          </div>
+          <div style="width:46px;height:6px;background:rgba(251,191,36,0.25);border-radius:3px;border:1px solid rgba(251,191,36,0.35);margin:-1px auto 0;"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:2px;" id="sp-beleg-val">€0</div>
+          <div style="font-size:11px;color:var(--muted);">Beleggingen</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;" id="sp-beleg-prognose-label">10jr: —</div>
+        </div>
+        <div style="width:6px;height:60px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;">
+          <div id="sp-beleg-bar" style="width:100%;background:var(--yellow);border-radius:999px;transition:height 0.8s ease;height:0%;"></div>
+        </div>
       </div>
-      <div style="font-size:24px;font-weight:700;color:var(--yellow);margin-bottom:4px;" id="sp-beleg-val">€0</div>
-      <div style="font-size:10px;color:var(--muted);" id="sp-beleg-prognose-label">10jr prognose: —</div>
     </div>
   </div>
 
-  <!-- Edit panels (hidden by default) -->
-  <div id="sp-edit-lt" style="display:none;background:var(--surface);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
-    <div style="font-size:13px;font-weight:600;color:var(--purple-light);margin-bottom:10px;">🏠 Saldo bijwerken</div>
+  <!-- Edit panels -->
+  <div id="sp-edit-lt" style="display:none;background:var(--surface);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-1rem;">
+    <div style="font-size:13px;font-weight:600;color:var(--purple-light);margin-bottom:10px;">Lange termijn bijwerken</div>
     <div style="display:flex;gap:8px;">
       <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;"/>
       <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="width:90px;flex:0 0 90px;"/>
-      <button onclick="spSave('lt')" style="height:42px;padding:0 16px;background:var(--purple-light);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
+      <button onclick="spSave('lt')" style="height:42px;padding:0 16px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
   </div>
 
-  <div id="sp-edit-beleg" style="display:none;background:var(--surface);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
-    <div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:10px;">📈 Portfolio bijwerken</div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
+  <div id="sp-edit-beleg" style="display:none;background:var(--surface);border:1px solid rgba(251,191,36,0.3);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;margin-top:-1rem;">
+    <div style="font-size:13px;font-weight:600;color:var(--yellow);margin-bottom:10px;">Beleggingen bijwerken</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input type="number" id="sp-beleg-input" placeholder="Portfolio waarde €" inputmode="decimal" style="flex:1;"/>
       <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="width:80px;flex:0 0 80px;"/>
       <button onclick="spSave('beleg')" style="height:42px;padding:0 16px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
@@ -669,7 +702,7 @@ select option { background: #1a1830; }
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:13px;font-weight:700;color:var(--green);" id="sp-totaal-inleg">€0/mnd</div>
-        <button onclick="spOpenRegel()" style="width:32px;height:32px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+        <button onclick="spOpenRegel()" style="width:32px;height:32px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
       </div>
     </div>
     <div id="sp-regels-list" style="padding:0 0.5rem;"></div>
@@ -677,9 +710,8 @@ select option { background: #1a1830; }
 
   <!-- Logboek -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem;">
-    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);">
       <div style="font-size:14px;font-weight:700;">Inleg logboek</div>
-      <div style="font-size:11px;color:var(--muted);">automatisch bijgehouden</div>
     </div>
     <div id="sp-log-list" style="padding:0 1.25rem;"></div>
     <div id="sp-log-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1.5rem;">Nog geen inleg geregistreerd</div>
@@ -1863,16 +1895,16 @@ function renderWater() {
   track.innerHTML = `
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
       ${recentAmounts.map(ml => `
-        <button onclick="addWaterMl(${ml})" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid rgba(34,211,238,0.2);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+        <button onclick="addWaterMl(${ml})" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid rgba(34,211,238,0.2);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:Outfit,sans-serif;">
           <span style="font-size:22px;">🥤</span>
           <span style="font-size:12px;font-weight:600;color:var(--cyan);">${ml} ml</span>
         </button>
       `).join('')}
-      <button onclick="addCustomWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+      <button onclick="addCustomWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:Outfit,sans-serif;">
         <span style="font-size:22px;">✏️</span>
         <span style="font-size:12px;color:var(--muted);">Eigen ml</span>
       </button>
-      ${totalMl > 0 ? `<button onclick="undoWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:'Outfit',sans-serif;">
+      ${totalMl > 0 ? `<button onclick="undoWater()" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:Outfit,sans-serif;">
         <span style="font-size:22px;">↩️</span>
         <span style="font-size:12px;color:var(--muted);">Ongedaan</span>
       </button>` : ''}
@@ -1895,8 +1927,8 @@ function addCustomWater() {
   inputDiv.style.cssText = 'display:flex;gap:8px;align-items:center;margin-top:8px;';
   inputDiv.innerHTML = `
     <input type="number" id="custom-water-input" placeholder="ml" inputmode="decimal" style="flex:1;max-width:120px;height:42px;" />
-    <button onclick="submitCustomWater()" style="height:42px;padding:0 16px;background:var(--cyan);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">+ Toevoegen</button>
-    <button onclick="renderWater()" style="height:42px;padding:0 12px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;">✕</button>`;
+    <button onclick="submitCustomWater()" style="height:42px;padding:0 16px;background:var(--cyan);color:#0f0e1a;border:none;border-radius:10px;font-family:Outfit,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">+ Toevoegen</button>
+    <button onclick="renderWater()" style="height:42px;padding:0 12px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:Outfit,sans-serif;">✕</button>`;
   track.appendChild(inputDiv);
   document.getElementById('custom-water-input').focus();
 }
@@ -2603,7 +2635,7 @@ async function searchMealProduct() {
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <input type="number" id="meal-product-grams" placeholder="Gram" value="100" inputmode="decimal" style="max-width:100px;flex:0 0 100px;" />
-            <button onclick="addProductToMeal(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:1;height:42px;background:var(--green);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">+ Toevoegen</button>
+            <button onclick="addProductToMeal(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:1;height:42px;background:var(--green);color:#0f0e1a;border:none;border-radius:10px;font-family:Outfit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">+ Toevoegen</button>
           </div>
         </div>`;
     } else {
@@ -2944,7 +2976,7 @@ function addRecipeFromMeal(meal) {
         <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${r.name}</div><div style="font-size:12px;color:var(--muted);">${r.kcal} kcal · E: ${r.protein}g</div></div>
       </div>`;
     }).join('')}
-    <button onclick="document.getElementById('recipe-quick-picker').remove()" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px;">Annuleren</button>
+    <button onclick="document.getElementById('recipe-quick-picker').remove()" style="width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;cursor:pointer;font-family:Outfit,sans-serif;margin-top:4px;">Annuleren</button>
   </div>`;
   document.body.appendChild(picker);
 }
@@ -2986,14 +3018,14 @@ function addRecipeToMeal(id, meal) {
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
       <input type="number" id="recipe-gram-input" value="${totalGrams ? Math.round(totalGrams) : 100}" inputmode="decimal" min="1"
-        style="flex:1;font-size:22px;font-weight:700;text-align:center;height:56px;border-radius:14px;border:2px solid var(--purple);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;"
+        style="flex:1;font-size:22px;font-weight:700;text-align:center;height:56px;border-radius:14px;border:2px solid var(--purple);background:var(--surface2);color:var(--text);font-family:Outfit,sans-serif;"
         oninput="updateGramPreview(${r.id})" />
       <span style="font-size:16px;color:var(--muted);font-weight:500;">gram</span>
     </div>
     <div id="gram-macro-preview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;"></div>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('recipe-gram-picker').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="confirmRecipeGrams(${r.id},'${meal}')" style="flex:2;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Toevoegen ✓</button>
+      <button onclick="document.getElementById('recipe-gram-picker').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>
+      <button onclick="confirmRecipeGrams(${r.id},'${meal}')" style="flex:2;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Toevoegen ✓</button>
     </div>
   </div>`;
 
@@ -3129,14 +3161,14 @@ function showMealProductGramPicker(product) {
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
       <input type="number" id="meal-gram-picker-input" value="100" inputmode="decimal" min="1"
-        style="flex:1;font-size:22px;font-weight:700;text-align:center;height:56px;border-radius:14px;border:2px solid var(--purple);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;"
+        style="flex:1;font-size:22px;font-weight:700;text-align:center;height:56px;border-radius:14px;border:2px solid var(--purple);background:var(--surface2);color:var(--text);font-family:Outfit,sans-serif;"
         oninput="updateMealGramPreview(${product.kcal_per100},${product.protein_per100},${product.carbs_per100},${product.fat_per100})" />
       <span style="font-size:16px;color:var(--muted);font-weight:500;">gram</span>
     </div>
     <div id="meal-gram-preview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem;"></div>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('meal-gram-picker').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="confirmMealGrams(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:2;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">+ Toevoegen ✓</button>
+      <button onclick="document.getElementById('meal-gram-picker').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>
+      <button onclick="confirmMealGrams(${JSON.stringify(product).replace(/"/g,'&quot;')})" style="flex:2;height:50px;background:linear-gradient(135deg,var(--purple),#a855f7);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">+ Toevoegen ✓</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
@@ -3357,28 +3389,33 @@ function spGet() {
   const def = {
     lt: { saldo: 0, doel: 50000 },
     beleg: { saldo: 0, inleg: 150 },
+    potjes: [
+      { id: 101, naam: 'Vakantie',  emoji: '🏖️', huidig: 0, doel: 2000, kleur: '#f472b6' },
+      { id: 102, naam: 'Trips',     emoji: '✈️', huidig: 0, doel: 600,  kleur: '#60a5fa' },
+      { id: 103, naam: 'Shoppen',   emoji: '🛍️', huidig: 0, doel: 500,  kleur: '#a78bfa' },
+      { id: 104, naam: 'Uiteten',   emoji: '🍽️', huidig: 0, doel: 200,  kleur: '#fb923c' },
+      { id: 105, naam: 'Buffer',    emoji: '🛡️', huidig: 0, doel: 1000, kleur: '#22d3ee' }
+    ],
     log: [],
     lastCheck: null,
     regels: [
-      { id: 1, naam: 'Buffer',         bedrag: 75,  kleur: 'var(--cyan)' },
-      { id: 2, naam: 'Vakantie',       bedrag: 100, kleur: 'var(--green)' },
-      { id: 3, naam: 'Trips',          bedrag: 50,  kleur: 'var(--green)' },
-      { id: 4, naam: 'Shoppen',        bedrag: 100, kleur: 'var(--green)' },
-      { id: 5, naam: 'Uiteten',        bedrag: 50,  kleur: 'var(--green)' },
-      { id: 6, naam: 'Lange termijn',  bedrag: 915, kleur: 'var(--purple-light)' },
-      { id: 7, naam: 'Beleggingen',    bedrag: 150, kleur: 'var(--yellow)' }
+      { id: 1, naam: 'Buffer',        bedrag: 75,  kleur: 'var(--cyan)' },
+      { id: 2, naam: 'Vakantie',      bedrag: 100, kleur: '#f472b6' },
+      { id: 3, naam: 'Trips',         bedrag: 50,  kleur: '#60a5fa' },
+      { id: 4, naam: 'Shoppen',       bedrag: 100, kleur: 'var(--purple-light)' },
+      { id: 5, naam: 'Uiteten',       bedrag: 50,  kleur: '#fb923c' },
+      { id: 6, naam: 'Lange termijn', bedrag: 915, kleur: 'var(--purple-light)' },
+      { id: 7, naam: 'Beleggingen',   bedrag: 150, kleur: 'var(--yellow)' }
     ]
   };
   try {
     const d = JSON.parse(localStorage.getItem(SP_KEY) || 'null');
     if (!d) return def;
     if (!d.regels || d.regels.length === 0) d.regels = def.regels;
-    // Re-add buffer if missing
-    if (!d.regels.find(r => r.naam === 'Buffer')) {
-      d.regels.unshift({ id: 1, naam: 'Buffer', bedrag: 75, kleur: 'var(--cyan)' });
-    }
+    if (!d.regels.find(r => r.naam === 'Buffer')) d.regels.unshift({ id: 1, naam: 'Buffer', bedrag: 75, kleur: 'var(--cyan)' });
     if (!d.lt) d.lt = def.lt;
     if (!d.beleg) d.beleg = def.beleg;
+    if (!d.potjes) d.potjes = def.potjes;
     if (!d.log) d.log = [];
     return d;
   } catch(e) { return def; }
@@ -3408,6 +3445,136 @@ function switchBudgetTab(tab) {
   }
 }
 
+function spToggleEdit(type) {
+  const lt = document.getElementById('sp-edit-lt');
+  const beleg = document.getElementById('sp-edit-beleg');
+  if (type === 'lt') {
+    const open = lt.style.display !== 'none';
+    lt.style.display = open ? 'none' : 'block';
+    beleg.style.display = 'none';
+  } else {
+    const open = beleg.style.display !== 'none';
+    beleg.style.display = open ? 'none' : 'block';
+    lt.style.display = 'none';
+  }
+}
+
+function spNieuwPotje() {
+  const el = document.getElementById('sp-nieuw-potje-modal');
+  if (el) el.remove();
+  const EMOJIS = ['🏖️','✈️','🛍️','🍽️','🎮','👟','🎵','🚗','💊','🎓','🏠','💍','🐶','🎁','🏋️'];
+  const m = document.createElement('div');
+  m.id = 'sp-nieuw-potje-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = '<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">Nieuw spaarpotje</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;" id="sp-emoji-kies">' +
+    EMOJIS.map(function(em) { return '<button onclick="spKiesEmoji(\'' + em + '\')" data-emoji="' + em + '" style="width:44px;height:44px;background:var(--surface2);border:2px solid var(--border);border-radius:12px;font-size:22px;cursor:pointer;">' + em + '</button>'; }).join('') +
+    '</div>' +
+    '<input type="text" id="sp-np-naam" placeholder="Naam bijv. Sneakers" style="width:100%;margin-bottom:8px;"/>' +
+    '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+    '<input type="number" id="sp-np-huidig" placeholder="Gespaard euro" inputmode="decimal" style="flex:1;"/>' +
+    '<input type="number" id="sp-np-doel" placeholder="Doel euro" inputmode="decimal" style="flex:1;"/>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+    '<button onclick="document.getElementById(\'sp-nieuw-potje-modal\').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>' +
+    '<button onclick="spSlaOpPotje()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Aanmaken</button>' +
+    '</div></div>';
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+  spKiesEmoji('🏖️');
+}
+
+function spKiesEmoji(emoji) {
+  document.querySelectorAll('#sp-emoji-kies button').forEach(b => {
+    b.style.borderColor = b.dataset.emoji === emoji ? 'var(--purple)' : 'var(--border)';
+    b.style.background = b.dataset.emoji === emoji ? 'rgba(124,92,252,0.2)' : 'var(--surface2)';
+  });
+  const modal = document.getElementById('sp-nieuw-potje-modal');
+  if (modal) modal.dataset.emoji = emoji;
+}
+
+function spSlaOpPotje() {
+  const naam = document.getElementById('sp-np-naam').value.trim();
+  if (!naam) { showToast('Vul een naam in.'); return; }
+  const emoji = document.getElementById('sp-nieuw-potje-modal').dataset.emoji || '🎯';
+  const d = spGet();
+  const KLEUREN = ['#f472b6','#60a5fa','#a78bfa','#fb923c','#22d3ee','#4ade80','#fbbf24','#f87171'];
+  d.potjes.push({
+    id: Date.now(), naam, emoji,
+    kleur: KLEUREN[d.potjes.length % KLEUREN.length],
+    huidig: parseFloat(document.getElementById('sp-np-huidig').value) || 0,
+    doel: parseFloat(document.getElementById('sp-np-doel').value) || 500
+  });
+  spSet(d);
+  document.getElementById('sp-nieuw-potje-modal').remove();
+  spRender(); showToast(naam + ' aangemaakt!');
+}
+
+function spCtxAct(id, action) {
+  const m = document.getElementById('sp-ctx-menu');
+  if (m) m.remove();
+  if (action === 'bijwerken') spBijwerkenPotje(id);
+  else if (action === 'verwijder') spVerwijderPotje(id);
+}
+
+function spPotjeMenu(id, btn) {
+  const existing = document.getElementById('sp-ctx-menu');
+  if (existing) { existing.remove(); if (existing.dataset.id == id) return; }
+  const menu = document.createElement('div');
+  menu.id = 'sp-ctx-menu';
+  menu.dataset.id = id;
+  const rect = btn.getBoundingClientRect();
+  menu.style.cssText = 'position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;z-index:70;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.5);';
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.innerHTML =
+    '<button onclick="spCtxAct(' + id + ',\'bijwerken\')" style="display:block;width:100%;padding:13px 16px;background:none;border:none;color:var(--text);font-size:14px;text-align:left;cursor:pointer;font-family:Outfit,sans-serif;border-bottom:1px solid var(--border);">✏️ Bijwerken</button>' +
+    '<button onclick="spCtxAct(' + id + ',\'verwijder\')" style="display:block;width:100%;padding:13px 16px;background:none;border:none;color:#f87171;font-size:14px;text-align:left;cursor:pointer;font-family:Outfit,sans-serif;">🗑️ Verwijderen</button>';
+  document.body.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', function h(e) {
+    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', h); }
+  }), 10);
+}
+
+function spBijwerkenPotje(id) {
+  const d = spGet();
+  const p = d.potjes.find(x => x.id === id);
+  if (!p) return;
+  const el = document.getElementById('sp-edit-potje-modal');
+  if (el) el.remove();
+  const m = document.createElement('div');
+  m.id = 'sp-edit-potje-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = '<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
+    '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">' + p.emoji + ' ' + p.naam + '</div>' +
+    '<input type="number" id="sp-ep-huidig" placeholder="Gespaard euro" value="' + p.huidig + '" inputmode="decimal" style="width:100%;margin-bottom:8px;"/>' +
+    '<input type="number" id="sp-ep-doel" placeholder="Doel euro" value="' + p.doel + '" inputmode="decimal" style="width:100%;margin-bottom:14px;"/>' +
+    '<div style="display:flex;gap:8px;">' +
+    '<button onclick="document.getElementById(\'sp-edit-potje-modal\').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>' +
+    '<button onclick="spSlaEditPotje(' + id + ')" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Opslaan</button>' +
+    '</div></div>';
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+}
+
+function spSlaEditPotje(id) {
+  const d = spGet();
+  const p = d.potjes.find(x => x.id === id);
+  if (!p) return;
+  p.huidig = parseFloat(document.getElementById('sp-ep-huidig').value) || 0;
+  p.doel   = parseFloat(document.getElementById('sp-ep-doel').value) || 500;
+  spSet(d);
+  document.getElementById('sp-edit-potje-modal').remove();
+  spRender(); showToast('Opgeslagen!');
+}
+
+function spVerwijderPotje(id) {
+  const d = spGet();
+  d.potjes = d.potjes.filter(x => x.id !== id);
+  spSet(d); spRender();
+}
+
 function spSave(type) {
   const d = spGet();
   if (type === 'lt') {
@@ -3425,17 +3592,28 @@ function spCheckAuto() {
   const now = new Date();
   const key = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   if (now.getDate() >= 23 && d.lastCheck !== key) {
-    d.lt.saldo    += d.regels.filter(r => r.naam === 'Lange termijn').reduce((s,r) => s+r.bedrag, 0);
-    d.beleg.saldo += d.regels.filter(r => r.naam === 'Beleggingen').reduce((s,r) => s+r.bedrag, 0);
+    for (const regel of d.regels) {
+      if (regel.naam === 'Lange termijn') {
+        d.lt.saldo += regel.bedrag;
+      } else if (regel.naam === 'Beleggingen') {
+        d.beleg.saldo += regel.bedrag;
+      } else {
+        // Match op naam met een spaarpotje
+        const potje = d.potjes.find(p => p.naam.toLowerCase() === regel.naam.toLowerCase());
+        if (potje) potje.huidig += regel.bedrag;
+      }
+    }
     d.log.unshift({
-      id: Date.now(), maand: now.toLocaleDateString('nl-NL', {month:'long',year:'numeric'}),
-      datum: now.toISOString().slice(0,10), auto: true,
+      id: Date.now(),
+      maand: now.toLocaleDateString('nl-NL', {month:'long', year:'numeric'}),
+      datum: now.toISOString().slice(0,10),
+      auto: true,
       regels: d.regels.map(r => ({ naam: r.naam, bedrag: r.bedrag }))
     });
     if (d.log.length > 24) d.log.pop();
     d.lastCheck = key;
     spSet(d);
-    showToast('Automatische inleg verwerkt ✓');
+    showToast('Automatische inleg van de 23e verwerkt ✓');
   }
 }
 
@@ -3450,8 +3628,8 @@ function spOpenRegel() {
     <input type="text" id="sp-rn" placeholder="Naam" style="width:100%;margin-bottom:8px;"/>
     <input type="number" id="sp-rb" placeholder="Bedrag €" inputmode="decimal" style="width:100%;margin-bottom:12px;"/>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('sp-regel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="spSaveRegel()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Toevoegen</button>
+      <button onclick="document.getElementById('sp-regel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>
+      <button onclick="spSaveRegel()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Toevoegen</button>
     </div>
   </div>`;
   document.body.appendChild(m);
@@ -3483,8 +3661,8 @@ function spEditRegel(id) {
     <input type="text" id="sp-en" value="${r.naam}" style="width:100%;margin-bottom:8px;"/>
     <input type="number" id="sp-eb" value="${r.bedrag}" inputmode="decimal" style="width:100%;margin-bottom:12px;"/>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('sp-edit-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="spSaveEdit(${id})" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
+      <button onclick="document.getElementById('sp-edit-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>
+      <button onclick="spSaveEdit(${id})" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Opslaan</button>
     </div>
   </div>`;
   document.body.appendChild(m);
@@ -3522,11 +3700,11 @@ function spRegelMenu(id, btn) {
   menu.style.right = (window.innerWidth - rect.right) + 'px';
   menu.innerHTML = `
     <button onclick="document.getElementById('sp-ctx-menu').remove();spEditRegel(${id})"
-      style="display:block;width:100%;padding:12px 16px;background:none;border:none;color:var(--text);font-size:14px;text-align:left;cursor:pointer;font-family:'Outfit',sans-serif;border-bottom:1px solid var(--border);">
+      style="display:block;width:100%;padding:12px 16px;background:none;border:none;color:var(--text);font-size:14px;text-align:left;cursor:pointer;font-family:Outfit,sans-serif;border-bottom:1px solid var(--border);">
       ✏️ Wijzigen
     </button>
     <button onclick="document.getElementById('sp-ctx-menu').remove();spDeleteRegel(${id})"
-      style="display:block;width:100%;padding:12px 16px;background:none;border:none;color:#f87171;font-size:14px;text-align:left;cursor:pointer;font-family:'Outfit',sans-serif;">
+      style="display:block;width:100%;padding:12px 16px;background:none;border:none;color:#f87171;font-size:14px;text-align:left;cursor:pointer;font-family:Outfit,sans-serif;">
       🗑️ Verwijderen
     </button>`;
   document.body.appendChild(menu);
@@ -3539,45 +3717,101 @@ function spRender() {
   const d = spGet();
   const fmt = n => '€' + Math.round(n).toLocaleString('nl-NL');
 
+  // Potjes totaal
+  const potjesTotaal = (d.potjes || []).reduce((s, p) => s + p.huidig, 0);
+
   // Hero
-  const totaal = d.lt.saldo + d.beleg.saldo;
-  document.getElementById('sp-totaal').textContent = fmt(totaal);
+  document.getElementById('sp-totaal').textContent = fmt(d.lt.saldo + d.beleg.saldo + potjesTotaal);
   document.getElementById('sp-lt-mini').textContent = fmt(d.lt.saldo);
   document.getElementById('sp-beleg-mini').textContent = fmt(d.beleg.saldo);
+  document.getElementById('sp-potjes-mini').textContent = fmt(potjesTotaal);
+  document.getElementById('sp-potjes-totaal-label').textContent = fmt(potjesTotaal) + ' totaal gespaard';
 
-  // Lange termijn card
+  // Lange termijn
+  const ltPct = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0);
   document.getElementById('sp-lt-val').textContent = fmt(d.lt.saldo);
   document.getElementById('sp-lt-doel-label').textContent = d.lt.doel.toLocaleString('nl-NL');
-  document.getElementById('sp-lt-bar').style.width = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0) + '%';
+  document.getElementById('sp-lt-bar').style.height = ltPct + '%';
+  document.getElementById('sp-lt-fill').style.height = ltPct + '%';
   document.getElementById('sp-lt-input').value = d.lt.saldo || '';
   document.getElementById('sp-lt-doel-input').value = d.lt.doel || '';
 
-  // Beleggingen card
+  // Beleggingen
   document.getElementById('sp-beleg-val').textContent = fmt(d.beleg.saldo);
   document.getElementById('sp-beleg-input').value = d.beleg.saldo || '';
   document.getElementById('sp-beleg-inleg-input').value = d.beleg.inleg || 150;
   let prog = d.beleg.saldo;
   for (let i = 0; i < 10; i++) prog = prog * 1.07 + (d.beleg.inleg || 150) * 12;
   document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prog));
-  document.getElementById('sp-beleg-prognose-label').textContent = '10jr prognose: ' + fmt(Math.round(prog));
+  document.getElementById('sp-beleg-prognose-label').textContent = '10jr: ' + fmt(Math.round(prog));
+  // beleg bar based on 10yr goal
+  const belegPct = Math.min(100, prog > 0 ? d.beleg.saldo / prog * 100 : 0);
+  document.getElementById('sp-beleg-bar').style.height = belegPct + '%';
+  document.getElementById('sp-beleg-fill').style.height = belegPct + '%';
 
-  // Regels totaal
+  // Spaarpotjes grid (Buut-stijl)
+  const grid = document.getElementById('sp-potjes-grid');
+  if (!d.potjes || d.potjes.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:var(--muted);font-size:13px;padding:1.5rem 0;">Geen spaarpotjes — tik + om te beginnen</div>';
+  } else {
+    grid.innerHTML = d.potjes.map(p => {
+      const pct = Math.min(100, p.doel > 0 ? p.huidig / p.doel * 100 : 0);
+      const kleur = p.kleur || 'var(--green)';
+      // Parse kleur for rgba
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;position:relative;">
+        <!-- Menu knop -->
+        <button onclick="spPotjeMenu(${p.id},this)" style="position:absolute;top:10px;right:10px;width:28px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;z-index:2;">⋯</button>
+        <!-- Potje + balk layout -->
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <!-- Glazen potje SVG -->
+          <div style="flex-shrink:0;position:relative;width:54px;">
+            <svg width="54" height="68" viewBox="0 0 54 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Deksel -->
+              <rect x="8" y="2" width="38" height="9" rx="4" fill="${kleur}" opacity="0.7"/>
+              <!-- Potje body -->
+              <rect x="6" y="10" width="42" height="52" rx="8" fill="${kleur}" opacity="0.13"/>
+              <rect x="6" y="10" width="42" height="52" rx="8" stroke="${kleur}" stroke-width="1.5" opacity="0.5"/>
+              <!-- Vulling -->
+              <clipPath id="clip${p.id}">
+                <rect x="7" y="11" width="40" height="50" rx="7"/>
+              </clipPath>
+              <rect x="7" y="${11 + 50 * (1 - pct/100)}" width="40" height="${50 * pct/100}" rx="0" fill="${kleur}" opacity="0.55" clip-path="url(#clip${p.id})"/>
+              <!-- Glans -->
+              <rect x="12" y="14" width="6" height="20" rx="3" fill="white" opacity="0.12"/>
+              <!-- Emoji -->
+              <text x="27" y="44" text-anchor="middle" font-size="20" dominant-baseline="middle">${p.emoji}</text>
+            </svg>
+          </div>
+          <!-- Info + verticale balk -->
+          <div style="flex:1;min-width:0;padding-bottom:4px;">
+            <div style="font-size:18px;font-weight:700;color:var(--text);line-height:1;">${fmt(p.huidig)}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.naam}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">${Math.round(pct)}% van ${fmt(p.doel)}</div>
+          </div>
+          <!-- Verticale voortgangsbalk -->
+          <div style="width:7px;height:64px;background:var(--surface2);border-radius:999px;overflow:hidden;flex-shrink:0;align-self:flex-end;">
+            <div style="width:100%;height:${pct}%;background:${kleur};border-radius:999px;margin-top:${100-pct}%;transition:height 0.8s ease;"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Automatische regels totaal
   const totaalInleg = (d.regels || []).reduce((s, r) => s + r.bedrag, 0);
   document.getElementById('sp-totaal-inleg').textContent = '€' + totaalInleg + '/mnd';
 
   // Regels list
   const rl = document.getElementById('sp-regels-list');
   if (!d.regels || d.regels.length === 0) {
-    rl.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:13px;">Geen regels — tik + om toe te voegen</div>';
+    rl.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:13px;">Geen regels</div>';
   } else {
     rl.innerHTML = d.regels.map((r, i) => `
       <div style="display:flex;align-items:center;gap:12px;padding:12px 0.75rem;${i < d.regels.length-1 ? 'border-bottom:1px solid var(--border);' : ''}">
-        <div style="width:10px;height:10px;border-radius:50%;background:${r.kleur};flex-shrink:0;box-shadow:0 0 8px ${r.kleur};"></div>
-        <div style="flex:1;">
-          <div style="font-size:14px;font-weight:500;">${r.naam}</div>
-        </div>
+        <div style="width:10px;height:10px;border-radius:50%;background:${r.kleur};flex-shrink:0;box-shadow:0 0 6px ${r.kleur};"></div>
+        <div style="flex:1;font-size:14px;font-weight:500;">${r.naam}</div>
         <div style="font-size:15px;font-weight:700;color:${r.kleur};">€${r.bedrag}</div>
-        <button onclick="spRegelMenu(${r.id},this)" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;letter-spacing:1px;line-height:1;">⋯</button>
+        <button onclick="spRegelMenu(${r.id},this)" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;letter-spacing:1px;">⋯</button>
       </div>`).join('');
   }
 
@@ -3590,12 +3824,12 @@ function spRender() {
     le.style.display = 'none';
     ll.innerHTML = d.log.slice(0, 12).map((l, i) => `
       <div style="padding:12px 0;${i < Math.min(d.log.length,12)-1 ? 'border-bottom:1px solid var(--border);' : ''}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:13px;font-weight:600;">${l.maand}</span>
-            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 7px;border-radius:6px;font-weight:500;">auto</span>' : ''}
+            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 7px;border-radius:6px;">auto</span>' : ''}
           </div>
-          <div style="font-size:14px;font-weight:700;color:var(--green);">+€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</div>
+          <span style="font-size:14px;font-weight:700;color:var(--green);">+€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">
           ${(l.regels||[]).map(r=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:3px 9px;border-radius:8px;">${r.naam} €${r.bedrag}</span>`).join('')}
@@ -3663,7 +3897,7 @@ function renderDT() {
             <div class="meal-kcal">${mealKcal > 0 ? Math.round(mealKcal) + ' kcal' : 'Leeg'}</div>
           </div>
         </div>
-        <button onclick="addRecipeFromMeal('${meal}')" style="background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.3);border-radius:8px;color:#14b8a6;font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">📖 Recept</button>
+        <button onclick="addRecipeFromMeal('${meal}')" style="background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.3);border-radius:8px;color:#14b8a6;font-size:12px;font-weight:500;padding:5px 10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap;">📖 Recept</button>
       </div>
       ${items.length > 0 ? `<div class="meal-items">${items.map(f =>
         `<div class="meal-item">
