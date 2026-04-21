@@ -3553,14 +3553,20 @@ function spRender() {
         '<text x="22" y="37" text-anchor="middle" font-size="17" dominant-baseline="middle">' + p.emoji + '</text>' +
       '</svg>';
 
-    var isReadonly = p.readonly === true;
-    var cardClick = isReadonly ? '' : ' onclick="spOpenModal(' + p.id + ',\'spaar\',\'in\')"';
+    var isReadonly    = p.readonly === true;
+    var isBetaalStijl = p.betaalStijl === true;
+    var inlegBadge = '<div style="margin-top:8px;"><span style="font-size:10px;color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:6px;">\u20ac' + (p.maandInleg||0) + '/mnd auto</span></div>';
+    var cardClick  = isReadonly ? '' : ' onclick="spOpenModal(' + p.id + ',\'spaar\',\'in\')" style="cursor:pointer;"';
     var actionBtns = isReadonly
-      ? '<div style="display:flex;align-items:center;gap:5px;margin-top:8px;"><span style="font-size:10px;color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:6px;">€' + (p.maandInleg||0) + '/mnd auto</span></div>'
-      : '<div style="display:flex;gap:5px;margin-top:8px;">' +
-          '<button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'uit\')" style="flex:1;height:32px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:9px;color:#f87171;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">-</button>' +
-          '<button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'in\')" style="flex:1;height:32px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:9px;color:#4ade80;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">+</button>' +
-        '</div>';
+      ? inlegBadge
+      : isBetaalStijl
+        ? '<div style="display:flex;gap:5px;margin-top:8px;">' +
+            '<button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'uit\')" style="flex:1;height:32px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:9px;color:#f87171;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">-</button>' +
+          '</div>'
+        : '<div style="display:flex;gap:5px;margin-top:8px;">' +
+            '<button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'uit\')" style="flex:1;height:32px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:9px;color:#f87171;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">-</button>' +
+            '<button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'in\')" style="flex:1;height:32px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:9px;color:#4ade80;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">+</button>' +
+          '</div>';
     return '<div style="background:#1a1830;border-radius:22px;padding:16px 12px 14px;border:1px solid rgba(255,255,255,0.07);position:relative;"' + cardClick + '>' +
       '<button onclick="event.stopPropagation();spMenu(' + p.id + ',\'spaar\',this)" style="position:absolute;top:10px;right:10px;width:26px;height:26px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:18px;cursor:pointer;line-height:1;z-index:2;">\u22ef</button>' +
       '<div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:10px;">' +
