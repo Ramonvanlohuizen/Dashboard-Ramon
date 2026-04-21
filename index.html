@@ -576,124 +576,103 @@ select option { background: #1a1830; }
   <!-- SPAREN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- Overview hero: totaal vermogen -->
+  <!-- Totaal vermogen hero: spaarcentrum + lt + beleggingen (geen buffer) -->
   <div style="background:linear-gradient(135deg,#1a3a5c 0%,#1e4d7b 50%,#2563a8 100%);border-radius:24px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
     <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
     <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Totaal vermogen</div>
     <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="sp-totaal-vermogen">€0</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:1.25rem;" id="sp-vermogen-sub">Alle potten bij elkaar</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:1.25rem;">Spaarcentrum + lange termijn + beleggingen</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1;">
       <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Buffer</div>
-        <div style="font-size:15px;font-weight:600;color:white;" id="sp-buffer-total">€0</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Spaardoelen</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Spaarcentrum</div>
         <div style="font-size:15px;font-weight:600;color:white;" id="sp-spaar-total">€0</div>
       </div>
       <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
         <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Lange termijn</div>
         <div style="font-size:15px;font-weight:600;color:white;" id="sp-lt-total">€0</div>
       </div>
-    </div>
-  </div>
-
-  <!-- Maandelijks inleg overzicht -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1.25rem;">
-    <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">Maandelijks inleg</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">🛡️ Buffer</div>
-        <div style="font-size:20px;font-weight:700;color:var(--cyan);">€75</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">per maand</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">🎯 Spaarcentrum</div>
-        <div style="font-size:20px;font-weight:700;color:var(--green);">€300</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">per maand</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">🏠 Lange termijn</div>
-        <div style="font-size:20px;font-weight:700;color:var(--purple-light);">€915</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">per maand</div>
-      </div>
-      <div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">📈 Beleggingen</div>
-        <div style="font-size:20px;font-weight:700;color:var(--yellow);">€150</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">per maand</div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Beleggingen</div>
+        <div style="font-size:15px;font-weight:600;color:white;" id="sp-beleg-total">€0</div>
       </div>
     </div>
   </div>
 
-  <!-- Buffer pot -->
+  <!-- Buffer pot (apart, telt niet mee in vermogen) -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <div>
         <div style="font-size:16px;font-weight:700;">🛡️ Buffer</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Noodfonds & aanvulling tekort</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Noodfonds & aanvulling tekort • niet in vermogen</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:700;color:var(--cyan);" id="sp-buffer-val">€0</div>
         <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-buffer-doel">1000</span></div>
       </div>
     </div>
-    <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
+    <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
       <div id="sp-buffer-bar" style="height:100%;background:var(--cyan);border-radius:999px;transition:width 0.6s ease;width:0%;"></div>
     </div>
     <div style="display:flex;gap:8px;">
       <input type="number" id="sp-buffer-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-buffer-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:100px;flex:0 0 100px;" />
+      <input type="number" id="sp-buffer-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" />
       <button onclick="saveSpaarpot('buffer')" style="height:42px;padding:0 14px;background:var(--cyan);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
   </div>
 
-  <!-- Spaarcentrum potten -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="font-size:16px;font-weight:700;margin-bottom:4px;">🎯 Spaarcentrum</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem;">€300/maand verdeeld over doelen</div>
-    <div id="sp-doelen-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
-    <button onclick="openSpaardoel()" style="width:100%;height:42px;background:var(--surface2);border:1px dashed rgba(74,222,128,0.4);border-radius:12px;color:var(--green);font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Spaardoel toevoegen</button>
-  </div>
-
-  <!-- Lange termijn pot -->
+  <!-- Spaarcentrum: vaste potten, geen invoervelden -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <div>
+        <div style="font-size:16px;font-weight:700;">🎯 Spaarcentrum</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">€300/maand verdeeld over doelen</div>
+      </div>
+      <div style="font-size:20px;font-weight:700;color:var(--green);" id="sp-spaar-val">€0</div>
+    </div>
+    <div id="sp-doelen-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+    <button onclick="openSpaardoel()" style="width:100%;height:42px;background:var(--surface2);border:1px dashed rgba(74,222,128,0.4);border-radius:12px;color:var(--green);font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Spaardoel toevoegen</button>
+  </div>
+
+  <!-- Lange termijn -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+      <div>
         <div style="font-size:16px;font-weight:700;">🏠 Lange termijn</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Toekomst, huis, grote doelen</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Toekomst, huis, grote doelen • €915/maand</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:700;color:var(--purple-light);" id="sp-lt-val">€0</div>
+        <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50000</span></div>
       </div>
     </div>
-    <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
+    <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
       <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;transition:width 0.6s ease;width:0%;"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:100px;flex:0 0 100px;" />
+      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" />
       <button onclick="saveSpaarpot('lt')" style="height:42px;padding:0 14px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
     <div style="font-size:12px;color:var(--muted);padding:8px 12px;background:rgba(124,92,252,0.08);border-radius:10px;border:1px solid rgba(124,92,252,0.15);">
-      💡 Overschot aan einde maand gaat ook naar lange termijn
+      💡 Maandoverschot gaat ook naar lange termijn
     </div>
   </div>
 
-  <!-- Beleggingen pot -->
+  <!-- Beleggingen -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <div>
         <div style="font-size:16px;font-weight:700;">📈 Beleggingen</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Lange termijn vermogensgroei</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Vermogensgroei • €150/maand</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:700;color:var(--yellow);" id="sp-beleg-val">€0</div>
-        <div style="font-size:11px;color:var(--muted);" id="sp-beleg-rendement"></div>
+        <div style="font-size:11px;color:var(--muted);">portfolio waarde</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="number" id="sp-beleg-input" placeholder="Huidig portfolio €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="max-width:100px;flex:0 0 100px;" value="150" />
+      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" value="150" />
       <button onclick="saveSpaarpot('beleg')" style="height:42px;padding:0 14px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
     <div style="font-size:12px;color:var(--muted);padding:8px 12px;background:rgba(251,191,36,0.08);border-radius:10px;border:1px solid rgba(251,191,36,0.15);">
@@ -701,12 +680,21 @@ select option { background: #1a1830; }
     </div>
   </div>
 
-  <!-- Maand inleg logboek -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:2rem;">
+  <!-- Automatische maandregels -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div style="font-size:14px;font-weight:600;">Inleg logboek</div>
-      <button onclick="logSparinleg()" style="height:34px;padding:0 14px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">+ Inleg registreren</button>
+      <div>
+        <div style="font-size:14px;font-weight:600;">📅 Automatische inleg (elke 23e)</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Worden automatisch geregistreerd op de 23e</div>
+      </div>
+      <button onclick="openAutoRegel()" style="height:34px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Regel</button>
     </div>
+    <div id="sp-auto-regels" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+
+  <!-- Inleg logboek -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:2rem;">
+    <div style="font-size:14px;font-weight:600;margin-bottom:1rem;">📓 Inleg logboek</div>
     <div id="sp-inleg-log" style="display:flex;flex-direction:column;gap:6px;"></div>
     <div id="sp-inleg-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem;">Nog geen inleg geregistreerd</div>
   </div>
@@ -3383,49 +3371,105 @@ function switchBudgetTab(tab) {
   const tabB = document.getElementById('bud-tab-budget');
   const tabS = document.getElementById('bud-tab-sparen');
   if (tab === 'budget') {
-    budget.style.display = 'block';
-    sparen.style.display = 'none';
+    budget.style.display = 'block'; sparen.style.display = 'none';
     tabB.style.background = 'var(--purple)'; tabB.style.color = 'white'; tabB.style.fontWeight = '600';
     tabS.style.background = 'none'; tabS.style.color = 'var(--muted)'; tabS.style.fontWeight = '500';
     document.getElementById('budget-page-title').textContent = 'Mijn zakgeld';
   } else {
-    budget.style.display = 'none';
-    sparen.style.display = 'block';
+    budget.style.display = 'none'; sparen.style.display = 'block';
     tabS.style.background = 'var(--purple)'; tabS.style.color = 'white'; tabS.style.fontWeight = '600';
     tabB.style.background = 'none'; tabB.style.color = 'var(--muted)'; tabB.style.fontWeight = '500';
     document.getElementById('budget-page-title').textContent = 'Mijn spaargeld';
+    checkAutoRegels();
     renderSparen();
   }
 }
 
 function getSpaarData() {
-  return JSON.parse(localStorage.getItem('spaar_data') || JSON.stringify({
+  const defaults = {
     buffer: { saldo: 0, doel: 1000 },
     lt: { saldo: 0, doel: 50000 },
     beleg: { saldo: 0, inleg: 150 },
-    doelen: [],
-    log: []
-  }));
+    doelen: [
+      { id: 1, naam: 'Vakantie', emoji: '🏖️', huidig: 0, target: 2000, maand: 100 },
+      { id: 2, naam: 'Trips', emoji: '🧳', huidig: 0, target: 600, maand: 50 },
+      { id: 3, naam: 'Shoppen', emoji: '🛍️', huidig: 0, target: 500, maand: 100 },
+      { id: 4, naam: 'Uiteten', emoji: '🍽️', huidig: 0, target: 200, maand: 50 }
+    ],
+    autoRegels: [
+      { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
+      { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'doel_1', kleur: 'var(--green)' },
+      { id: 12, naam: 'Trips', bedrag: 50, pot: 'doel_2', kleur: 'var(--green)' },
+      { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'doel_3', kleur: 'var(--green)' },
+      { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'doel_4', kleur: 'var(--green)' },
+      { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
+      { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
+    ],
+    log: [],
+    lastAutoCheck: null
+  };
+  const saved = localStorage.getItem('spaar_data');
+  if (!saved) return defaults;
+  const d = JSON.parse(saved);
+  // merge defaults for missing keys
+  if (!d.autoRegels) d.autoRegels = defaults.autoRegels;
+  if (!d.lastAutoCheck) d.lastAutoCheck = null;
+  return d;
 }
 
 function saveSpaarData(data) {
   localStorage.setItem('spaar_data', JSON.stringify(data));
 }
 
+// Check if auto-regels should fire (on the 23rd of month)
+function checkAutoRegels() {
+  const data = getSpaarData();
+  const now = new Date();
+  const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-23';
+  if (now.getDate() >= 23 && data.lastAutoCheck !== todayKey) {
+    // Auto-fire all active rules
+    applyAutoRegels(data, todayKey);
+  }
+}
+
+function applyAutoRegels(data, key) {
+  let applied = false;
+  for (const regel of data.autoRegels) {
+    if (regel.pot === 'buffer') {
+      data.buffer.saldo = (data.buffer.saldo || 0) + regel.bedrag;
+      applied = true;
+    } else if (regel.pot === 'lt') {
+      data.lt.saldo = (data.lt.saldo || 0) + regel.bedrag;
+      applied = true;
+    } else if (regel.pot === 'beleg') {
+      data.beleg.saldo = (data.beleg.saldo || 0) + regel.bedrag;
+      applied = true;
+    } else if (regel.pot.startsWith('doel_')) {
+      const doelId = parseInt(regel.pot.replace('doel_', ''));
+      const doel = data.doelen.find(d => d.id === doelId);
+      if (doel) { doel.huidig = (doel.huidig || 0) + regel.bedrag; applied = true; }
+    }
+  }
+  if (applied) {
+    const maand = new Date().toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+    data.log.unshift({ id: Date.now(), maand, datum: key, auto: true, regels: data.autoRegels.map(r => ({ naam: r.naam, bedrag: r.bedrag })) });
+    data.lastAutoCheck = key;
+    saveSpaarData(data);
+    showToast('Automatische inleg van de 23e verwerkt ✓');
+  }
+}
+
 function saveSpaarpot(type) {
   const data = getSpaarData();
   if (type === 'buffer') {
-    const saldo = parseFloat(document.getElementById('sp-buffer-input').value) || 0;
-    const doel = parseFloat(document.getElementById('sp-buffer-doel-input').value) || 1000;
-    data.buffer = { saldo, doel };
+    data.buffer.saldo = parseFloat(document.getElementById('sp-buffer-input').value) || 0;
+    data.buffer.doel = parseFloat(document.getElementById('sp-buffer-doel-input').value) || 1000;
   } else if (type === 'lt') {
-    const saldo = parseFloat(document.getElementById('sp-lt-input').value) || 0;
-    const doel = parseFloat(document.getElementById('sp-lt-doel-input').value) || 50000;
-    data.lt = { saldo, doel };
+    data.lt.saldo = parseFloat(document.getElementById('sp-lt-input').value) || 0;
+    data.lt.doel = parseFloat(document.getElementById('sp-lt-doel-input').value) || 50000;
   } else if (type === 'beleg') {
-    const saldo = parseFloat(document.getElementById('sp-beleg-input').value) || 0;
-    const inleg = parseFloat(document.getElementById('sp-beleg-inleg-input').value) || 150;
-    data.beleg = { saldo, inleg };
+    data.beleg.saldo = parseFloat(document.getElementById('sp-beleg-input').value) || 0;
+    data.beleg.inleg = parseFloat(document.getElementById('sp-beleg-inleg-input').value) || 150;
   }
   saveSpaarData(data);
   renderSparen();
@@ -3440,7 +3484,10 @@ function openSpaardoel() {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:60;display:flex;align-items:flex-end;justify-content:center;';
   modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
     <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Nieuw spaardoel</div>
-    <input type="text" id="doel-naam" placeholder="Naam (bijv. Vakantie)" style="width:100%;margin-bottom:8px;" />
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="doel-emoji" placeholder="🎯" style="width:60px;text-align:center;font-size:20px;" maxlength="2" />
+      <input type="text" id="doel-naam" placeholder="Naam (bijv. Vakantie)" style="flex:1;" />
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input type="number" id="doel-huidig" placeholder="Huidig €" inputmode="decimal" style="flex:1;" />
       <input type="number" id="doel-target" placeholder="Doel €" inputmode="decimal" style="flex:1;" />
@@ -3459,9 +3506,11 @@ function saveSpaardoel() {
   const naam = document.getElementById('doel-naam').value.trim();
   if (!naam) { showToast('Vul een naam in.'); return; }
   const data = getSpaarData();
+  const newId = Date.now();
   data.doelen.push({
-    id: Date.now(),
+    id: newId,
     naam,
+    emoji: document.getElementById('doel-emoji').value.trim() || '🎯',
     huidig: parseFloat(document.getElementById('doel-huidig').value) || 0,
     target: parseFloat(document.getElementById('doel-target').value) || 1000,
     maand: parseFloat(document.getElementById('doel-maand').value) || 0
@@ -3477,6 +3526,7 @@ function deleteSpaardoel(id) {
   data.doelen = data.doelen.filter(d => d.id !== id);
   saveSpaarData(data);
   renderSparen();
+  showToast('Spaardoel verwijderd');
 }
 
 function updateDoelSaldo(id, val) {
@@ -3485,27 +3535,77 @@ function updateDoelSaldo(id, val) {
   if (doel) { doel.huidig = parseFloat(val) || 0; saveSpaarData(data); renderSparen(); }
 }
 
-function logSparinleg() {
+function openAutoRegel() {
+  const existing = document.getElementById('autoregel-modal');
+  if (existing) existing.remove();
   const data = getSpaarData();
-  const now = new Date();
-  const maand = now.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
-  data.log.unshift({
-    id: Date.now(),
-    maand,
-    buffer: data.buffer.saldo,
-    lt: data.lt.saldo,
-    beleg: data.beleg.saldo,
-    datum: now.toISOString().slice(0, 10)
-  });
-  if (data.log.length > 24) data.log = data.log.slice(0, 24);
+  const potOpties = [
+    { val: 'buffer', label: '🛡️ Buffer' },
+    { val: 'lt', label: '🏠 Lange termijn' },
+    { val: 'beleg', label: '📈 Beleggingen' },
+    ...data.doelen.map(d => ({ val: 'doel_' + d.id, label: (d.emoji || '🎯') + ' ' + d.naam }))
+  ];
+  const modal = document.createElement('div');
+  modal.id = 'autoregel-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:60;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Automatische inlegregel</div>
+    <input type="text" id="ar-naam" placeholder="Naam (bijv. Vakantie)" style="width:100%;margin-bottom:8px;" />
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="number" id="ar-bedrag" placeholder="Bedrag €" inputmode="decimal" style="flex:1;" />
+      <select id="ar-pot" style="flex:1;">
+        ${potOpties.map(p => `<option value="${p.val}">${p.label}</option>`).join('')}
+      </select>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Wordt automatisch toegepast op de 23e van elke maand</div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('autoregel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
+      <button onclick="saveAutoRegel()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function saveAutoRegel() {
+  const naam = document.getElementById('ar-naam').value.trim();
+  const bedrag = parseFloat(document.getElementById('ar-bedrag').value) || 0;
+  const pot = document.getElementById('ar-pot').value;
+  if (!naam || !bedrag) { showToast('Vul naam en bedrag in.'); return; }
+  const data = getSpaarData();
+  const KLEUR_MAP = { buffer: 'var(--cyan)', lt: 'var(--purple-light)', beleg: 'var(--yellow)' };
+  data.autoRegels.push({ id: Date.now(), naam, bedrag, pot, kleur: KLEUR_MAP[pot] || 'var(--green)' });
+  saveSpaarData(data);
+  document.getElementById('autoregel-modal').remove();
+  renderSparen();
+  showToast(naam + ' toegevoegd ✓');
+}
+
+function deleteAutoRegel(id) {
+  const data = getSpaarData();
+  data.autoRegels = data.autoRegels.filter(r => r.id !== id);
   saveSpaarData(data);
   renderSparen();
-  showToast('Inleg geregistreerd ✓');
+}
+
+function editAutoRegel(id) {
+  const data = getSpaarData();
+  const regel = data.autoRegels.find(r => r.id === id);
+  if (!regel) return;
+  const nieuw = prompt('Nieuw bedrag voor ' + regel.naam + ':', regel.bedrag);
+  if (nieuw === null) return;
+  const val = parseFloat(nieuw);
+  if (!isNaN(val) && val >= 0) {
+    regel.bedrag = val;
+    saveSpaarData(data);
+    renderSparen();
+    showToast('Aangepast ✓');
+  }
 }
 
 function renderSparen() {
   const data = getSpaarData();
-  const fmt = n => '€' + Number(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const fmt = n => '€' + Math.round(n).toLocaleString('nl-NL');
 
   // Buffer
   const bufPct = Math.min(100, data.buffer.doel > 0 ? (data.buffer.saldo / data.buffer.doel * 100) : 0);
@@ -3514,11 +3614,11 @@ function renderSparen() {
   document.getElementById('sp-buffer-bar').style.width = bufPct + '%';
   document.getElementById('sp-buffer-input').value = data.buffer.saldo || '';
   document.getElementById('sp-buffer-doel-input').value = data.buffer.doel || '';
-  document.getElementById('sp-buffer-total').textContent = fmt(data.buffer.saldo);
 
   // Lange termijn
   const ltPct = Math.min(100, data.lt.doel > 0 ? (data.lt.saldo / data.lt.doel * 100) : 0);
   document.getElementById('sp-lt-val').textContent = fmt(data.lt.saldo);
+  document.getElementById('sp-lt-doel-label').textContent = data.lt.doel;
   document.getElementById('sp-lt-bar').style.width = ltPct + '%';
   document.getElementById('sp-lt-input').value = data.lt.saldo || '';
   document.getElementById('sp-lt-doel-input').value = data.lt.doel || '';
@@ -3528,71 +3628,90 @@ function renderSparen() {
   document.getElementById('sp-beleg-val').textContent = fmt(data.beleg.saldo);
   document.getElementById('sp-beleg-input').value = data.beleg.saldo || '';
   document.getElementById('sp-beleg-inleg-input').value = data.beleg.inleg || 150;
-  // 10-jaar prognose bij 7% jaarlijks
-  const inlegPerJaar = (data.beleg.inleg || 150) * 12;
-  const startKapitaal = data.beleg.saldo || 0;
-  let prognose = startKapitaal;
-  for (let i = 0; i < 10; i++) { prognose = prognose * 1.07 + inlegPerJaar; }
+  document.getElementById('sp-beleg-total').textContent = fmt(data.beleg.saldo);
+  const inlegJaar = (data.beleg.inleg || 150) * 12;
+  let prognose = data.beleg.saldo || 0;
+  for (let i = 0; i < 10; i++) prognose = prognose * 1.07 + inlegJaar;
   document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prognose));
-  document.getElementById('sp-beleg-rendement').textContent = 'Portfolio waarde';
 
-  // Spaardoelen
-  const doelenList = document.getElementById('sp-doelen-list');
-  const doelenTotaal = data.doelen.reduce((s, d) => s + d.huidig, 0);
+  // Spaarcentrum doelen
+  const doelenTotaal = data.doelen.reduce((s, d) => s + (d.huidig || 0), 0);
+  document.getElementById('sp-spaar-val').textContent = fmt(doelenTotaal);
   document.getElementById('sp-spaar-total').textContent = fmt(doelenTotaal);
-
+  const KLEUREN = ['var(--green)', 'var(--cyan)', 'var(--yellow)', 'var(--pink)', 'var(--orange)', 'var(--purple-light)'];
+  const doelenList = document.getElementById('sp-doelen-list');
   if (data.doelen.length === 0) {
-    doelenList.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:1rem;">Nog geen spaardoelen. Voeg er een toe!</div>';
+    doelenList.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.75rem;">Nog geen spaardoelen. Voeg er een toe!</div>';
   } else {
-    doelenList.innerHTML = data.doelen.map(d => {
+    doelenList.innerHTML = data.doelen.map((d, i) => {
       const pct = Math.min(100, d.target > 0 ? (d.huidig / d.target * 100) : 0);
-      const maandOver = d.target > d.huidig && d.maand > 0 ? Math.ceil((d.target - d.huidig) / d.maand) : null;
-      const DOEL_COLORS = ['var(--green)', 'var(--cyan)', 'var(--yellow)', 'var(--pink)', 'var(--orange)', 'var(--purple-light)'];
-      const kleur = DOEL_COLORS[data.doelen.indexOf(d) % DOEL_COLORS.length];
+      const mOver = d.target > d.huidig && d.maand > 0 ? Math.ceil((d.target - d.huidig) / d.maand) : null;
+      const kleur = KLEUREN[i % KLEUREN.length];
       return `<div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="font-size:14px;font-weight:600;">${d.naam}</div>
-          <button onclick="deleteSpaardoel(${d.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;">×</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:14px;font-weight:600;">${d.emoji || '🎯'} ${d.naam}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:700;color:${kleur};">${Math.round(pct)}%</span>
+            <button onclick="deleteSpaardoel(${d.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 2px;">×</button>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <input type="number" value="${d.huidig}" inputmode="decimal" onchange="updateDoelSaldo(${d.id},this.value)" style="width:90px;font-size:13px;padding:6px 8px;" />
-          <span style="font-size:12px;color:var(--muted);">/ ${fmt(d.target)}</span>
-          <span style="flex:1;text-align:right;font-size:13px;font-weight:600;color:${kleur};">${Math.round(pct)}%</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <input type="number" value="${d.huidig}" inputmode="decimal" onchange="updateDoelSaldo(${d.id},this.value)" style="width:90px;font-size:13px;padding:5px 8px;" />
+          <span style="font-size:12px;color:var(--muted);flex:1;">/ ${fmt(d.target)}${d.maand ? ' • €' + d.maand + '/mnd' : ''}</span>
         </div>
-        <div style="height:6px;background:var(--surface);border-radius:999px;overflow:hidden;margin-bottom:6px;">
-          <div style="height:100%;background:${kleur};border-radius:999px;width:${pct}%;transition:width 0.6s ease;"></div>
+        <div style="height:5px;background:var(--surface);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;background:${kleur};border-radius:999px;width:${pct}%;transition:width 0.6s;"></div>
         </div>
-        ${maandOver ? `<div style="font-size:11px;color:var(--muted);">Nog ~${maandOver} maanden bij €${d.maand}/maand</div>` : ''}
+        ${mOver ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">Nog ~${mOver} maanden</div>` : ''}
       </div>`;
     }).join('');
   }
 
-  // Totaal vermogen
-  const totaal = data.buffer.saldo + data.lt.saldo + data.beleg.saldo + doelenTotaal;
+  // Totaal vermogen = spaarcentrum + lt + beleggingen (geen buffer)
+  const totaal = doelenTotaal + data.lt.saldo + data.beleg.saldo;
   document.getElementById('sp-totaal-vermogen').textContent = fmt(totaal);
-  document.getElementById('sp-vermogen-sub').textContent = 'Buffer + spaardoelen + lange termijn + beleggingen';
+
+  // Auto-regels
+  const autoEl = document.getElementById('sp-auto-regels');
+  if (!data.autoRegels || data.autoRegels.length === 0) {
+    autoEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.75rem;">Geen automatische regels</div>';
+  } else {
+    autoEl.innerHTML = data.autoRegels.map(r => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);">
+        <div style="width:8px;height:8px;border-radius:50%;background:${r.kleur || 'var(--green)'};flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;">${r.naam}</div>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:${r.kleur || 'var(--green)'};">€${r.bedrag}</div>
+        <button onclick="editAutoRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;">✏️</button>
+        <button onclick="deleteAutoRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;">×</button>
+      </div>`).join('');
+  }
 
   // Inleg log
   const logEl = document.getElementById('sp-inleg-log');
   const emptyEl = document.getElementById('sp-inleg-empty');
-  if (data.log.length === 0) {
+  if (!data.log || data.log.length === 0) {
     logEl.innerHTML = '';
     emptyEl.style.display = 'block';
   } else {
     emptyEl.style.display = 'none';
-    logEl.innerHTML = data.log.slice(0, 6).map(l => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-        <div>
-          <div style="font-size:13px;font-weight:500;">${l.maand}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${l.datum}</div>
+    logEl.innerHTML = data.log.slice(0, 12).map(l => {
+      const totaalInleg = l.regels ? l.regels.reduce((s, r) => s + r.bedrag, 0) : 0;
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:13px;font-weight:500;">${l.maand} ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 6px;border-radius:6px;margin-left:4px;">auto</span>' : ''}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${l.datum}</div>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:var(--green);">€${totaalInleg}</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:13px;font-weight:600;color:var(--green);">${fmt(l.beleg + (l.lt||0) + (l.buffer||0))}</div>
-          <div style="font-size:11px;color:var(--muted);">totaal opgeslagen</div>
-        </div>
-      </div>`).join('');
+        ${l.regels ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${l.regels.map(r => `<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:6px;">${r.naam} €${r.bedrag}</span>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
   }
 }
+
 
 function renderDT() {
   const dk = dateKey(dtViewDate);
