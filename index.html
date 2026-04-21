@@ -3333,26 +3333,33 @@ async function addUrlIngredientsToMeal(recipeStr) {
 // ===== SPAREN TAB =====
 
 function migrateSpaarData() {
-  const CURRENT_VERSION = 3;
-  const DEFAULT_REGELS = [
-    { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
-    { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
-    { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
-  ];
-  const raw = localStorage.getItem('spaar_data');
-  const d = raw ? JSON.parse(raw) : {};
-  if ((d._v || 0) < CURRENT_VERSION) {
-    d.autoRegels = DEFAULT_REGELS;
-    if (!d.lt) d.lt = { saldo: 0, doel: 50000 };
-    if (!d.beleg) d.beleg = { saldo: 0, inleg: 150 };
-    if (!d.log) d.log = [];
-    if (!d.lastAutoCheck) d.lastAutoCheck = null;
-    d._v = CURRENT_VERSION;
-    localStorage.setItem('spaar_data', JSON.stringify(d));
+  // v3: wipe old key entirely and start fresh with spaar_data_v3
+  const KEY = 'spaar_data_v3';
+  if (!localStorage.getItem(KEY)) {
+    // Copy over saldo's from old data if present
+    let lt = { saldo: 0, doel: 50000 };
+    let beleg = { saldo: 0, inleg: 150 };
+    let log = [];
+    try {
+      const old = JSON.parse(localStorage.getItem('spaar_data_v3') || '{}');
+      if (old.lt) lt = old.lt;
+      if (old.beleg) beleg = old.beleg;
+      if (old.log) log = old.log;
+    } catch(e) {}
+    const fresh = {
+      lt, beleg, log,
+      lastAutoCheck: null,
+      autoRegels: [
+        { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
+        { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
+        { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
+        { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
+        { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
+        { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
+        { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
+      ]
+    };
+    localStorage.setItem(KEY, JSON.stringify(fresh));
   }
 }
 
@@ -3400,22 +3407,10 @@ function getSpaarData() {
     log: [],
     lastAutoCheck: null
   };
-  const saved = localStorage.getItem('spaar_data');
+  const saved = localStorage.getItem('spaar_data_v3');
   if (!saved) return defaults;
   const d = JSON.parse(saved);
-  // Always force default auto-regels if empty or all have doel_ references
-  const hasValidRegels = d.autoRegels && d.autoRegels.length > 0 &&
-    d.autoRegels.some(r => r.pot && !r.pot.startsWith('doel_'));
-  if (!hasValidRegels) d.autoRegels = defaults.autoRegels;
-  else {
-    // migrate any remaining doel_ refs
-    d.autoRegels = d.autoRegels.map(r => ({
-      ...r,
-      pot: r.pot && r.pot.startsWith('doel_') ? 'spaarcentrum' : (r.pot || 'spaarcentrum'),
-      kleur: r.kleur || 'var(--green)'
-    }));
-  }
-  if (d.lastAutoCheck === undefined) d.lastAutoCheck = null;
+  if (!d.autoRegels) d.autoRegels = defaults.autoRegels;
   if (!d.lt) d.lt = defaults.lt;
   if (!d.beleg) d.beleg = defaults.beleg;
   if (!d.log) d.log = [];
@@ -3423,7 +3418,7 @@ function getSpaarData() {
 }
 
 function saveSpaarData(data) {
-  localStorage.setItem('spaar_data', JSON.stringify(data));
+  localStorage.setItem('spaar_data_v3', JSON.stringify(data));
 }
 
 // Check if auto-regels should fire (on the 23rd of month)
