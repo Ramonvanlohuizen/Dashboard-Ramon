@@ -3333,6 +3333,7 @@ async function addUrlIngredientsToMeal(recipeStr) {
 // ===== SPAREN TAB =====
 
 function migrateSpaarData() {
+  const CURRENT_VERSION = 3;
   const DEFAULT_REGELS = [
     { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
     { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
@@ -3344,14 +3345,13 @@ function migrateSpaarData() {
   ];
   const raw = localStorage.getItem('spaar_data');
   const d = raw ? JSON.parse(raw) : {};
-  // Always set default regels if empty or broken
-  if (!d.autoRegels || d.autoRegels.length === 0 ||
-      d.autoRegels.every(r => !r.pot || r.pot.startsWith('doel_'))) {
+  if ((d._v || 0) < CURRENT_VERSION) {
     d.autoRegels = DEFAULT_REGELS;
     if (!d.lt) d.lt = { saldo: 0, doel: 50000 };
     if (!d.beleg) d.beleg = { saldo: 0, inleg: 150 };
     if (!d.log) d.log = [];
     if (!d.lastAutoCheck) d.lastAutoCheck = null;
+    d._v = CURRENT_VERSION;
     localStorage.setItem('spaar_data', JSON.stringify(d));
   }
 }
