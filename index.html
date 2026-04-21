@@ -363,6 +363,13 @@ select option { background: #1a1830; }
 .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--text); opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 100; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+<meta name="version" content="1776771770">
+<script>
+// Clear all old spaar keys so fresh start
+(function() {
+  ['spaar_data','spaar_data_v2','spaar_data_v3'].forEach(function(k){localStorage.removeItem(k);});
+})();
+</script>
 </head>
 <body>
 
@@ -576,52 +583,33 @@ select option { background: #1a1830; }
   <!-- SPAREN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- Totaal vermogen hero: spaarcentrum + lt + beleggingen (geen buffer) -->
-  <div style="background:linear-gradient(135deg,#1a3a5c 0%,#1e4d7b 50%,#2563a8 100%);border-radius:24px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+  <!-- Hero -->
+  <div style="background:linear-gradient(135deg,#1a3a5c,#2563a8);border-radius:24px;padding:1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
     <div style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Totaal vermogen</div>
-    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="sp-totaal-vermogen">€0</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:1.25rem;">Spaarcentrum + lange termijn + beleggingen</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;position:relative;z-index:1;">
-      <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Spaarcentrum</div>
-        <div style="font-size:15px;font-weight:600;color:white;" id="sp-spaar-total">€0</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Lange termijn</div>
-        <div style="font-size:15px;font-weight:600;color:white;" id="sp-lt-total">€0</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Beleggingen</div>
-        <div style="font-size:15px;font-weight:600;color:white;" id="sp-beleg-total">€0</div>
-      </div>
-    </div>
+    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="sp-totaal">€0</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.7);">Spaarcentrum + lange termijn + beleggingen</div>
   </div>
-
-
 
   <!-- Lange termijn -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <div>
         <div style="font-size:16px;font-weight:700;">🏠 Lange termijn</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Toekomst, huis, grote doelen • €915/maand</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Toekomst, huis, grote doelen • €915/mnd</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:700;color:var(--purple-light);" id="sp-lt-val">€0</div>
-        <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50000</span></div>
+        <div style="font-size:11px;color:var(--muted);">doel: €<span id="sp-lt-doel-label">50.000</span></div>
       </div>
     </div>
     <div style="height:6px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:10px;">
-      <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;transition:width 0.6s ease;width:0%;"></div>
+      <div id="sp-lt-bar" style="height:100%;background:var(--purple-light);border-radius:999px;width:0%;transition:width 0.6s;"></div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <div style="display:flex;gap:8px;">
       <input type="number" id="sp-lt-input" placeholder="Huidig saldo €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" />
-      <button onclick="saveSpaarpot('lt')" style="height:42px;padding:0 14px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
-    </div>
-    <div style="font-size:12px;color:var(--muted);padding:8px 12px;background:rgba(124,92,252,0.08);border-radius:10px;border:1px solid rgba(124,92,252,0.15);">
-      💡 Maandoverschot gaat ook naar lange termijn
+      <input type="number" id="sp-lt-doel-input" placeholder="Doel €" inputmode="decimal" style="width:90px;flex:0 0 90px;" />
+      <button onclick="spSave('lt')" style="height:42px;padding:0 14px;background:var(--purple);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
   </div>
 
@@ -630,7 +618,7 @@ select option { background: #1a1830; }
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <div>
         <div style="font-size:16px;font-weight:700;">📈 Beleggingen</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Vermogensgroei • €150/maand</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Vermogensgroei • €150/mnd</div>
       </div>
       <div style="text-align:right;">
         <div style="font-size:22px;font-weight:700;color:var(--yellow);" id="sp-beleg-val">€0</div>
@@ -639,31 +627,31 @@ select option { background: #1a1830; }
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
       <input type="number" id="sp-beleg-input" placeholder="Huidig portfolio €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="max-width:90px;flex:0 0 90px;" value="150" />
-      <button onclick="saveSpaarpot('beleg')" style="height:42px;padding:0 14px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
+      <input type="number" id="sp-beleg-inleg-input" placeholder="Inleg €" inputmode="decimal" style="width:90px;flex:0 0 90px;" />
+      <button onclick="spSave('beleg')" style="height:42px;padding:0 14px;background:var(--yellow);color:#0f0e1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">OK</button>
     </div>
     <div style="font-size:12px;color:var(--muted);padding:8px 12px;background:rgba(251,191,36,0.08);border-radius:10px;border:1px solid rgba(251,191,36,0.15);">
-      Bij 7% rendement over 10 jaar: <strong style="color:var(--yellow);" id="sp-beleg-prognose">berekening...</strong>
+      Bij 7% rendement over 10 jaar: <strong style="color:var(--yellow);" id="sp-beleg-prognose">—</strong>
     </div>
   </div>
 
-  <!-- Automatische maandregels -->
+  <!-- Automatische regels -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:1rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <div>
         <div style="font-size:14px;font-weight:600;">📅 Automatische inleg (elke 23e)</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Worden automatisch geregistreerd op de 23e</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Worden automatisch bijgehouden op de 23e</div>
       </div>
-<button onclick="openAutoRegel()" style="height:34px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Regel</button>
+      <button onclick="spOpenRegel()" style="height:34px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--purple-light);font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">+ Regel</button>
     </div>
-    <div id="sp-auto-regels" style="display:flex;flex-direction:column;gap:6px;"></div>
+    <div id="sp-regels-list" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 
-  <!-- Inleg logboek -->
+  <!-- Logboek -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;margin-bottom:2rem;">
     <div style="font-size:14px;font-weight:600;margin-bottom:1rem;">📓 Inleg logboek</div>
-    <div id="sp-inleg-log" style="display:flex;flex-direction:column;gap:6px;"></div>
-    <div id="sp-inleg-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem;">Nog geen inleg geregistreerd</div>
+    <div id="sp-log-list"></div>
+    <div id="sp-log-empty" style="text-align:center;color:var(--muted);font-size:13px;padding:1rem;">Nog geen inleg geregistreerd</div>
   </div>
 
   </div><!-- end bud-view-sparen -->
@@ -3332,35 +3320,37 @@ async function addUrlIngredientsToMeal(recipeStr) {
 
 // ===== SPAREN TAB =====
 
-function migrateSpaarData() {
-  // v3: wipe old key entirely and start fresh with spaar_data_v3
-  const KEY = 'spaar_data_v3';
-  if (!localStorage.getItem(KEY)) {
-    // Copy over saldo's from old data if present
-    let lt = { saldo: 0, doel: 50000 };
-    let beleg = { saldo: 0, inleg: 150 };
-    let log = [];
-    try {
-      const old = JSON.parse(localStorage.getItem('spaar_data_v3') || '{}');
-      if (old.lt) lt = old.lt;
-      if (old.beleg) beleg = old.beleg;
-      if (old.log) log = old.log;
-    } catch(e) {}
-    const fresh = {
-      lt, beleg, log,
-      lastAutoCheck: null,
-      autoRegels: [
-        { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
-        { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-        { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-        { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-        { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-        { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
-        { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
-      ]
-    };
-    localStorage.setItem(KEY, JSON.stringify(fresh));
-  }
+const SP_KEY = 'sp_v1';
+
+function spGet() {
+  const def = {
+    lt: { saldo: 0, doel: 50000 },
+    beleg: { saldo: 0, inleg: 150 },
+    log: [],
+    lastCheck: null,
+    regels: [
+      { id: 1, naam: 'Buffer',         bedrag: 75,  kleur: 'var(--cyan)' },
+      { id: 2, naam: 'Vakantie',       bedrag: 100, kleur: 'var(--green)' },
+      { id: 3, naam: 'Trips',          bedrag: 50,  kleur: 'var(--green)' },
+      { id: 4, naam: 'Shoppen',        bedrag: 100, kleur: 'var(--green)' },
+      { id: 5, naam: 'Uiteten',        bedrag: 50,  kleur: 'var(--green)' },
+      { id: 6, naam: 'Lange termijn',  bedrag: 915, kleur: 'var(--purple-light)' },
+      { id: 7, naam: 'Beleggingen',    bedrag: 150, kleur: 'var(--yellow)' }
+    ]
+  };
+  try {
+    const d = JSON.parse(localStorage.getItem(SP_KEY) || 'null');
+    if (!d) return def;
+    if (!d.regels || d.regels.length === 0) d.regels = def.regels;
+    if (!d.lt) d.lt = def.lt;
+    if (!d.beleg) d.beleg = def.beleg;
+    if (!d.log) d.log = [];
+    return d;
+  } catch(e) { return def; }
+}
+
+function spSet(d) {
+  localStorage.setItem(SP_KEY, JSON.stringify(d));
 }
 
 function switchBudgetTab(tab) {
@@ -3370,380 +3360,180 @@ function switchBudgetTab(tab) {
   const tabS = document.getElementById('bud-tab-sparen');
   if (tab === 'budget') {
     budget.style.display = 'block'; sparen.style.display = 'none';
-    tabB.style.background = 'var(--purple)'; tabB.style.color = 'white'; tabB.style.fontWeight = '600';
-    tabS.style.background = 'none'; tabS.style.color = 'var(--muted)'; tabS.style.fontWeight = '500';
+    tabB.style.cssText += ';background:var(--purple);color:white;font-weight:600;';
+    tabS.style.cssText += ';background:none;color:var(--muted);font-weight:500;';
     document.getElementById('budget-page-title').textContent = 'Mijn zakgeld';
   } else {
     budget.style.display = 'none'; sparen.style.display = 'block';
-    tabS.style.background = 'var(--purple)'; tabS.style.color = 'white'; tabS.style.fontWeight = '600';
-    tabB.style.background = 'none'; tabB.style.color = 'var(--muted)'; tabB.style.fontWeight = '500';
+    tabS.style.cssText += ';background:var(--purple);color:white;font-weight:600;';
+    tabB.style.cssText += ';background:none;color:var(--muted);font-weight:500;';
     document.getElementById('budget-page-title').textContent = 'Mijn spaargeld';
-    migrateSpaarData();
-    checkAutoRegels();
-    renderSparen();
+    spCheckAuto();
+    spRender();
   }
 }
 
-function getSpaarData() {
-  const defaults = {
-    buffer: { saldo: 0, doel: 1000 },
-    lt: { saldo: 0, doel: 50000 },
-    beleg: { saldo: 0, inleg: 150 },
-    doelen: [
-      { id: 1, naam: 'Vakantie', emoji: '🏖️', huidig: 0, target: 2000, maand: 100 },
-      { id: 2, naam: 'Trips', emoji: '🧳', huidig: 0, target: 600, maand: 50 },
-      { id: 3, naam: 'Shoppen', emoji: '🛍️', huidig: 0, target: 500, maand: 100 },
-      { id: 4, naam: 'Uiteten', emoji: '🍽️', huidig: 0, target: 200, maand: 50 }
-    ],
-    autoRegels: [
-      { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
-      { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-      { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-      { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-      { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-      { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
-      { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
-    ],
-    log: [],
-    lastAutoCheck: null
-  };
-  const saved = localStorage.getItem('spaar_data_v3');
-  if (!saved) return defaults;
-  const d = JSON.parse(saved);
-  if (!d.autoRegels) d.autoRegels = defaults.autoRegels;
-  if (!d.lt) d.lt = defaults.lt;
-  if (!d.beleg) d.beleg = defaults.beleg;
-  if (!d.log) d.log = [];
-  return d;
-}
-
-function saveSpaarData(data) {
-  localStorage.setItem('spaar_data_v3', JSON.stringify(data));
-}
-
-// Check if auto-regels should fire (on the 23rd of month)
-function checkAutoRegels() {
-  const data = getSpaarData();
-  const now = new Date();
-  const todayKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-23';
-  if (now.getDate() >= 23 && data.lastAutoCheck !== todayKey) {
-    // Auto-fire all active rules
-    applyAutoRegels(data, todayKey);
-  }
-}
-
-function applyAutoRegels(data, key) {
-  if (!data.autoRegels || data.autoRegels.length === 0) return;
-  // Update lt and beleg saldo's for tracked pots
-  for (const regel of data.autoRegels) {
-    if (regel.pot === 'lt') data.lt.saldo = (data.lt.saldo || 0) + regel.bedrag;
-    else if (regel.pot === 'beleg') data.beleg.saldo = (data.beleg.saldo || 0) + regel.bedrag;
-  }
-  const maand = new Date().toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
-  data.log.unshift({
-    id: Date.now(),
-    maand,
-    datum: key,
-    auto: true,
-    totaal: data.autoRegels.reduce((s, r) => s + r.bedrag, 0),
-    regels: data.autoRegels.map(r => ({ naam: r.naam, bedrag: r.bedrag, kleur: r.kleur }))
-  });
-  if (data.log.length > 24) data.log = data.log.slice(0, 24);
-  data.lastAutoCheck = key;
-  saveSpaarData(data);
-  showToast('Automatische inleg van de 23e verwerkt ✓');
-}
-
-function saveSpaarpot(type) {
-  const data = getSpaarData();
-  if (type === 'buffer') {
-    data.buffer.saldo = parseFloat(document.getElementById('sp-buffer-input').value) || 0;
-    data.buffer.doel = parseFloat(document.getElementById('sp-buffer-doel-input').value) || 1000;
-  } else if (type === 'lt') {
-    data.lt.saldo = parseFloat(document.getElementById('sp-lt-input').value) || 0;
-    data.lt.doel = parseFloat(document.getElementById('sp-lt-doel-input').value) || 50000;
+function spSave(type) {
+  const d = spGet();
+  if (type === 'lt') {
+    d.lt.saldo = parseFloat(document.getElementById('sp-lt-input').value) || 0;
+    d.lt.doel  = parseFloat(document.getElementById('sp-lt-doel-input').value) || 50000;
   } else if (type === 'beleg') {
-    data.beleg.saldo = parseFloat(document.getElementById('sp-beleg-input').value) || 0;
-    data.beleg.inleg = parseFloat(document.getElementById('sp-beleg-inleg-input').value) || 150;
+    d.beleg.saldo = parseFloat(document.getElementById('sp-beleg-input').value) || 0;
+    d.beleg.inleg = parseFloat(document.getElementById('sp-beleg-inleg-input').value) || 150;
   }
-  saveSpaarData(data);
-  renderSparen();
-  showToast('Opgeslagen ✓');
+  spSet(d); spRender(); showToast('Opgeslagen ✓');
 }
 
-function openSpaardoel() {
-  const existing = document.getElementById('spaardoel-modal');
-  if (existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'spaardoel-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:60;display:flex;align-items:flex-end;justify-content:center;';
-  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
-    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Nieuw spaardoel</div>
-    <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <input type="text" id="doel-emoji" placeholder="🎯" style="width:60px;text-align:center;font-size:20px;" maxlength="2" />
-      <input type="text" id="doel-naam" placeholder="Naam (bijv. Vakantie)" style="flex:1;" />
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <input type="number" id="doel-huidig" placeholder="Huidig €" inputmode="decimal" style="flex:1;" />
-      <input type="number" id="doel-target" placeholder="Doel €" inputmode="decimal" style="flex:1;" />
-    </div>
-    <input type="number" id="doel-maand" placeholder="Maandelijks inleg €" inputmode="decimal" style="width:100%;margin-bottom:12px;" />
+function spCheckAuto() {
+  const d = spGet();
+  const now = new Date();
+  const key = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  if (now.getDate() >= 23 && d.lastCheck !== key) {
+    d.lt.saldo    += d.regels.filter(r => r.naam === 'Lange termijn').reduce((s,r) => s+r.bedrag, 0);
+    d.beleg.saldo += d.regels.filter(r => r.naam === 'Beleggingen').reduce((s,r) => s+r.bedrag, 0);
+    d.log.unshift({
+      id: Date.now(), maand: now.toLocaleDateString('nl-NL', {month:'long',year:'numeric'}),
+      datum: now.toISOString().slice(0,10), auto: true,
+      regels: d.regels.map(r => ({ naam: r.naam, bedrag: r.bedrag }))
+    });
+    if (d.log.length > 24) d.log.pop();
+    d.lastCheck = key;
+    spSet(d);
+    showToast('Automatische inleg verwerkt ✓');
+  }
+}
+
+function spOpenRegel() {
+  const el = document.getElementById('sp-regel-modal');
+  if (el) el.remove();
+  const m = document.createElement('div');
+  m.id = 'sp-regel-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Nieuwe inlegregel</div>
+    <input type="text" id="sp-rn" placeholder="Naam" style="width:100%;margin-bottom:8px;"/>
+    <input type="number" id="sp-rb" placeholder="Bedrag €" inputmode="decimal" style="width:100%;margin-bottom:12px;"/>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('spaardoel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="saveSpaardoel()" style="flex:2;height:50px;background:linear-gradient(135deg,var(--green),#22c55e);border:none;border-radius:12px;color:#0f0e1a;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
+      <button onclick="document.getElementById('sp-regel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
+      <button onclick="spSaveRegel()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Toevoegen</button>
     </div>
   </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
 }
 
-function saveSpaardoel() {
-  const naam = document.getElementById('doel-naam').value.trim();
-  if (!naam) { showToast('Vul een naam in.'); return; }
-  const data = getSpaarData();
-  const newId = Date.now();
-  data.doelen.push({
-    id: newId,
-    naam,
-    emoji: document.getElementById('doel-emoji').value.trim() || '🎯',
-    huidig: parseFloat(document.getElementById('doel-huidig').value) || 0,
-    target: parseFloat(document.getElementById('doel-target').value) || 1000,
-    maand: parseFloat(document.getElementById('doel-maand').value) || 0
-  });
-  saveSpaarData(data);
-  document.getElementById('spaardoel-modal').remove();
-  renderSparen();
-  showToast(naam + ' toegevoegd ✓');
-}
-
-function deleteSpaardoel(id) {
-  const data = getSpaarData();
-  data.doelen = data.doelen.filter(d => d.id !== id);
-  saveSpaarData(data);
-  renderSparen();
-  showToast('Spaardoel verwijderd');
-}
-
-function updateDoelSaldo(id, val) {
-  const data = getSpaarData();
-  const doel = data.doelen.find(d => d.id === id);
-  if (doel) { doel.huidig = parseFloat(val) || 0; saveSpaarData(data); renderSparen(); }
-}
-
-function openAutoRegel() {
-  const existing = document.getElementById('autoregel-modal');
-  if (existing) existing.remove();
-  const potOpties = [
-    { val: 'buffer', label: '🛡️ Buffer' },
-    { val: 'spaarcentrum', label: '🎯 Spaarcentrum' },
-    { val: 'lt', label: '🏠 Lange termijn' },
-    { val: 'beleg', label: '📈 Beleggingen' }
-  ];
-  const modal = document.createElement('div');
-  modal.id = 'autoregel-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:60;display:flex;align-items:flex-end;justify-content:center;';
-  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
-    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">Automatische inlegregel</div>
-    <input type="text" id="ar-naam" placeholder="Naam (bijv. Vakantie)" style="width:100%;margin-bottom:8px;" />
-    <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <input type="number" id="ar-bedrag" placeholder="Bedrag €" inputmode="decimal" style="flex:1;" />
-      <select id="ar-pot" style="flex:1;">
-        ${potOpties.map(p => `<option value="${p.val}">${p.label}</option>`).join('')}
-      </select>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Wordt automatisch toegepast op de 23e van elke maand</div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('autoregel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="saveAutoRegel()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
-function saveAutoRegel() {
-  const naam = document.getElementById('ar-naam').value.trim();
-  const bedrag = parseFloat(document.getElementById('ar-bedrag').value) || 0;
-  const pot = document.getElementById('ar-pot').value;
+function spSaveRegel() {
+  const naam = document.getElementById('sp-rn').value.trim();
+  const bedrag = parseFloat(document.getElementById('sp-rb').value) || 0;
   if (!naam || !bedrag) { showToast('Vul naam en bedrag in.'); return; }
-  const data = getSpaarData();
-  const KLEUR_MAP = { buffer: 'var(--cyan)', spaarcentrum: 'var(--green)', lt: 'var(--purple-light)', beleg: 'var(--yellow)' };
-  data.autoRegels.push({ id: Date.now(), naam, bedrag, pot, kleur: KLEUR_MAP[pot] || 'var(--green)' });
-  saveSpaarData(data);
-  document.getElementById('autoregel-modal').remove();
-  renderSparen();
-  showToast(naam + ' toegevoegd ✓');
+  const d = spGet();
+  d.regels.push({ id: Date.now(), naam, bedrag, kleur: 'var(--green)' });
+  spSet(d);
+  document.getElementById('sp-regel-modal').remove();
+  spRender(); showToast(naam + ' toegevoegd ✓');
 }
 
-function resetAutoRegels() {
-  const data = getSpaarData();
-  data.autoRegels = [
-    { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
-    { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
-    { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
-    { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
-  ];
-  saveSpaarData(data);
-  renderSparen();
-  showToast('Regels hersteld ✓');
-}
-
-function deleteAutoRegel(id) {
-  const data = getSpaarData();
-  data.autoRegels = data.autoRegels.filter(r => r.id !== id);
-  saveSpaarData(data);
-  renderSparen();
-}
-
-function editAutoRegel(id) {
-  const data = getSpaarData();
-  const regel = data.autoRegels.find(r => r.id === id);
-  if (!regel) return;
-  const existing = document.getElementById('edit-autoregel-modal');
-  if (existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'edit-autoregel-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
-  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
-    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">✏️ ${regel.naam} aanpassen</div>
-    <input type="text" id="ear-naam" value="${regel.naam}" placeholder="Naam" style="width:100%;margin-bottom:8px;" />
-    <input type="number" id="ear-bedrag" value="${regel.bedrag}" placeholder="Bedrag €" inputmode="decimal" style="width:100%;margin-bottom:12px;" />
+function spEditRegel(id) {
+  const d = spGet();
+  const r = d.regels.find(x => x.id === id);
+  if (!r) return;
+  const el = document.getElementById('sp-edit-modal');
+  if (el) el.remove();
+  const m = document.createElement('div');
+  m.id = 'sp-edit-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">✏️ ${r.naam}</div>
+    <input type="text" id="sp-en" value="${r.naam}" style="width:100%;margin-bottom:8px;"/>
+    <input type="number" id="sp-eb" value="${r.bedrag}" inputmode="decimal" style="width:100%;margin-bottom:12px;"/>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('edit-autoregel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
-      <button onclick="saveEditAutoRegel(${id})" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
+      <button onclick="document.getElementById('sp-edit-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
+      <button onclick="spSaveEdit(${id})" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
     </div>
   </div>`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { if (e.target === m) m.remove(); });
 }
 
-function saveEditAutoRegel(id) {
-  const data = getSpaarData();
-  const regel = data.autoRegels.find(r => r.id === id);
-  if (!regel) return;
-  const naam = document.getElementById('ear-naam').value.trim();
-  const bedrag = parseFloat(document.getElementById('ear-bedrag').value);
-  if (!naam || isNaN(bedrag) || bedrag < 0) { showToast('Vul geldige waarden in.'); return; }
-  regel.naam = naam;
-  regel.bedrag = bedrag;
-  saveSpaarData(data);
-  document.getElementById('edit-autoregel-modal').remove();
-  renderSparen();
-  showToast('Aangepast ✓');
+function spSaveEdit(id) {
+  const naam = document.getElementById('sp-en').value.trim();
+  const bedrag = parseFloat(document.getElementById('sp-eb').value) || 0;
+  if (!naam || !bedrag) { showToast('Vul geldige waarden in.'); return; }
+  const d = spGet();
+  const r = d.regels.find(x => x.id === id);
+  if (r) { r.naam = naam; r.bedrag = bedrag; }
+  spSet(d);
+  document.getElementById('sp-edit-modal').remove();
+  spRender(); showToast('Opgeslagen ✓');
 }
 
-function renderSparen() {
-  const data = getSpaarData();
+function spDeleteRegel(id) {
+  const d = spGet();
+  d.regels = d.regels.filter(x => x.id !== id);
+  spSet(d); spRender();
+}
+
+function spRender() {
+  const d = spGet();
   const fmt = n => '€' + Math.round(n).toLocaleString('nl-NL');
 
-  // Buffer
-  const bufPct = Math.min(100, data.buffer.doel > 0 ? (data.buffer.saldo / data.buffer.doel * 100) : 0);
-  document.getElementById('sp-buffer-val').textContent = fmt(data.buffer.saldo);
-  document.getElementById('sp-buffer-doel').textContent = data.buffer.doel;
-  document.getElementById('sp-buffer-bar').style.width = bufPct + '%';
-  document.getElementById('sp-buffer-input').value = data.buffer.saldo || '';
-  document.getElementById('sp-buffer-doel-input').value = data.buffer.doel || '';
-
   // Lange termijn
-  const ltPct = Math.min(100, data.lt.doel > 0 ? (data.lt.saldo / data.lt.doel * 100) : 0);
-  document.getElementById('sp-lt-val').textContent = fmt(data.lt.saldo);
-  document.getElementById('sp-lt-doel-label').textContent = data.lt.doel;
+  const ltPct = Math.min(100, d.lt.doel > 0 ? d.lt.saldo / d.lt.doel * 100 : 0);
+  document.getElementById('sp-lt-val').textContent = fmt(d.lt.saldo);
+  document.getElementById('sp-lt-doel-label').textContent = d.lt.doel.toLocaleString('nl-NL');
   document.getElementById('sp-lt-bar').style.width = ltPct + '%';
-  document.getElementById('sp-lt-input').value = data.lt.saldo || '';
-  document.getElementById('sp-lt-doel-input').value = data.lt.doel || '';
-  document.getElementById('sp-lt-total').textContent = fmt(data.lt.saldo);
+  document.getElementById('sp-lt-input').value = d.lt.saldo || '';
+  document.getElementById('sp-lt-doel-input').value = d.lt.doel || '';
 
   // Beleggingen
-  document.getElementById('sp-beleg-val').textContent = fmt(data.beleg.saldo);
-  document.getElementById('sp-beleg-input').value = data.beleg.saldo || '';
-  document.getElementById('sp-beleg-inleg-input').value = data.beleg.inleg || 150;
-  document.getElementById('sp-beleg-total').textContent = fmt(data.beleg.saldo);
-  const inlegJaar = (data.beleg.inleg || 150) * 12;
-  let prognose = data.beleg.saldo || 0;
-  for (let i = 0; i < 10; i++) prognose = prognose * 1.07 + inlegJaar;
-  document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prognose));
+  document.getElementById('sp-beleg-val').textContent = fmt(d.beleg.saldo);
+  document.getElementById('sp-beleg-input').value = d.beleg.saldo || '';
+  document.getElementById('sp-beleg-inleg-input').value = d.beleg.inleg || 150;
+  let prog = d.beleg.saldo;
+  for (let i = 0; i < 10; i++) prog = prog * 1.07 + (d.beleg.inleg || 150) * 12;
+  document.getElementById('sp-beleg-prognose').textContent = fmt(Math.round(prog));
 
-  // Spaarcentrum doelen
-  const doelenTotaal = data.doelen.reduce((s, d) => s + (d.huidig || 0), 0);
-  document.getElementById('sp-spaar-val').textContent = fmt(doelenTotaal);
-  document.getElementById('sp-spaar-total').textContent = fmt(doelenTotaal);
-  const KLEUREN = ['var(--green)', 'var(--cyan)', 'var(--yellow)', 'var(--pink)', 'var(--orange)', 'var(--purple-light)'];
-  const doelenList = document.getElementById('sp-doelen-list');
-  if (data.doelen.length === 0) {
-    doelenList.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.75rem;">Nog geen spaardoelen. Voeg er een toe!</div>';
+  // Totaal
+  document.getElementById('sp-totaal').textContent = fmt(d.lt.saldo + d.beleg.saldo);
+
+  // Regels
+  const rl = document.getElementById('sp-regels-list');
+  if (!d.regels || d.regels.length === 0) {
+    rl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.5rem;">Geen regels</div>';
   } else {
-    doelenList.innerHTML = data.doelen.map((d, i) => {
-      const pct = Math.min(100, d.target > 0 ? (d.huidig / d.target * 100) : 0);
-      const mOver = d.target > d.huidig && d.maand > 0 ? Math.ceil((d.target - d.huidig) / d.maand) : null;
-      const kleur = KLEUREN[i % KLEUREN.length];
-      return `<div style="background:var(--surface2);border-radius:14px;padding:12px;border:1px solid var(--border);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:14px;font-weight:600;">${d.emoji || '🎯'} ${d.naam}</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:13px;font-weight:700;color:${kleur};">${Math.round(pct)}%</span>
-            <button onclick="deleteSpaardoel(${d.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 2px;">×</button>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <input type="number" value="${d.huidig}" inputmode="decimal" onchange="updateDoelSaldo(${d.id},this.value)" style="width:90px;font-size:13px;padding:5px 8px;" />
-          <span style="font-size:12px;color:var(--muted);flex:1;">/ ${fmt(d.target)}${d.maand ? ' • €' + d.maand + '/mnd' : ''}</span>
-        </div>
-        <div style="height:5px;background:var(--surface);border-radius:999px;overflow:hidden;">
-          <div style="height:100%;background:${kleur};border-radius:999px;width:${pct}%;transition:width 0.6s;"></div>
-        </div>
-        ${mOver ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">Nog ~${mOver} maanden</div>` : ''}
-      </div>`;
-    }).join('');
-  }
-
-  // Totaal vermogen = spaarcentrum + lt + beleggingen (geen buffer)
-  const totaal = doelenTotaal + data.lt.saldo + data.beleg.saldo;
-  document.getElementById('sp-totaal-vermogen').textContent = fmt(totaal);
-
-  // Auto-regels
-  const autoEl = document.getElementById('sp-auto-regels');
-  if (!data.autoRegels || data.autoRegels.length === 0) {
-    autoEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:0.75rem;">Geen automatische regels</div>';
-  } else {
-    autoEl.innerHTML = data.autoRegels.map(r => `
+    rl.innerHTML = d.regels.map(r => `
       <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);">
-        <div style="width:8px;height:8px;border-radius:50%;background:${r.kleur || 'var(--green)'};flex-shrink:0;"></div>
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:500;">${r.naam}</div>
-        </div>
-        <div style="font-size:14px;font-weight:700;color:${r.kleur || 'var(--green)'};">€${r.bedrag}</div>
-        <button onclick="editAutoRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;">✏️</button>
-        <button onclick="deleteAutoRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;">×</button>
+        <div style="width:8px;height:8px;border-radius:50%;background:${r.kleur};flex-shrink:0;"></div>
+        <div style="flex:1;font-size:13px;font-weight:500;">${r.naam}</div>
+        <div style="font-size:14px;font-weight:700;color:${r.kleur};">€${r.bedrag}</div>
+        <button onclick="spEditRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;">✏️</button>
+        <button onclick="spDeleteRegel(${r.id})" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 4px;line-height:1;">×</button>
       </div>`).join('');
   }
 
-  // Inleg log
-  const logEl = document.getElementById('sp-inleg-log');
-  const emptyEl = document.getElementById('sp-inleg-empty');
-  if (!data.log || data.log.length === 0) {
-    logEl.innerHTML = '';
-    emptyEl.style.display = 'block';
+  // Log
+  const ll = document.getElementById('sp-log-list');
+  const le = document.getElementById('sp-log-empty');
+  if (!d.log || d.log.length === 0) {
+    ll.innerHTML = ''; le.style.display = 'block';
   } else {
-    emptyEl.style.display = 'none';
-    logEl.innerHTML = data.log.slice(0, 12).map(l => {
-      const totaalInleg = l.regels ? l.regels.reduce((s, r) => s + r.bedrag, 0) : 0;
-      return `<div style="padding:10px 0;border-bottom:1px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+    le.style.display = 'none';
+    ll.innerHTML = d.log.slice(0, 12).map(l => `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div>
-            <div style="font-size:13px;font-weight:500;">${l.maand} ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 6px;border-radius:6px;margin-left:4px;">auto</span>' : ''}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${l.datum}</div>
+            <span style="font-size:13px;font-weight:500;">${l.maand}</span>
+            ${l.auto ? '<span style="font-size:10px;color:var(--purple-light);background:rgba(124,92,252,0.15);padding:2px 6px;border-radius:6px;margin-left:6px;">auto</span>' : ''}
           </div>
-          <div style="font-size:14px;font-weight:600;color:var(--green);">€${totaalInleg}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--green);">€${(l.regels||[]).reduce((s,r)=>s+r.bedrag,0)}</div>
         </div>
-        ${l.regels ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${l.regels.map(r => `<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:6px;">${r.naam} €${r.bedrag}</span>`).join('')}</div>` : ''}
-      </div>`;
-    }).join('');
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${(l.regels||[]).map(r=>`<span style="font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:6px;">${r.naam} €${r.bedrag}</span>`).join('')}
+        </div>
+      </div>`).join('');
   }
 }
-
 
 function renderDT() {
   const dk = dateKey(dtViewDate);
