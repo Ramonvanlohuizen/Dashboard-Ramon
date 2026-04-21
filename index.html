@@ -3380,11 +3380,17 @@ function spOpenModal(id, type, mode) {
   if (!p) return;
 
   var isIn  = mode === 'in';
-  var label = isIn ? (p.emoji + ' Toevoegen aan ' + p.naam) : (p.emoji + ' Uitgeven uit ' + p.naam);
+  var isBetaal = type === 'betaal';
+  var label = isIn
+    ? (isBetaal ? (p.emoji + ' Saldo instellen — ' + p.naam) : (p.emoji + ' Toevoegen aan ' + p.naam))
+    : (p.emoji + ' Uitgeven uit ' + p.naam);
+  var subLabel = isIn
+    ? (isBetaal ? 'Huidig: ' + spFmt(p.saldo) + ' • Vul het nieuwe saldo in' : 'Huidig: ' + spFmt(p.saldo))
+    : 'Huidig: ' + spFmt(p.saldo);
   var btnCls = isIn
     ? 'background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);color:#4ade80;'
     : 'background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.35);color:#f87171;';
-  var btnTxt = isIn ? '+ Toevoegen' : '- Uitgeven';
+  var btnTxt = isIn ? (isBetaal ? '✓ Instellen' : '+ Toevoegen') : '- Uitgeven';
 
   var m = document.createElement('div');
   m.id = 'sp-inuit-modal';
@@ -3392,7 +3398,7 @@ function spOpenModal(id, type, mode) {
   m.innerHTML =
     '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
       '<div style="font-size:17px;font-weight:700;margin-bottom:3px;">' + label + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Huidig: ' + spFmt(p.saldo) + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + subLabel + '</div>' +
       '<input id="sp-iu-val" type="number" inputmode="decimal" placeholder="\u20ac 0" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;font-size:26px;font-weight:700;color:white;outline:none;margin-bottom:16px;font-family:inherit;"/>' +
       '<div style="display:flex;gap:8px;">' +
         '<button onclick="spSluitModal()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
@@ -3411,7 +3417,7 @@ function spBevestig(id, type, mode) {
   var arr = type === 'betaal' ? d.betaal : d.spaar;
   var p   = arr.find(function(x){ return x.id === id; });
   if (!p) return;
-  if (mode === 'in') p.saldo = Math.round((p.saldo + val) * 100) / 100;
+  if (mode === 'in') p.saldo = Math.round(val * 100) / 100;
   else               p.saldo = Math.max(0, Math.round((p.saldo - val) * 100) / 100);
   spSet(d); spSluitModal(); spRender();
   // Als zakgeld aangepast: sync naar budget display
