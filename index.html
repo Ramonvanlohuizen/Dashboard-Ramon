@@ -614,10 +614,7 @@ select option { background: #1a1830; }
   <!-- Spaarpotjes sectie -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
     <div class="section-title" style="margin-bottom:0;">Spaarpotjes</div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:12px;color:var(--muted);" id="sp-potjes-totaal-label">€0 gespaard</span>
-      <button onclick="spNieuwPotje()" style="width:30px;height:30px;background:var(--purple);color:white;border:none;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">+</button>
-    </div>
+    <span style="font-size:12px;color:var(--muted);" id="sp-potjes-totaal-label">€0 gespaard</span>
   </div>
 
   <!-- Potjes grid -->
@@ -3605,7 +3602,8 @@ function spCheckAuto() {
   const d = spGet();
   const now = new Date();
   const key = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  if (now.getDate() >= 23 && d.lastCheck !== key) {
+  const simulate23 = true; // TIJDELIJK: simuleer de 23e
+  if ((now.getDate() >= 23 || simulate23) && d.lastCheck !== key) {
     for (const regel of d.regels) {
       if (regel.naam === 'Lange termijn') {
         d.lt.saldo += regel.bedrag;
@@ -3772,8 +3770,8 @@ function spRender() {
       const kleur = p.kleur || '#4ade80';
       const fillH = Math.round(44 * pct / 100);
       const fillY = 53 - fillH;
-      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;position:relative;">' +
-        '<button onclick="spPotjeMenu(' + p.id + ',this)" style="position:absolute;top:10px;right:10px;width:26px;height:26px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px;z-index:2;line-height:1;">⋯</button>' +
+      return '<div onclick="spPotjeMenu(' + p.id + ',this)" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.25rem;position:relative;cursor:pointer;">' +
+
         '<div style="display:flex;gap:10px;align-items:flex-start;">' +
           '<svg width="44" height="58" viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">' +
             '<rect x="6" y="2" width="32" height="7" rx="3.5" fill="' + kleur + '" opacity="0.7"/>' +
