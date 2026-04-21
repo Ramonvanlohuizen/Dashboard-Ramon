@@ -697,8 +697,8 @@ select option { background: #1a1830; }
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:1.25rem;">
     <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:14px;font-weight:700;">Automatische inleg</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Elke 23e van de maand</div>
+        <div style="font-size:14px;font-weight:700;">Alle potjes</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Inleg elke 23e van de maand</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:13px;font-weight:700;color:var(--green);" id="sp-totaal-inleg">€0/mnd</div>
@@ -3399,20 +3399,17 @@ function spGet() {
     log: [],
     lastCheck: null,
     regels: [
-      { id: 1, naam: 'Buffer',        bedrag: 75,  kleur: 'var(--cyan)' },
       { id: 2, naam: 'Vakantie',      bedrag: 100, kleur: '#f472b6' },
       { id: 3, naam: 'Trips',         bedrag: 50,  kleur: '#60a5fa' },
       { id: 4, naam: 'Shoppen',       bedrag: 100, kleur: 'var(--purple-light)' },
       { id: 5, naam: 'Uiteten',       bedrag: 50,  kleur: '#fb923c' },
-      { id: 6, naam: 'Lange termijn', bedrag: 915, kleur: 'var(--purple-light)' },
-      { id: 7, naam: 'Beleggingen',   bedrag: 150, kleur: 'var(--yellow)' }
+      { id: 6, naam: 'Lange termijn', bedrag: 915, kleur: 'var(--purple-light)' }
     ]
   };
   try {
     const d = JSON.parse(localStorage.getItem(SP_KEY) || 'null');
     if (!d) return def;
     if (!d.regels || d.regels.length === 0) d.regels = def.regels;
-    if (!d.regels.find(r => r.naam === 'Buffer')) d.regels.unshift({ id: 1, naam: 'Buffer', bedrag: 75, kleur: 'var(--cyan)' });
     if (!d.lt) d.lt = def.lt;
     if (!d.beleg) d.beleg = def.beleg;
     if (!d.potjes) d.potjes = def.potjes;
@@ -3472,10 +3469,11 @@ function spNieuwPotje() {
     EMOJIS.map(function(em) { return '<button onclick="spKiesEmoji(\'' + em + '\')" data-emoji="' + em + '" style="width:44px;height:44px;background:var(--surface2);border:2px solid var(--border);border-radius:12px;font-size:22px;cursor:pointer;">' + em + '</button>'; }).join('') +
     '</div>' +
     '<input type="text" id="sp-np-naam" placeholder="Naam bijv. Sneakers" style="width:100%;margin-bottom:8px;"/>' +
-    '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-    '<input type="number" id="sp-np-huidig" placeholder="Gespaard euro" inputmode="decimal" style="flex:1;"/>' +
-    '<input type="number" id="sp-np-doel" placeholder="Doel euro" inputmode="decimal" style="flex:1;"/>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+    '<input type="number" id="sp-np-huidig" placeholder="Gespaard €" inputmode="decimal" style="flex:1;"/>' +
+    '<input type="number" id="sp-np-doel" placeholder="Doel €" inputmode="decimal" style="flex:1;"/>' +
     '</div>' +
+    '<input type="number" id="sp-np-maand" placeholder="Maandelijks inleg € (optioneel)" inputmode="decimal" style="width:100%;margin-bottom:14px;"/>' +
     '<div style="display:flex;gap:8px;">' +
     '<button onclick="document.getElementById(\'sp-nieuw-potje-modal\').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:15px;cursor:pointer;font-family:Outfit,sans-serif;">Annuleren</button>' +
     '<button onclick="spSlaOpPotje()" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Aanmaken</button>' +
@@ -3498,14 +3496,21 @@ function spSlaOpPotje() {
   const naam = document.getElementById('sp-np-naam').value.trim();
   if (!naam) { showToast('Vul een naam in.'); return; }
   const emoji = document.getElementById('sp-nieuw-potje-modal').dataset.emoji || '🎯';
+  const maandBedrag = parseFloat(document.getElementById('sp-np-maand').value) || 0;
   const d = spGet();
   const KLEUREN = ['#f472b6','#60a5fa','#a78bfa','#fb923c','#22d3ee','#4ade80','#fbbf24','#f87171'];
+  const kleur = KLEUREN[d.potjes.length % KLEUREN.length];
+  const newId = Date.now();
+  // Voeg potje toe
   d.potjes.push({
-    id: Date.now(), naam, emoji,
-    kleur: KLEUREN[d.potjes.length % KLEUREN.length],
+    id: newId, naam, emoji, kleur,
     huidig: parseFloat(document.getElementById('sp-np-huidig').value) || 0,
     doel: parseFloat(document.getElementById('sp-np-doel').value) || 500
   });
+  // Voeg ook automatische regel toe als maandbedrag > 0
+  if (maandBedrag > 0) {
+    d.regels.push({ id: newId + 1, naam, bedrag: maandBedrag, kleur });
+  }
   spSet(d);
   document.getElementById('sp-nieuw-potje-modal').remove();
   spRender(); showToast(naam + ' aangemaakt!');
