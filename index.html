@@ -3315,7 +3315,7 @@ function spGet() {
     ],
     spaar: [
       { id:301, naam:'Lange termijn', emoji:'\uD83C\uDFE0', saldo:17000, maandInleg:950,  kleur:'#a78bfa', readonly:true },
-      { id:302, naam:'Vakantie',      emoji:'\uD83C\uDFD6\uFE0F', saldo:0,     maandInleg:100,  kleur:'#f472b6', readonly:false },
+      { id:302, naam:'Vakantie',      emoji:'\uD83C\uDFD6\uFE0F', saldo:0,     maandInleg:100,  kleur:'#f472b6', readonly:false, betaalStijl:true },
       { id:303, naam:'Beleggingen',   emoji:'\uD83D\uDCC8', saldo:735,   maandInleg:150,  kleur:'#fbbf24', readonly:true }
     ]
   };
@@ -3331,6 +3331,7 @@ function spGet() {
       if (saved) {
         if (saved.maandInleg === undefined) saved.maandInleg = ds.maandInleg;
         if (saved.readonly === undefined) saved.readonly = ds.readonly;
+        if (saved.betaalStijl === undefined) saved.betaalStijl = ds.betaalStijl;
       }
     });
     def.betaal.forEach(function(db) {
@@ -3399,13 +3400,13 @@ function spOpenModal(id, type, mode) {
   if (!p) return;
 
   var isIn  = mode === 'in';
-  var isBetaal = type === 'betaal';
+  var isBetaal = type === 'betaal' || p.betaalStijl;
   var label = isIn
     ? (isBetaal ? (p.emoji + ' Saldo instellen — ' + p.naam) : (p.emoji + ' Toevoegen aan ' + p.naam))
-    : (p.emoji + ' Uitgeven uit ' + p.naam);
+    : (p.emoji + ' Pakken uit ' + p.naam);
   var subLabel = isIn
-    ? (isBetaal ? 'Huidig: ' + spFmt(p.saldo) + ' • Vul het nieuwe saldo in' : 'Huidig: ' + spFmt(p.saldo))
-    : 'Huidig: ' + spFmt(p.saldo);
+    ? (isBetaal ? 'Huidig: ' + spFmt(p.saldo) + ' • Vul het nieuwe saldo in' : 'Huidig saldo: ' + spFmt(p.saldo))
+    : 'Huidig saldo: ' + spFmt(p.saldo);
   var btnCls = isIn
     ? 'background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);color:#4ade80;'
     : 'background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.35);color:#f87171;';
@@ -3436,7 +3437,7 @@ function spBevestig(id, type, mode) {
   var arr = type === 'betaal' ? d.betaal : d.spaar;
   var p   = arr.find(function(x){ return x.id === id; });
   if (!p) return;
-  if (mode === 'in' && type === 'betaal') p.saldo = Math.round(val * 100) / 100;
+  if (mode === 'in' && (type === 'betaal' || p.betaalStijl)) p.saldo = Math.round(val * 100) / 100;
   else if (mode === 'in') p.saldo = Math.round((p.saldo + val) * 100) / 100;
   else p.saldo = Math.max(0, Math.round((p.saldo - val) * 100) / 100);
   spSet(d); spSluitModal(); spRender();
@@ -3529,7 +3530,7 @@ function spRender() {
   // + Nieuw betaalpotje
   '';
   // Small add button below grid
-  bgEl.insertAdjacentHTML('afterend', '<button onclick="spNieuwBetaal()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;font-weight:500;cursor:pointer;padding:4px 2px;margin-bottom:18px;font-family:inherit;">+ potje toevoegen</button>');
+
 
   // SPAARPOTJES — donkere kaartjes met glazen pot + balk (Buut-stijl)
   var spTot = d.spaar.reduce(function(s,p){ return s+p.saldo; }, 0);
@@ -3574,7 +3575,7 @@ function spRender() {
     '</div>';
   }).join('') +
   '';
-  sgEl.insertAdjacentHTML('afterend', '<button onclick="spNieuwSpaar()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;font-weight:500;cursor:pointer;padding:4px 2px;margin-bottom:18px;font-family:inherit;">+ potje toevoegen</button>');
+
 
   // INLEG LIJST
   var inlegPotjes = d.betaal.filter(function(p){ return p.naam !== 'Zakgeld'; });
