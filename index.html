@@ -603,6 +603,18 @@ select option { background: #1a1830; }
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem;" id="sp-grid"></div>
 
+  <!-- INLEG OP DE 23E -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">Inleg op de 23e</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Automatisch in betaalpotjes</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--green);" id="bp-inleg-totaal">€0/mnd</div>
+    </div>
+    <div id="bp-inleg-list" style="padding:0 0.75rem;"></div>
+  </div>
+
   </div><!-- end bud-view-sparen -->
 
 </div><!-- end #page-zakgeld -->
@@ -1549,6 +1561,8 @@ function render() {
   const pct = Math.min((spent/BUDGET)*100, 100);
 
   document.getElementById('stat-left').textContent = fmt(Math.max(left,0));
+  // Sync zakgeld potje met resterend budget
+  spSyncZakgeld(Math.max(left, 0));
   document.getElementById('stat-spent').textContent = fmt(spent);
   document.getElementById('prog-bar').style.width = pct.toFixed(1)+'%';
 
@@ -3276,13 +3290,28 @@ function spFmt(n) { return '\u20ac\u00a0' + Math.round(n).toLocaleString('nl-NL'
 const BP_KLEUREN = ['#7B5CFA','#F5E642','#4ade80','#f472b6','#fb923c','#60a5fa','#f87171','#34d399'];
 const BP_EMOJIS  = ['\uD83D\uDCB0','\uD83E\uDD50','\uD83D\uDED2','\u2708\uFE0F','\uD83C\uDFB5','\uD83D\uDC5F','\uD83C\uDF55','\u2615'];
 
+function spSyncZakgeld(bedrag) {
+  try {
+    var d = JSON.parse(localStorage.getItem(SP_KEY) || 'null');
+    if (!d || !d.betaal) return;
+    var p = d.betaal.find(function(x){ return x.naam === 'Zakgeld'; });
+    if (!p) return;
+    if (Math.round(p.saldo) === Math.round(bedrag)) return; // geen wijziging nodig
+    p.saldo = Math.round(bedrag * 100) / 100;
+    localStorage.setItem(SP_KEY, JSON.stringify(d));
+    // als sparen tab open is, herrender
+    var spView = document.getElementById('bud-view-sparen');
+    if (spView && spView.style.display !== 'none') spRender();
+  } catch(e) {}
+}
+
 function spGet() {
   const def = {
     betaal: [
-      { id:201, naam:'Zakgeld',  emoji:'\uD83D\uDCB0', saldo:0, kleur:'#7B5CFA' },
-      { id:202, naam:'Uiteten',  emoji:'\uD83C\uDF7D\uFE0F', saldo:0, kleur:'#F5E642' },
-      { id:203, naam:'Shoppen',  emoji:'\uD83D\uDED2', saldo:0, kleur:'#f472b6' },
-      { id:204, naam:'Trips',    emoji:'\u2708\uFE0F', saldo:0, kleur:'#60a5fa' }
+      { id:201, naam:'Zakgeld',  emoji:'\uD83D\uDCB0', saldo:0, kleur:'#7B5CFA',  maandInleg:0 },
+      { id:202, naam:'Uiteten',  emoji:'\uD83C\uDF7D\uFE0F', saldo:0, kleur:'#F5E642', maandInleg:50 },
+      { id:203, naam:'Shoppen',  emoji:'\uD83D\uDED2', saldo:0, kleur:'#f472b6', maandInleg:100 },
+      { id:204, naam:'Trips',    emoji:'\u2708\uFE0F', saldo:0, kleur:'#60a5fa', maandInleg:50 }
     ],
     spaar: [
       { id:301, naam:'Lange termijn', emoji:'\uD83C\uDFE0', saldo:0, kleur:'#a78bfa' },
@@ -3316,7 +3345,24 @@ function switchBudgetTab(tab) {
     tabS.style.background = 'var(--purple)'; tabS.style.color = 'white'; tabS.style.fontWeight = '600';
     tabB.style.background = 'none'; tabB.style.color = 'var(--muted)'; tabB.style.fontWeight = '500';
     document.getElementById('budget-page-title').textContent = 'Mijn potjes';
+    spCheckAutoInleg();
     spRender();
+  }
+}
+
+function spCheckAutoInleg() {
+  var d = spGet();
+  var now = new Date();
+  var key = 'bp_' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  if (now.getDate() >= 23 && d.lastBetaalCheck !== key) {
+    d.betaal.forEach(function(p) {
+      if (p.naam !== 'Zakgeld' && p.maandInleg > 0) {
+        p.saldo = Math.round((p.saldo + p.maandInleg) * 100) / 100;
+      }
+    });
+    d.lastBetaalCheck = key;
+    spSet(d);
+    showToast('Betaalpotjes aangevuld ✓');
   }
 }
 
@@ -3368,6 +3414,13 @@ function spBevestig(id, type, mode) {
   if (mode === 'in') p.saldo = Math.round((p.saldo + val) * 100) / 100;
   else               p.saldo = Math.max(0, Math.round((p.saldo - val) * 100) / 100);
   spSet(d); spSluitModal(); spRender();
+  // Als zakgeld aangepast: sync naar budget display
+  if (type === 'betaal') {
+    var changed = (type==='betaal' ? d.betaal : d.spaar).find(function(x){return x.id===id;});
+    if (changed && changed.naam === 'Zakgeld') {
+      document.getElementById('stat-left').textContent = fmt(changed.saldo);
+    }
+  }
   showToast((mode==='in' ? '+' : '-') + spFmt(val) + ' ' + p.naam);
 }
 
@@ -3423,6 +3476,19 @@ function spRender() {
     var isDark = ['#7B5CFA','#60a5fa','#f87171','#34d399'].indexOf(p.kleur) >= 0;
     var txtCol = isDark ? 'white' : '#1a1830';
     var subCol = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(26,24,48,0.55)';
+    var isZakgeld = p.naam === 'Zakgeld';
+    if (isZakgeld) {
+      return '<div style="background:' + p.kleur + ';border-radius:22px;padding:16px 16px 14px;position:relative;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+          '<span style="font-size:32px;line-height:1;">' + p.emoji + '</span>' +
+          '<span style="font-size:13px;color:' + subCol + ';opacity:0.7;background:rgba(0,0,0,0.12);padding:3px 8px;border-radius:8px;">budget</span>' +
+        '</div>' +
+        '<div>' +
+          '<div style="font-size:22px;font-weight:700;color:' + txtCol + ';margin-bottom:2px;">' + spFmt(p.saldo) + '</div>' +
+          '<div style="font-size:13px;color:' + subCol + ';font-weight:500;">' + p.naam + '</div>' +
+        '</div>' +
+      '</div>';
+    }
     return '<div style="background:' + p.kleur + ';border-radius:22px;padding:16px 16px 14px;position:relative;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;" onclick="spOpenModal(' + p.id + ',\'betaal\',\'in\')">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
         '<span style="font-size:32px;line-height:1;">' + p.emoji + '</span>' +
@@ -3477,9 +3543,60 @@ function spRender() {
     '<div style="width:36px;height:36px;background:rgba(255,255,255,0.07);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,0.35);">+</div>' +
     '<div style="font-size:12px;color:rgba(255,255,255,0.25);font-weight:500;">Nieuw potje</div>' +
   '</div>';
+
+  // INLEG LIJST
+  var inlegPotjes = d.betaal.filter(function(p){ return p.naam !== 'Zakgeld'; });
+  var inlegTotaal = inlegPotjes.reduce(function(s,p){ return s+(p.maandInleg||0); }, 0);
+  var inlegEl = document.getElementById('bp-inleg-totaal');
+  if (inlegEl) inlegEl.textContent = '€' + inlegTotaal + '/mnd';
+  var listEl = document.getElementById('bp-inleg-list');
+  if (listEl) {
+    listEl.innerHTML = inlegPotjes.map(function(p, i) {
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0.5rem;' + (i < inlegPotjes.length-1 ? 'border-bottom:1px solid var(--border);' : '') + '">' +
+        '<span style="font-size:20px;line-height:1;">' + p.emoji + '</span>' +
+        '<div style="flex:1;font-size:14px;font-weight:500;">' + p.naam + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:' + p.kleur + ';">€' + (p.maandInleg||0) + '</div>' +
+        '<button onclick="spEditInleg(' + p.id + ')" style="width:28px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>' +
+      '</div>';
+    }).join('');
+  }
 }
 
 // ── NIEUW POTJE ───────────────────────────────────────────
+function spEditInleg(id) {
+  var d = spGet();
+  var p = d.betaal.find(function(x){ return x.id === id; });
+  if (!p) return;
+  var ex = document.getElementById('sp-inleg-modal'); if (ex) ex.remove();
+  var m = document.createElement('div');
+  m.id = 'sp-inleg-modal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML =
+    '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
+      '<div style="font-size:17px;font-weight:700;margin-bottom:3px;">' + p.emoji + ' ' + p.naam + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Maandelijks inleg op de 23e</div>' +
+      '<input id="sp-il-val" type="number" inputmode="decimal" value="' + (p.maandInleg||0) + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;font-size:26px;font-weight:700;color:white;outline:none;margin-bottom:16px;font-family:inherit;"/>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<button onclick="spSluitInlegModal()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
+        '<button onclick="spSlaInlegOp(' + id + ')" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Opslaan</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(m);
+  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
+  setTimeout(function(){ var i=document.getElementById('sp-il-val'); if(i){i.focus();i.select();} }, 80);
+}
+
+function spSluitInlegModal() { var m=document.getElementById('sp-inleg-modal'); if(m) m.remove(); }
+
+function spSlaInlegOp(id) {
+  var val = parseFloat(document.getElementById('sp-il-val').value) || 0;
+  var d = spGet();
+  var p = d.betaal.find(function(x){ return x.id === id; });
+  if (p) p.maandInleg = Math.round(val * 100) / 100;
+  spSet(d); spSluitInlegModal(); spRender();
+  showToast('Inleg bijgewerkt ✓');
+}
+
 function spNieuwBetaal() { spNieuwModal('betaal'); }
 function spNieuwSpaar()  { spNieuwModal('spaar'); }
 
