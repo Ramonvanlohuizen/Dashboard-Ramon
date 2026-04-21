@@ -3365,10 +3365,10 @@ function getSpaarData() {
     ],
     autoRegels: [
       { id: 10, naam: 'Buffer', bedrag: 75, pot: 'buffer', kleur: 'var(--cyan)' },
-      { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'doel_1', kleur: 'var(--green)' },
-      { id: 12, naam: 'Trips', bedrag: 50, pot: 'doel_2', kleur: 'var(--green)' },
-      { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'doel_3', kleur: 'var(--green)' },
-      { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'doel_4', kleur: 'var(--green)' },
+      { id: 11, naam: 'Vakantie', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
+      { id: 12, naam: 'Trips', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
+      { id: 13, naam: 'Shoppen', bedrag: 100, pot: 'spaarcentrum', kleur: 'var(--green)' },
+      { id: 14, naam: 'Uiteten', bedrag: 50, pot: 'spaarcentrum', kleur: 'var(--green)' },
       { id: 15, naam: 'Lange termijn', bedrag: 915, pot: 'lt', kleur: 'var(--purple-light)' },
       { id: 16, naam: 'Beleggingen', bedrag: 150, pot: 'beleg', kleur: 'var(--yellow)' }
     ],
@@ -3400,30 +3400,25 @@ function checkAutoRegels() {
 }
 
 function applyAutoRegels(data, key) {
-  let applied = false;
+  if (!data.autoRegels || data.autoRegels.length === 0) return;
+  // Update lt and beleg saldo's for tracked pots
   for (const regel of data.autoRegels) {
-    if (regel.pot === 'buffer') {
-      data.buffer.saldo = (data.buffer.saldo || 0) + regel.bedrag;
-      applied = true;
-    } else if (regel.pot === 'lt') {
-      data.lt.saldo = (data.lt.saldo || 0) + regel.bedrag;
-      applied = true;
-    } else if (regel.pot === 'beleg') {
-      data.beleg.saldo = (data.beleg.saldo || 0) + regel.bedrag;
-      applied = true;
-    } else if (regel.pot.startsWith('doel_')) {
-      const doelId = parseInt(regel.pot.replace('doel_', ''));
-      const doel = data.doelen.find(d => d.id === doelId);
-      if (doel) { doel.huidig = (doel.huidig || 0) + regel.bedrag; applied = true; }
-    }
+    if (regel.pot === 'lt') data.lt.saldo = (data.lt.saldo || 0) + regel.bedrag;
+    else if (regel.pot === 'beleg') data.beleg.saldo = (data.beleg.saldo || 0) + regel.bedrag;
   }
-  if (applied) {
-    const maand = new Date().toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
-    data.log.unshift({ id: Date.now(), maand, datum: key, auto: true, regels: data.autoRegels.map(r => ({ naam: r.naam, bedrag: r.bedrag })) });
-    data.lastAutoCheck = key;
-    saveSpaarData(data);
-    showToast('Automatische inleg van de 23e verwerkt ✓');
-  }
+  const maand = new Date().toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+  data.log.unshift({
+    id: Date.now(),
+    maand,
+    datum: key,
+    auto: true,
+    totaal: data.autoRegels.reduce((s, r) => s + r.bedrag, 0),
+    regels: data.autoRegels.map(r => ({ naam: r.naam, bedrag: r.bedrag, kleur: r.kleur }))
+  });
+  if (data.log.length > 24) data.log = data.log.slice(0, 24);
+  data.lastAutoCheck = key;
+  saveSpaarData(data);
+  showToast('Automatische inleg van de 23e verwerkt ✓');
 }
 
 function saveSpaarpot(type) {
@@ -3505,12 +3500,11 @@ function updateDoelSaldo(id, val) {
 function openAutoRegel() {
   const existing = document.getElementById('autoregel-modal');
   if (existing) existing.remove();
-  const data = getSpaarData();
   const potOpties = [
     { val: 'buffer', label: '🛡️ Buffer' },
+    { val: 'spaarcentrum', label: '🎯 Spaarcentrum' },
     { val: 'lt', label: '🏠 Lange termijn' },
-    { val: 'beleg', label: '📈 Beleggingen' },
-    ...data.doelen.map(d => ({ val: 'doel_' + d.id, label: (d.emoji || '🎯') + ' ' + d.naam }))
+    { val: 'beleg', label: '📈 Beleggingen' }
   ];
   const modal = document.createElement('div');
   modal.id = 'autoregel-modal';
@@ -3540,7 +3534,7 @@ function saveAutoRegel() {
   const pot = document.getElementById('ar-pot').value;
   if (!naam || !bedrag) { showToast('Vul naam en bedrag in.'); return; }
   const data = getSpaarData();
-  const KLEUR_MAP = { buffer: 'var(--cyan)', lt: 'var(--purple-light)', beleg: 'var(--yellow)' };
+  const KLEUR_MAP = { buffer: 'var(--cyan)', spaarcentrum: 'var(--green)', lt: 'var(--purple-light)', beleg: 'var(--yellow)' };
   data.autoRegels.push({ id: Date.now(), naam, bedrag, pot, kleur: KLEUR_MAP[pot] || 'var(--green)' });
   saveSpaarData(data);
   document.getElementById('autoregel-modal').remove();
@@ -3559,15 +3553,37 @@ function editAutoRegel(id) {
   const data = getSpaarData();
   const regel = data.autoRegels.find(r => r.id === id);
   if (!regel) return;
-  const nieuw = prompt('Nieuw bedrag voor ' + regel.naam + ':', regel.bedrag);
-  if (nieuw === null) return;
-  const val = parseFloat(nieuw);
-  if (!isNaN(val) && val >= 0) {
-    regel.bedrag = val;
-    saveSpaarData(data);
-    renderSparen();
-    showToast('Aangepast ✓');
-  }
+  const existing = document.getElementById('edit-autoregel-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'edit-autoregel-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `<div style="background:var(--surface);border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px) + 1.5rem);width:100%;max-width:480px;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:1rem;">✏️ ${regel.naam} aanpassen</div>
+    <input type="text" id="ear-naam" value="${regel.naam}" placeholder="Naam" style="width:100%;margin-bottom:8px;" />
+    <input type="number" id="ear-bedrag" value="${regel.bedrag}" placeholder="Bedrag €" inputmode="decimal" style="width:100%;margin-bottom:12px;" />
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('edit-autoregel-modal').remove()" style="flex:1;height:50px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;">Annuleren</button>
+      <button onclick="saveEditAutoRegel(${id})" style="flex:2;height:50px;background:var(--purple);border:none;border-radius:12px;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">Opslaan</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function saveEditAutoRegel(id) {
+  const data = getSpaarData();
+  const regel = data.autoRegels.find(r => r.id === id);
+  if (!regel) return;
+  const naam = document.getElementById('ear-naam').value.trim();
+  const bedrag = parseFloat(document.getElementById('ear-bedrag').value);
+  if (!naam || isNaN(bedrag) || bedrag < 0) { showToast('Vul geldige waarden in.'); return; }
+  regel.naam = naam;
+  regel.bedrag = bedrag;
+  saveSpaarData(data);
+  document.getElementById('edit-autoregel-modal').remove();
+  renderSparen();
+  showToast('Aangepast ✓');
 }
 
 function renderSparen() {
