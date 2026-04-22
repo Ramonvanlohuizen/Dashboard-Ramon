@@ -457,7 +457,7 @@ select option { background: #1a1830; }
   <!-- Budget tab switcher -->
   <div style="display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:1.25rem;border:1px solid var(--border);">
     <button id="bud-tab-budget" onclick="switchBudgetTab('budget')" style="flex:1;height:38px;border:none;border-radius:10px;background:var(--purple);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">💰 Budget</button>
-    <button id="bud-tab-sparen" onclick="switchBudgetTab('sparen')" style="flex:1;height:38px;border:none;border-radius:10px;background:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">🏦 Sparen</button>
+    <button id="bud-tab-sparen" onclick="switchBudgetTab('sparen')" style="flex:1;height:38px;border:none;border-radius:10px;background:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">🧾 Verwacht</button>
   </div>
 
   <!-- BUDGET VIEW -->
@@ -586,34 +586,34 @@ select option { background: #1a1830; }
 
   </div><!-- end bud-view-budget -->
 
-  <!-- SPAREN VIEW -->
+  <!-- VERWACHTE BETALINGEN VIEW -->
   <div id="bud-view-sparen" style="display:none;">
 
-  <!-- BETAALPOTJES -->
-  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
-    <div style="font-size:20px;font-weight:700;">Betaalpotjes</div>
-    <div style="font-size:15px;color:rgba(255,255,255,0.35);font-weight:500;" id="bp-totaal-label">€0</div>
+  <!-- Hero totaal -->
+  <div style="background:linear-gradient(135deg,#1e1a3a 0%,#2d2060 50%,#3d2a80 100%);border-radius:24px;padding:1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Openstaand</div>
+    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="vb-totaal">€0</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.45);" id="vb-sub">0 verwachte betalingen</div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;" id="bp-grid"></div>
 
-  <!-- SPAARPOTJES -->
-  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
-    <div style="font-size:20px;font-weight:700;">Spaarpotjes</div>
-    <div style="font-size:15px;color:rgba(255,255,255,0.35);font-weight:500;" id="sp-totaal-label">€0</div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem;" id="sp-grid"></div>
+  <!-- Betalingen lijst -->
+  <div id="vb-list"></div>
 
-  <!-- INLEG OP DE 23E -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem;">
-    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:14px;font-weight:700;">Inleg op de 23e</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Automatisch in betaalpotjes</div>
-      </div>
-      <div style="font-size:13px;font-weight:700;color:var(--green);" id="bp-inleg-totaal">€0/mnd</div>
-    </div>
-    <div id="bp-inleg-list" style="padding:0 0.75rem;"></div>
+  <!-- Leeg state -->
+  <div id="vb-empty" style="text-align:center;padding:3rem 1rem;">
+    <div style="font-size:40px;margin-bottom:12px;">🧾</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Geen openstaande betalingen</div>
+    <div style="font-size:13px;color:var(--muted);">Voeg een verwachte betaling toe via de + knop</div>
   </div>
+
+  <!-- Betaald sectie -->
+  <div id="vb-paid-section" style="display:none;margin-top:0.5rem;">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Betaald</div>
+    <div id="vb-paid-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+
+  <div style="height:2rem;"></div>
 
   </div><!-- end bud-view-sparen -->
 
@@ -3281,427 +3281,177 @@ async function addUrlIngredientsToMeal(recipeStr) {
 }
 
 
-// ===== SPAREN TAB =====
+// ===== VERWACHTE BETALINGEN =====
 
-const SP_KEY = 'sp_v4';
-function spFmt(n) { return '\u20ac\u00a0' + Math.round(n).toLocaleString('nl-NL'); }
+const VB_KEY = 'vb_v1';
 
-// Betaalpotjes kleuren (Buut-stijl: felle achtergrond)
-const BP_KLEUREN = ['#7B5CFA','#F5E642','#4ade80','#f472b6','#fb923c','#60a5fa','#f87171','#34d399'];
-const BP_EMOJIS  = ['\uD83D\uDCB0','\uD83E\uDD50','\uD83D\uDED2','\u2708\uFE0F','\uD83C\uDFB5','\uD83D\uDC5F','\uD83C\uDF55','\u2615'];
-
-function spSyncZakgeld(bedrag) {
+function vbGet() {
   try {
-    var d = JSON.parse(localStorage.getItem(SP_KEY) || 'null');
-    if (!d || !d.betaal) return;
-    var p = d.betaal.find(function(x){ return x.naam === 'Zakgeld'; });
-    if (!p) return;
-    if (Math.round(p.saldo) === Math.round(bedrag)) return; // geen wijziging nodig
-    p.saldo = Math.round(bedrag * 100) / 100;
-    localStorage.setItem(SP_KEY, JSON.stringify(d));
-    // als sparen tab open is, herrender
-    var spView = document.getElementById('bud-view-sparen');
-    if (spView && spView.style.display !== 'none') spRender();
-  } catch(e) {}
+    return JSON.parse(localStorage.getItem(VB_KEY) || '[]');
+  } catch(e) { return []; }
 }
-
-function spGet() {
-  const def = {
-    betaal: [
-      { id:201, naam:'Zakgeld',  emoji:'\uD83D\uDCB0', saldo:0, kleur:'#7B5CFA',  maandInleg:0 },
-      { id:202, naam:'Uiteten',  emoji:'\uD83C\uDF7D\uFE0F', saldo:0, kleur:'#F5E642', maandInleg:50 },
-      { id:203, naam:'Shoppen',  emoji:'\uD83D\uDED2', saldo:0, kleur:'#f472b6', maandInleg:100 },
-      { id:204, naam:'Trips',    emoji:'\u2708\uFE0F', saldo:0, kleur:'#60a5fa', maandInleg:50 }
-    ],
-    spaar: [
-      { id:301, naam:'Lange termijn', emoji:'\uD83C\uDFE0', saldo:17000, maandInleg:950,  kleur:'#a78bfa', readonly:true },
-      { id:302, naam:'Vakantie',      emoji:'\uD83C\uDFD6\uFE0F', saldo:0,     maandInleg:100,  kleur:'#f472b6', readonly:false, betaalStijl:true },
-      { id:303, naam:'Beleggingen',   emoji:'\uD83D\uDCC8', saldo:735,   maandInleg:150,  kleur:'#fbbf24', readonly:true }
-    ]
-  };
-  try {
-    const raw = localStorage.getItem(SP_KEY);
-    if (!raw) return def;
-    const d = JSON.parse(raw);
-    if (!d.betaal || d.betaal.length === 0) d.betaal = def.betaal;
-    if (!d.spaar  || d.spaar.length === 0)  d.spaar  = def.spaar;
-    // Merge maandInleg and readonly from defaults into saved data
-    def.spaar.forEach(function(ds) {
-      var saved = d.spaar.find(function(x){ return x.id === ds.id; });
-      if (saved) {
-        if (saved.maandInleg === undefined) saved.maandInleg = ds.maandInleg;
-        if (saved.readonly === undefined) saved.readonly = ds.readonly;
-        if (saved.betaalStijl === undefined) saved.betaalStijl = ds.betaalStijl;
-      }
-    });
-    def.betaal.forEach(function(db) {
-      var saved = d.betaal.find(function(x){ return x.id === db.id; });
-      if (saved && saved.maandInleg === undefined) saved.maandInleg = db.maandInleg;
-    });
-    return d;
-  } catch(e) { return def; }
-}
-function spSet(d) { localStorage.setItem(SP_KEY, JSON.stringify(d)); }
+function vbSet(d) { localStorage.setItem(VB_KEY, JSON.stringify(d)); }
+function vbFmt(n) { return '\u20ac\u00a0' + Number(n).toFixed(2).replace('.',','); }
 
 function switchBudgetTab(tab) {
   const budget = document.getElementById('bud-view-budget');
-  const sparen = document.getElementById('bud-view-sparen');
+  const vb     = document.getElementById('bud-view-sparen');
   const tabB   = document.getElementById('bud-tab-budget');
-  const tabS   = document.getElementById('bud-tab-sparen');
+  const tabV   = document.getElementById('bud-tab-sparen');
   if (tab === 'budget') {
-    budget.style.display = 'block'; sparen.style.display = 'none';
+    budget.style.display = 'block'; vb.style.display = 'none';
     tabB.style.background = 'var(--purple)'; tabB.style.color = 'white'; tabB.style.fontWeight = '600';
-    tabS.style.background = 'none'; tabS.style.color = 'var(--muted)'; tabS.style.fontWeight = '500';
+    tabV.style.background = 'none'; tabV.style.color = 'var(--muted)'; tabV.style.fontWeight = '500';
     document.getElementById('budget-page-title').textContent = 'Mijn zakgeld';
+    var addBtn = document.getElementById('vb-add-btn');
+    if (addBtn) addBtn.style.display = 'none';
   } else {
-    budget.style.display = 'none'; sparen.style.display = 'block';
-    tabS.style.background = 'var(--purple)'; tabS.style.color = 'white'; tabS.style.fontWeight = '600';
+    budget.style.display = 'none'; vb.style.display = 'block';
+    tabV.style.background = 'var(--purple)'; tabV.style.color = 'white'; tabV.style.fontWeight = '600';
     tabB.style.background = 'none'; tabB.style.color = 'var(--muted)'; tabB.style.fontWeight = '500';
-    document.getElementById('budget-page-title').textContent = 'Mijn potjes';
-    spCheckAutoInleg();
-    spRender();
+    document.getElementById('budget-page-title').textContent = 'Verwachte betalingen';
+    vbInjectAddBtn();
+    document.getElementById('vb-add-btn').style.display = 'flex';
+    vbRender();
   }
 }
 
-function spCheckAutoInleg() {
-  var d = spGet();
-  var now = new Date();
-  var key = 'auto_' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  if (now.getDate() >= 23 && d.lastBetaalCheck !== key) {
-    // Betaalpotjes
-    d.betaal.forEach(function(p) {
-      if (p.naam !== 'Zakgeld' && p.maandInleg > 0) {
-        p.saldo = Math.round((p.saldo + p.maandInleg) * 100) / 100;
-      }
-    });
-    // Spaarpotjes met maandInleg
-    d.spaar.forEach(function(p) {
-      if (p.maandInleg > 0) {
-        p.saldo = Math.round((p.saldo + p.maandInleg) * 100) / 100;
-      }
-    });
-    d.lastBetaalCheck = key;
-    spSet(d);
-    showToast('Potjes aangevuld op de 23e ✓');
-  }
-}
-
-// ── IN/UIT MODAL ──────────────────────────────────────────
-function spSluitModal() {
-  var m = document.getElementById('sp-inuit-modal');
-  if (m) m.remove();
-}
-
-function spOpenModal(id, type, mode) {
-  spSluitModal();
-  var d   = spGet();
-  var arr = type === 'betaal' ? d.betaal : d.spaar;
-  var p   = arr.find(function(x){ return x.id === id; });
-  if (!p) return;
-
-  var isIn  = mode === 'in';
-  var isBetaal = type === 'betaal' || p.betaalStijl;
-  var label = isIn
-    ? (isBetaal ? (p.emoji + ' Saldo instellen — ' + p.naam) : (p.emoji + ' Toevoegen aan ' + p.naam))
-    : (p.emoji + ' Pakken uit ' + p.naam);
-  var subLabel = isIn
-    ? (isBetaal ? 'Huidig: ' + spFmt(p.saldo) + ' • Vul het nieuwe saldo in' : 'Huidig saldo: ' + spFmt(p.saldo))
-    : 'Huidig saldo: ' + spFmt(p.saldo);
-  var btnCls = isIn
-    ? 'background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.4);color:#4ade80;'
-    : 'background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.35);color:#f87171;';
-  var btnTxt = isIn ? (isBetaal ? '✓ Instellen' : '+ Toevoegen') : '- Pakken';
-
+// ── ADD BUTTON in header ──────────────────────────────────
+// Inject + button in header when on vb tab
+function vbOpenNieuw() {
+  var ex = document.getElementById('vb-nieuw-modal'); if (ex) ex.remove();
+  var vandaag = new Date().toISOString().slice(0,10);
   var m = document.createElement('div');
-  m.id = 'sp-inuit-modal';
+  m.id = 'vb-nieuw-modal';
   m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
   m.innerHTML =
     '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
-      '<div style="font-size:17px;font-weight:700;margin-bottom:3px;">' + label + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + subLabel + '</div>' +
-      '<input id="sp-iu-val" type="number" inputmode="decimal" placeholder="\u20ac 0" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;font-size:26px;font-weight:700;color:white;outline:none;margin-bottom:16px;font-family:inherit;"/>' +
+      '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">Nieuwe verwachte betaling</div>' +
+      '<input id="vb-n-aan" type="text" placeholder="Aan wie? (bijv. Tikkie Thomas)" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
+      '<input id="vb-n-omschr" type="text" placeholder="Omschrijving (bijv. Terras vrijdag)" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
+      '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+        '<input id="vb-n-bedrag" type="number" inputmode="decimal" placeholder="\u20ac Bedrag" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
+        '<input id="vb-n-datum" type="date" value="' + vandaag + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
+      '</div>' +
       '<div style="display:flex;gap:8px;">' +
-        '<button onclick="spSluitModal()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
-        '<button onclick="spBevestig(' + id + ',\'' + type + '\',\'' + mode + '\')" style="flex:2;height:50px;' + btnCls + 'border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">' + btnTxt + '</button>' +
+        '<button onclick="vbSluit()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
+        '<button onclick="vbSlaOp()" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Toevoegen</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(m);
-  m.addEventListener('click', function(e){ if (e.target === m) spSluitModal(); });
-  setTimeout(function(){ var i=document.getElementById('sp-iu-val'); if(i) i.focus(); }, 80);
+  m.addEventListener('click', function(e){ if(e.target===m) vbSluit(); });
+  setTimeout(function(){ var i=document.getElementById('vb-n-aan'); if(i) i.focus(); }, 80);
 }
 
-function spBevestig(id, type, mode) {
-  var val = parseFloat(document.getElementById('sp-iu-val').value) || 0;
-  if (!val) { showToast('Vul een bedrag in.'); return; }
-  var d   = spGet();
-  var arr = type === 'betaal' ? d.betaal : d.spaar;
-  var p   = arr.find(function(x){ return x.id === id; });
-  if (!p) return;
-  if (mode === 'in' && (type === 'betaal' || p.betaalStijl)) p.saldo = Math.round(val * 100) / 100;
-  else if (mode === 'in') p.saldo = Math.round((p.saldo + val) * 100) / 100;
-  else p.saldo = Math.max(0, Math.round((p.saldo - val) * 100) / 100);
-  spSet(d); spSluitModal(); spRender();
-  // Als zakgeld aangepast: sync naar budget display
-  if (type === 'betaal') {
-    var changed = (type==='betaal' ? d.betaal : d.spaar).find(function(x){return x.id===id;});
-    if (changed && changed.naam === 'Zakgeld') {
-      document.getElementById('stat-left').textContent = fmt(changed.saldo);
-    }
-  }
-  showToast((mode==='in' ? '+' : '-') + spFmt(val) + ' ' + p.naam);
+function vbSluit() { var m=document.getElementById('vb-nieuw-modal'); if(m) m.remove(); }
+
+function vbSlaOp() {
+  var aan    = document.getElementById('vb-n-aan').value.trim();
+  var omschr = document.getElementById('vb-n-omschr').value.trim();
+  var bedrag = parseFloat(document.getElementById('vb-n-bedrag').value) || 0;
+  var datum  = document.getElementById('vb-n-datum').value;
+  if (!aan || !bedrag) { showToast('Vul naam en bedrag in.'); return; }
+  var d = vbGet();
+  d.push({ id: Date.now(), aan: aan, omschr: omschr, bedrag: bedrag, datum: datum, betaald: false });
+  d.sort(function(a,b){ return a.datum.localeCompare(b.datum); });
+  vbSet(d); vbSluit(); vbRender();
+  showToast('Toegevoegd!');
 }
 
-// ── POTJE MENU ────────────────────────────────────────────
-function spMenu(id, type, btn) {
-  var ex = document.getElementById('sp-ctx');
-  if (ex) { ex.remove(); if (ex.dataset.id == id) return; }
-  var d   = spGet();
-  var arr = type === 'betaal' ? d.betaal : d.spaar;
-  var p   = arr.find(function(x){ return x.id === id; });
-  if (!p) return;
-
-  var menu = document.createElement('div');
-  menu.id = 'sp-ctx'; menu.dataset.id = id;
-  var rect = btn.getBoundingClientRect();
-  menu.style.cssText = 'position:fixed;background:#241f3d;border:1px solid rgba(255,255,255,0.1);border-radius:14px;overflow:hidden;z-index:70;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
-  menu.style.top   = Math.min(rect.bottom + 6, window.innerHeight - 120) + 'px';
-  menu.style.right = (window.innerWidth - rect.right) + 'px';
-  menu.innerHTML =
-    '<button onclick="spMenuAct(' + id + ',\'' + type + '\',\'edit\')" style="display:block;width:100%;padding:13px 16px;background:none;border:none;color:white;font-size:14px;text-align:left;cursor:pointer;font-family:inherit;border-bottom:1px solid rgba(255,255,255,0.07);">\u270f\ufe0f\u00a0 Saldo wijzigen</button>' +
-    '<button onclick="spMenuAct(' + id + ',\'' + type + '\',\'del\')" style="display:block;width:100%;padding:13px 16px;background:none;border:none;color:#f87171;font-size:14px;text-align:left;cursor:pointer;font-family:inherit;">\uD83D\uDDD1\uFE0F\u00a0 Verwijderen</button>';
-  document.body.appendChild(menu);
-  setTimeout(function(){
-    document.addEventListener('click', function h(e){
-      if (!menu.contains(e.target)){ menu.remove(); document.removeEventListener('click',h); }
-    });
-  }, 10);
+function vbBetaald(id) {
+  var d = vbGet();
+  var p = d.find(function(x){ return x.id === id; });
+  if (p) { p.betaald = true; p.betaaldOp = new Date().toISOString().slice(0,10); }
+  vbSet(d); vbRender();
+  showToast('Gemarkeerd als betaald \u2713');
 }
 
-function spMenuAct(id, type, action) {
-  var m = document.getElementById('sp-ctx'); if (m) m.remove();
-  if (action === 'del') {
-    var d = spGet();
-    if (type==='betaal') d.betaal = d.betaal.filter(function(x){return x.id!==id;});
-    else                 d.spaar  = d.spaar.filter(function(x){return x.id!==id;});
-    spSet(d); spRender();
+function vbVerwijder(id) {
+  var d = vbGet().filter(function(x){ return x.id !== id; });
+  vbSet(d); vbRender();
+}
+
+function vbDatumLabel(datum) {
+  if (!datum) return '';
+  var d = new Date(datum + 'T00:00:00');
+  var now = new Date(); now.setHours(0,0,0,0);
+  var diff = Math.round((d - now) / 86400000);
+  if (diff < 0)  return '<span style="color:#f87171;">Verlopen</span>';
+  if (diff === 0) return '<span style="color:#fbbf24;">Vandaag</span>';
+  if (diff === 1) return '<span style="color:#fbbf24;">Morgen</span>';
+  if (diff <= 7)  return '<span style="color:#fb923c;">Over ' + diff + ' dagen</span>';
+  return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+}
+
+function vbRender() {
+  var all    = vbGet();
+  var open   = all.filter(function(x){ return !x.betaald; });
+  var paid   = all.filter(function(x){ return x.betaald; });
+
+  // Hero
+  var totaal = open.reduce(function(s,x){ return s + x.bedrag; }, 0);
+  document.getElementById('vb-totaal').textContent = vbFmt(totaal);
+  document.getElementById('vb-sub').textContent = open.length + ' verwachte betaling' + (open.length !== 1 ? 'en' : '');
+
+  // Empty / list toggle
+  var listEl  = document.getElementById('vb-list');
+  var emptyEl = document.getElementById('vb-empty');
+  if (open.length === 0) {
+    listEl.innerHTML = ''; emptyEl.style.display = 'block';
   } else {
-    spOpenModal(id, type, 'in');
-  }
-}
-
-// ── RENDER ────────────────────────────────────────────────
-function spRender() {
-  var d = spGet();
-
-  // BETAALPOTJES — felle gekleurde kaartjes (Buut-stijl)
-  var btTot = d.betaal.reduce(function(s,p){ return s+p.saldo; }, 0);
-  document.getElementById('bp-totaal-label').textContent = spFmt(btTot);
-
-  var bgEl = document.getElementById('bp-grid');
-  bgEl.innerHTML = d.betaal.map(function(p) {
-    // Tekstkleur: donker op lichte achtergrond, wit op donkere
-    var isDark = ['#7B5CFA','#60a5fa','#f87171','#34d399'].indexOf(p.kleur) >= 0;
-    var txtCol = isDark ? 'white' : '#1a1830';
-    var subCol = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(26,24,48,0.55)';
-    var isZakgeld = p.naam === 'Zakgeld';
-    if (isZakgeld) {
-      return '<div style="background:' + p.kleur + ';border-radius:22px;padding:16px 16px 14px;position:relative;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-          '<span style="font-size:32px;line-height:1;">' + p.emoji + '</span>' +
-          '<span style="font-size:13px;color:' + subCol + ';opacity:0.7;background:rgba(0,0,0,0.12);padding:3px 8px;border-radius:8px;">budget</span>' +
-        '</div>' +
-        '<div>' +
-          '<div style="font-size:22px;font-weight:700;color:' + txtCol + ';margin-bottom:2px;">' + spFmt(p.saldo) + '</div>' +
-          '<div style="font-size:13px;color:' + subCol + ';font-weight:500;">' + p.naam + '</div>' +
+    emptyEl.style.display = 'none';
+    listEl.innerHTML = open.map(function(p) {
+      var isLaat = p.datum && new Date(p.datum + 'T00:00:00') < new Date(new Date().setHours(0,0,0,0));
+      return '<div style="background:#1a1830;border-radius:20px;padding:1.1rem 1.25rem;margin-bottom:10px;border:1px solid ' + (isLaat ? 'rgba(248,113,113,0.3)' : 'rgba(255,255,255,0.07)') + ';">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:15px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.aan + '</div>' +
+            (p.omschr ? '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;">' + p.omschr + '</div>' : '') +
+            '<div style="font-size:12px;">' + vbDatumLabel(p.datum) + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;flex-shrink:0;">' +
+            '<div style="font-size:20px;font-weight:700;margin-bottom:8px;">' + vbFmt(p.bedrag) + '</div>' +
+            '<div style="display:flex;gap:6px;justify-content:flex-end;">' +
+              '<button onclick="vbBetaald(' + p.id + ')" style="height:32px;padding:0 12px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:9px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">\u2713 Betaald</button>' +
+              '<button onclick="vbVerwijder(' + p.id + ')" style="width:32px;height:32px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:9px;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;">×</button>' +
+            '</div>' +
+          '</div>' +
         '</div>' +
       '</div>';
-    }
-    return '<div style="background:' + p.kleur + ';border-radius:22px;padding:16px 16px 14px;position:relative;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;" onclick="spOpenModal(' + p.id + ',\'betaal\',\'in\')">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-        '<span style="font-size:32px;line-height:1;">' + p.emoji + '</span>' +
-        '<button onclick="event.stopPropagation();spMenu(' + p.id + ',\'betaal\',this)" style="width:28px;height:28px;background:rgba(0,0,0,0.15);border:none;border-radius:8px;color:' + txtCol + ';font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.7;line-height:1;">\u22ef</button>' +
-      '</div>' +
-      '<div>' +
-        '<div style="font-size:22px;font-weight:700;color:' + txtCol + ';margin-bottom:2px;">' + spFmt(p.saldo) + '</div>' +
-        '<div style="font-size:13px;color:' + subCol + ';font-weight:500;">' + p.naam + '</div>' +
-      '</div>' +
-    '</div>';
-  }).join('') +
-  // + Nieuw betaalpotje
-  '';
-  // Small add button below grid
+    }).join('');
+  }
 
-
-  // SPAARPOTJES — donkere kaartjes met glazen pot + balk (Buut-stijl)
-  var spTot = d.spaar.reduce(function(s,p){ return s+p.saldo; }, 0);
-  document.getElementById('sp-totaal-label').textContent = spFmt(spTot);
-
-  var sgEl = document.getElementById('sp-grid');
-  sgEl.innerHTML = d.spaar.map(function(p) {
-    var maxVal = p.saldo > 0 ? p.saldo * 2 : 1000;
-    var pct = Math.min(95, Math.max(5, p.saldo / maxVal * 100));
-    var fillH = Math.round(44 * pct / 100);
-    var fillY = 53 - fillH;
-    var svg =
-      '<svg width="52" height="64" viewBox="0 0 44 58" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<rect x="6" y="2" width="32" height="7" rx="3.5" fill="' + p.kleur + '" opacity="0.75"/>' +
-        '<rect x="4" y="8" width="36" height="46" rx="7" fill="' + p.kleur + '" opacity="0.1"/>' +
-        '<rect x="4" y="8" width="36" height="46" rx="7" stroke="' + p.kleur + '" stroke-width="1.5" opacity="0.35"/>' +
-        '<clipPath id="csp' + p.id + '"><rect x="5" y="9" width="34" height="44" rx="6"/></clipPath>' +
-        '<rect x="5" y="' + fillY + '" width="34" height="' + fillH + '" fill="' + p.kleur + '" opacity="0.6" clip-path="url(#csp' + p.id + ')"/>' +
-        '<rect x="10" y="12" width="5" height="18" rx="2.5" fill="white" opacity="0.08"/>' +
-        '<text x="22" y="37" text-anchor="middle" font-size="17" dominant-baseline="middle">' + p.emoji + '</text>' +
-      '</svg>';
-
-    var isReadonly    = p.readonly === true;
-    var isBetaalStijl = p.betaalStijl === true;
-    var inlegBadge = '<div style="margin-top:8px;"><span style="font-size:10px;color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:6px;">\u20ac' + (p.maandInleg||0) + '/mnd</span></div>';
-    var actionBtns = isReadonly
-      ? inlegBadge
-      : isBetaalStijl
-        ? inlegBadge
-        : '<div style="display:flex;gap:5px;margin-top:8px;"><button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'uit\')" style="flex:1;height:32px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:9px;color:#f87171;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">-</button><button onclick="event.stopPropagation();spOpenModal(' + p.id + ',\'spaar\',\'in\')" style="flex:1;height:32px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:9px;color:#4ade80;font-size:18px;font-weight:700;cursor:pointer;line-height:1;">+</button></div>';
-    var cursorStr = (!isReadonly && isBetaalStijl) ? 'cursor:pointer;' : '';
-    var clickAttr = (!isReadonly && isBetaalStijl) ? ' onclick="spOpenModal(' + p.id + ',\'spaar\',\'in\')"' : '';
-    return '<div style="background:#1a1830;border-radius:22px;padding:16px 12px 14px;border:1px solid rgba(255,255,255,0.07);position:relative;' + cursorStr + '"' + clickAttr + '>' +
-      '<button onclick="event.stopPropagation();spMenu(' + p.id + ',\'spaar\',this)" style="position:absolute;top:10px;right:10px;width:26px;height:26px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:18px;cursor:pointer;line-height:1;z-index:2;">\u22ef</button>' +
-      '<div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:10px;">' +
-        svg +
-        '<div style="width:7px;height:64px;background:rgba(255,255,255,0.07);border-radius:999px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;">' +
-          '<div style="width:100%;height:' + pct + '%;background:' + p.kleur + ';border-radius:999px;"></div>' +
+  // Paid section
+  var paidSection = document.getElementById('vb-paid-section');
+  var paidList    = document.getElementById('vb-paid-list');
+  if (paid.length === 0) {
+    paidSection.style.display = 'none';
+  } else {
+    paidSection.style.display = 'block';
+    paidList.innerHTML = paid.slice(0,5).map(function(p) {
+      return '<div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:0.875rem 1.1rem;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.5);">' + p.aan + '</div>' +
+          (p.omschr ? '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + p.omschr + '</div>' : '') +
         '</div>' +
-      '</div>' +
-      '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:2px;">' + spFmt(p.saldo) + '</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:500;">' + p.naam + '</div>' +
-      actionBtns +
-    '</div>';
-  }).join('') +
-  '';
-
-
-  // INLEG LIJST
-  var inlegPotjes = d.betaal.filter(function(p){ return p.naam !== 'Zakgeld'; });
-  var inlegTotaal = inlegPotjes.reduce(function(s,p){ return s+(p.maandInleg||0); }, 0);
-  var inlegEl = document.getElementById('bp-inleg-totaal');
-  if (inlegEl) inlegEl.textContent = '€' + inlegTotaal + '/mnd';
-  var listEl = document.getElementById('bp-inleg-list');
-  if (listEl) {
-    listEl.innerHTML = inlegPotjes.map(function(p, i) {
-      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0.5rem;' + (i < inlegPotjes.length-1 ? 'border-bottom:1px solid var(--border);' : '') + '">' +
-        '<span style="font-size:20px;line-height:1;">' + p.emoji + '</span>' +
-        '<div style="flex:1;font-size:14px;font-weight:500;">' + p.naam + '</div>' +
-        '<div style="font-size:14px;font-weight:700;color:' + p.kleur + ';">€' + (p.maandInleg||0) + '</div>' +
-        '<button onclick="spEditInleg(' + p.id + ')" style="width:28px;height:28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✏️</button>' +
+        '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.35);text-decoration:line-through;">' + vbFmt(p.bedrag) + '</div>' +
+        '<button onclick="vbVerwijder(' + p.id + ')" style="width:28px;height:28px;background:none;border:none;color:rgba(255,255,255,0.2);font-size:14px;cursor:pointer;">×</button>' +
       '</div>';
     }).join('');
   }
 }
 
-// ── NIEUW POTJE ───────────────────────────────────────────
-function spEditInleg(id) {
-  var d = spGet();
-  var p = d.betaal.find(function(x){ return x.id === id; });
-  if (!p) return;
-  var ex = document.getElementById('sp-inleg-modal'); if (ex) ex.remove();
-  var m = document.createElement('div');
-  m.id = 'sp-inleg-modal';
-  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
-  m.innerHTML =
-    '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
-      '<div style="font-size:17px;font-weight:700;margin-bottom:3px;">' + p.emoji + ' ' + p.naam + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Maandelijks inleg op de 23e</div>' +
-      '<input id="sp-il-val" type="number" inputmode="decimal" value="' + (p.maandInleg||0) + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;font-size:26px;font-weight:700;color:white;outline:none;margin-bottom:16px;font-family:inherit;"/>' +
-      '<div style="display:flex;gap:8px;">' +
-        '<button onclick="spSluitInlegModal()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
-        '<button onclick="spSlaInlegOp(' + id + ')" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Opslaan</button>' +
-      '</div>' +
-    '</div>';
-  document.body.appendChild(m);
-  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
-  setTimeout(function(){ var i=document.getElementById('sp-il-val'); if(i){i.focus();i.select();} }, 80);
-}
-
-function spSluitInlegModal() { var m=document.getElementById('sp-inleg-modal'); if(m) m.remove(); }
-
-function spSlaInlegOp(id) {
-  var val = parseFloat(document.getElementById('sp-il-val').value) || 0;
-  var d = spGet();
-  var p = d.betaal.find(function(x){ return x.id === id; });
-  if (p) p.maandInleg = Math.round(val * 100) / 100;
-  spSet(d); spSluitInlegModal(); spRender();
-  showToast('Inleg bijgewerkt ✓');
-}
-
-function spNieuwBetaal() { spNieuwModal('betaal'); }
-function spNieuwSpaar()  { spNieuwModal('spaar'); }
-
-function spNieuwModal(type) {
-  var ex = document.getElementById('sp-nieuw-modal'); if (ex) ex.remove();
-  var EMOJIS = ['\uD83D\uDCB0','\uD83E\uDD50','\uD83D\uDED2','\u2708\uFE0F','\uD83C\uDFD6\uFE0F','\uD83D\uDCF1','\uD83D\uDC5F','\uD83C\uDF55','\u2615','\uD83C\uDFAE','\uD83D\uDC96','\uD83C\uDFA7','\uD83D\uDE97','\uD83C\uDF7D\uFE0F','\uD83D\uDCC8','\uD83C\uDFE0'];
-  var isBetaal = type === 'betaal';
-  var KLEUREN = isBetaal
-    ? ['#7B5CFA','#F5E642','#f472b6','#60a5fa','#4ade80','#fb923c','#f87171','#34d399']
-    : ['#a78bfa','#f472b6','#fbbf24','#22d3ee','#4ade80','#f87171'];
-
-  var emojiHTML = EMOJIS.map(function(e){
-    return '<button onclick="spKiesEmoji(\'' + e + '\')" data-e="' + e + '" style="width:38px;height:38px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);border-radius:10px;font-size:20px;cursor:pointer;">' + e + '</button>';
-  }).join('');
-  var kleurHTML = KLEUREN.map(function(k){
-    return '<button onclick="spKiesKleur(\'' + k + '\')" data-k="' + k + '" style="width:28px;height:28px;background:' + k + ';border:2px solid transparent;border-radius:8px;cursor:pointer;"></button>';
-  }).join('');
-
-  var m = document.createElement('div');
-  m.id = 'sp-nieuw-modal'; m.dataset.type = type; m.dataset.emoji = EMOJIS[0]; m.dataset.kleur = KLEUREN[0];
-  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
-  m.innerHTML =
-    '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
-      '<div style="font-size:17px;font-weight:700;margin-bottom:14px;">' + (isBetaal ? 'Nieuw betaalpotje' : 'Nieuw spaarpotje') + '</div>' +
-      '<div id="sp-emoji-row" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + emojiHTML + '</div>' +
-      (isBetaal ? '<div id="sp-kleur-row" style="display:flex;gap:6px;margin-bottom:12px;">' + kleurHTML + '</div>' : '') +
-      '<input id="sp-np-naam" type="text" placeholder="Naam bijv. Snacks" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:16px;color:white;outline:none;margin-bottom:10px;font-family:inherit;"/>' +
-      '<input id="sp-np-saldo" type="number" inputmode="decimal" placeholder="Beginsaldo \u20ac (optioneel)" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:16px;color:white;outline:none;margin-bottom:16px;font-family:inherit;"/>' +
-      '<div style="display:flex;gap:8px;">' +
-        '<button onclick="spSluitNieuw()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
-        '<button onclick="spSlaOpNieuw()" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Aanmaken</button>' +
-      '</div>' +
-    '</div>';
-  document.body.appendChild(m);
-  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
-  spKiesEmoji(EMOJIS[0]);
-  spKiesKleur(KLEUREN[0]);
-}
-
-function spSluitNieuw() { var m=document.getElementById('sp-nieuw-modal'); if(m) m.remove(); }
-
-function spKiesEmoji(e) {
-  document.querySelectorAll('#sp-emoji-row button').forEach(function(b){
-    b.style.borderColor = b.dataset.e===e ? '#7c5cfc' : 'rgba(255,255,255,0.08)';
-    b.style.background  = b.dataset.e===e ? 'rgba(124,92,252,0.25)' : 'rgba(255,255,255,0.05)';
-  });
-  var m=document.getElementById('sp-nieuw-modal'); if(m) m.dataset.emoji=e;
-}
-
-function spKiesKleur(k) {
-  document.querySelectorAll('#sp-kleur-row button').forEach(function(b){
-    b.style.borderColor = b.dataset.k===k ? 'white' : 'transparent';
-    b.style.transform   = b.dataset.k===k ? 'scale(1.2)' : 'scale(1)';
-  });
-  var m=document.getElementById('sp-nieuw-modal'); if(m) m.dataset.kleur=k;
-}
-
-function spSlaOpNieuw() {
-  var naam = document.getElementById('sp-np-naam').value.trim();
-  if (!naam) { showToast('Vul een naam in.'); return; }
-  var m     = document.getElementById('sp-nieuw-modal');
-  var type  = m.dataset.type;
-  var emoji = m.dataset.emoji || '\uD83C\uDFAF';
-  var kleur = m.dataset.kleur || '#7B5CFA';
-  var saldo = parseFloat(document.getElementById('sp-np-saldo').value) || 0;
-  var d     = spGet();
-  var arr   = type==='betaal' ? d.betaal : d.spaar;
-  arr.push({ id: Date.now(), naam: naam, emoji: emoji, saldo: saldo, kleur: kleur });
-  spSet(d); m.remove(); spRender();
-  showToast(naam + ' aangemaakt!');
+// + knop in de header injecteren als verwacht tab actief is
+function vbInjectAddBtn() {
+  if (document.getElementById('vb-add-btn')) return;
+  var header = document.querySelector('#page-zakgeld header');
+  if (!header) return;
+  var btn = document.createElement('button');
+  btn.id = 'vb-add-btn';
+  btn.textContent = '+';
+  btn.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+24px);right:20px;width:54px;height:54px;background:#7c5cfc;border:none;border-radius:50%;color:white;font-size:26px;font-weight:300;cursor:pointer;z-index:30;box-shadow:0 4px 20px rgba(124,92,252,0.5);display:none;font-family:inherit;line-height:1;';
+  document.body.appendChild(btn);
+  btn.addEventListener('click', vbOpenNieuw);
 }
 
 
