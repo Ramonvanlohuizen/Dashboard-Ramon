@@ -1074,7 +1074,8 @@ async function loadEntries() {
   document.getElementById('cat-grid').innerHTML = '<div style="color:var(--muted);font-size:13px;grid-column:span 2;"><span class="spinner"></span>Laden...</div>';
   try {
     entries = await api('GET', `uitgaven?datum=gte.${monthStart()}&datum=lte.${monthEnd()}&order=created_at.desc`);
-    // Load last 3 months of history for average calculation (run once)
+    // Save to localStorage as backup
+    localStorage.setItem('entries_backup_' + currentMonth + '_' + currentYear, JSON.stringify(entries));
     if (allHistoryEntries.length === 0) {
       const threeMonthsAgo = new Date();
       threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
@@ -1085,8 +1086,17 @@ async function loadEntries() {
     }
     render();
   } catch(e) {
-    showToast('Fout bij laden: ' + e.message);
-    document.getElementById('entries-list').innerHTML = '<div class="empty-msg">Kon niet laden.</div>';
+    // Fallback to localStorage
+    const backup = localStorage.getItem('entries_backup_' + currentMonth + '_' + currentYear);
+    if (backup) {
+      entries = JSON.parse(backup);
+      showToast('Offline — lokale data geladen');
+      render();
+    } else {
+      entries = [];
+      render();
+      document.getElementById('entries-list').innerHTML = '<div class="empty-msg" style="text-align:center;padding:2rem;color:var(--muted);">Geen verbinding. Voeg uitgaven toe — die worden gesynchroniseerd zodra je weer online bent.</div>';
+    }
   }
 }
 
@@ -1572,7 +1582,14 @@ function render() {
 
   document.getElementById('stat-left').textContent = fmt(Math.max(left,0));
   // Sync zakgeld potje met resterend budget
-  spSyncZakgeld(Math.max(left, 0));
+  // Sync zakgeld potje met resterend budget
+  try {
+    var _spd = JSON.parse(localStorage.getItem('sp_v4') || 'null');
+    if (_spd && _spd.betaal) {
+      var _zp = _spd.betaal.find(function(x){ return x.naam === 'Zakgeld'; });
+      if (_zp) { _zp.saldo = Math.round(Math.max(left,0)*100)/100; localStorage.setItem('sp_v4', JSON.stringify(_spd)); }
+    }
+  } catch(e) {}
   document.getElementById('stat-spent').textContent = fmt(spent);
   document.getElementById('prog-bar').style.width = pct.toFixed(1)+'%';
 
@@ -3347,32 +3364,29 @@ function vbOpenNieuw(editId) {
 
   var typeHTML = VB_TYPES.map(function(t) {
     var sel = selectedType === t.id;
-    return '<button onclick="vbKiesType(\'' + t.id + '\')" data-type="' + t.id + '" style="flex:1;height:36px;background:' + (sel ? t.kleur : 'rgba(255,255,255,0.05)') + ';border:1px solid ' + (sel ? t.kleur : 'rgba(255,255,255,0.08)') + ';border-radius:10px;color:' + (sel ? '#0f0e1a' : 'rgba(255,255,255,0.5)') + ';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">' + t.emoji + ' ' + t.label + '</button>';
+    return '<button onclick="vbKiesType(\'' + t.id + '\')" data-type="' + t.id + '" style="height:38px;background:' + (sel ? t.kleur : 'rgba(255,255,255,0.05)') + ';border:1px solid ' + (sel ? t.kleur : 'rgba(255,255,255,0.08)') + ';border-radius:10px;color:' + (sel ? '#0f0e1a' : 'rgba(255,255,255,0.5)') + ';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">' + t.emoji + ' ' + t.label + '</button>';
   }).join('');
 
   var m = document.createElement('div');
   m.id = 'vb-modal';
   m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
   m.innerHTML =
-    '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
-      '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">' + (edit ? 'Bewerken' : 'Nieuwe betaling') + '</div>' +
-      // Type
-      '<div style="display:flex;gap:6px;margin-bottom:12px;" id="vb-type-row">' + typeHTML + '</div>' +
-      // Richting toggle
-      '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+    '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.1rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.25rem);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">' +
+      '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">' + (edit ? 'Bewerken' : 'Nieuwe betaling') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;" id="vb-type-row">' + typeHTML + '</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:10px;">' +
         '<button id="vb-r-uit" onclick="vbKiesRichting(\'uit\')" style="flex:1;height:36px;border-radius:10px;border:1px solid rgba(248,113,113,0.4);background:' + (!isTerug ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.04)') + ';color:' + (!isTerug ? '#f87171' : 'rgba(255,255,255,0.4)') + ';font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">\uD83D\uDCB8 Jij betaalt</button>' +
-        '<button id="vb-r-in"  onclick="vbKiesRichting(\'in\')"  style="flex:1;height:36px;border-radius:10px;border:1px solid rgba(74,222,128,0.4);background:' + (isTerug ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.04)') + ';color:' + (isTerug ? '#4ade80' : 'rgba(255,255,255,0.4)') + ';font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">\uD83D\uDCB0 Jij ontvangt</button>' +
+        '<button id="vb-r-in" onclick="vbKiesRichting(\'in\')" style="flex:1;height:36px;border-radius:10px;border:1px solid rgba(74,222,128,0.4);background:' + (isTerug ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.04)') + ';color:' + (isTerug ? '#4ade80' : 'rgba(255,255,255,0.4)') + ';font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">\uD83D\uDCB0 Jij ontvangt</button>' +
       '</div>' +
-      '<input id="vb-n-aan" type="text" placeholder="Naam (bijv. Thomas, Werk)" value="' + (edit ? edit.aan : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
-      '<input id="vb-n-omschr" type="text" placeholder="Omschrijving (bijv. Terras vrijdag)" value="' + (edit ? edit.omschr || '' : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
-      '<textarea id="vb-n-notitie" placeholder="Notitie (optioneel, bijv. \'wacht op tikkie\')" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:13px;color:white;outline:none;margin-bottom:8px;font-family:inherit;resize:none;height:60px;">' + (edit ? edit.notitie || '' : '') + '</textarea>' +
-      '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-        '<input id="vb-n-bedrag" type="number" inputmode="decimal" placeholder="\u20ac Bedrag" value="' + (edit ? edit.bedrag : '') + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
-        '<input id="vb-n-datum" type="date" value="' + (edit ? edit.datum : vandaag) + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
+      '<input id="vb-n-aan" type="text" placeholder="Naam (bijv. Thomas, Werk)" value="' + (edit ? edit.aan : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 13px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;box-sizing:border-box;"/>' +
+      '<input id="vb-n-omschr" type="text" placeholder="Omschrijving (bijv. Terras vrijdag)" value="' + (edit ? edit.omschr || '' : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 13px;font-size:15px;color:white;outline:none;margin-bottom:10px;font-family:inherit;box-sizing:border-box;"/>' +
+      '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
+        '<input id="vb-n-bedrag" type="number" inputmode="decimal" placeholder="\u20ac Bedrag" value="' + (edit ? edit.bedrag : '') + '" style="flex:1;min-width:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 13px;font-size:15px;color:white;outline:none;font-family:inherit;box-sizing:border-box;"/>' +
+        '<input id="vb-n-datum" type="date" value="' + (edit ? edit.datum : vandaag) + '" style="flex:1;min-width:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 13px;font-size:14px;color:white;outline:none;font-family:inherit;box-sizing:border-box;"/>' +
       '</div>' +
       '<div style="display:flex;gap:8px;">' +
-        '<button onclick="vbSluit()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
-        '<button onclick="vbSlaOp(' + (edit ? edit.id : 'null') + ')" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">' + (edit ? 'Opslaan' : 'Toevoegen') + '</button>' +
+        '<button onclick="vbSluit()" style="flex:1;height:48px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
+        '<button onclick="vbSlaOp(' + (edit ? edit.id : 'null') + ')" style="flex:2;height:48px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">' + (edit ? 'Opslaan' : 'Toevoegen') + '</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(m);
@@ -3414,7 +3428,7 @@ function vbSlaOp(editId) {
   var m      = document.getElementById('vb-modal');
   var aan    = document.getElementById('vb-n-aan').value.trim();
   var omschr = document.getElementById('vb-n-omschr').value.trim();
-  var notitie= document.getElementById('vb-n-notitie').value.trim();
+  var notitie= '';
   var bedrag = parseFloat(document.getElementById('vb-n-bedrag').value) || 0;
   var datum  = document.getElementById('vb-n-datum').value;
   var type   = m.dataset.type || 'tikkie';
