@@ -592,9 +592,19 @@ select option { background: #1a1830; }
   <!-- Hero totaal -->
   <div style="background:linear-gradient(135deg,#1e1a3a 0%,#2d2060 50%,#3d2a80 100%);border-radius:24px;padding:1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;">
     <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
-    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Openstaand</div>
-    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:4px;" id="vb-totaal">€0</div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.45);" id="vb-sub">0 verwachte betalingen</div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Te betalen</div>
+    <div style="font-size:42px;font-weight:700;color:white;line-height:1;margin-bottom:2px;" id="vb-totaal">€0</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:1rem;" id="vb-sub">0 openstaand</div>
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Jij betaalt</div>
+        <div style="font-size:16px;font-weight:700;color:#f87171;" id="vb-uit-totaal">€0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">Jij ontvangt</div>
+        <div style="font-size:16px;font-weight:700;color:#4ade80;" id="vb-in-totaal">€0</div>
+      </div>
+    </div>
   </div>
 
   <!-- Betalingen lijst -->
@@ -3285,11 +3295,14 @@ async function addUrlIngredientsToMeal(recipeStr) {
 
 const VB_KEY = 'vb_v1';
 
-function vbGet() {
-  try {
-    return JSON.parse(localStorage.getItem(VB_KEY) || '[]');
-  } catch(e) { return []; }
-}
+const VB_TYPES = [
+  { id:'tikkie',    label:'Tikkie',       emoji:'\uD83C\uDF7B', kleur:'#f472b6' },
+  { id:'factuur',   label:'Factuur',      emoji:'\uD83E\uDDFE', kleur:'#fb923c' },
+  { id:'bestelling',label:'Bestelling',   emoji:'\uD83D\uDED2', kleur:'#60a5fa' },
+  { id:'terugbet',  label:'Terugbetaling',emoji:'\uD83E\uDD1D', kleur:'#4ade80' },
+];
+
+function vbGet() { try { return JSON.parse(localStorage.getItem(VB_KEY) || '[]'); } catch(e) { return []; } }
 function vbSet(d) { localStorage.setItem(VB_KEY, JSON.stringify(d)); }
 function vbFmt(n) { return '\u20ac\u00a0' + Number(n).toFixed(2).replace('.',','); }
 
@@ -3303,8 +3316,7 @@ function switchBudgetTab(tab) {
     tabB.style.background = 'var(--purple)'; tabB.style.color = 'white'; tabB.style.fontWeight = '600';
     tabV.style.background = 'none'; tabV.style.color = 'var(--muted)'; tabV.style.fontWeight = '500';
     document.getElementById('budget-page-title').textContent = 'Mijn zakgeld';
-    var addBtn = document.getElementById('vb-add-btn');
-    if (addBtn) addBtn.style.display = 'none';
+    var addBtn = document.getElementById('vb-add-btn'); if (addBtn) addBtn.style.display = 'none';
   } else {
     budget.style.display = 'none'; vb.style.display = 'block';
     tabV.style.background = 'var(--purple)'; tabV.style.color = 'white'; tabV.style.fontWeight = '600';
@@ -3316,59 +3328,121 @@ function switchBudgetTab(tab) {
   }
 }
 
-// ── ADD BUTTON in header ──────────────────────────────────
-// Inject + button in header when on vb tab
-function vbOpenNieuw() {
-  var ex = document.getElementById('vb-nieuw-modal'); if (ex) ex.remove();
+function vbInjectAddBtn() {
+  if (document.getElementById('vb-add-btn')) return;
+  var btn = document.createElement('button');
+  btn.id = 'vb-add-btn';
+  btn.innerHTML = '+';
+  btn.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+24px);right:20px;width:54px;height:54px;background:#7c5cfc;border:none;border-radius:50%;color:white;font-size:28px;font-weight:300;cursor:pointer;z-index:30;box-shadow:0 4px 20px rgba(124,92,252,0.5);display:none;align-items:center;justify-content:center;line-height:1;font-family:inherit;';
+  document.body.appendChild(btn);
+  btn.addEventListener('click', vbOpenNieuw);
+}
+
+function vbOpenNieuw(editId) {
+  var ex = document.getElementById('vb-modal'); if (ex) ex.remove();
+  var edit = typeof editId === 'number' ? vbGet().find(function(x){return x.id===editId;}) : null;
   var vandaag = new Date().toISOString().slice(0,10);
+  var selectedType = edit ? edit.type : 'tikkie';
+  var isTerug = edit ? edit.richting === 'in' : false;
+
+  var typeHTML = VB_TYPES.map(function(t) {
+    var sel = selectedType === t.id;
+    return '<button onclick="vbKiesType(\'' + t.id + '\')" data-type="' + t.id + '" style="flex:1;height:36px;background:' + (sel ? t.kleur : 'rgba(255,255,255,0.05)') + ';border:1px solid ' + (sel ? t.kleur : 'rgba(255,255,255,0.08)') + ';border-radius:10px;color:' + (sel ? '#0f0e1a' : 'rgba(255,255,255,0.5)') + ';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">' + t.emoji + ' ' + t.label + '</button>';
+  }).join('');
+
   var m = document.createElement('div');
-  m.id = 'vb-nieuw-modal';
+  m.id = 'vb-modal';
   m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:65;display:flex;align-items:flex-end;justify-content:center;';
   m.innerHTML =
     '<div style="background:#1a1830;border-radius:24px 24px 0 0;padding:1.5rem 1.25rem calc(env(safe-area-inset-bottom,0px)+1.5rem);width:100%;max-width:480px;">' +
-      '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">Nieuwe verwachte betaling</div>' +
-      '<input id="vb-n-aan" type="text" placeholder="Aan wie? (bijv. Tikkie Thomas)" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
-      '<input id="vb-n-omschr" type="text" placeholder="Omschrijving (bijv. Terras vrijdag)" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
+      '<div style="font-size:17px;font-weight:700;margin-bottom:1rem;">' + (edit ? 'Bewerken' : 'Nieuwe betaling') + '</div>' +
+      // Type
+      '<div style="display:flex;gap:6px;margin-bottom:12px;" id="vb-type-row">' + typeHTML + '</div>' +
+      // Richting toggle
+      '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+        '<button id="vb-r-uit" onclick="vbKiesRichting(\'uit\')" style="flex:1;height:36px;border-radius:10px;border:1px solid rgba(248,113,113,0.4);background:' + (!isTerug ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.04)') + ';color:' + (!isTerug ? '#f87171' : 'rgba(255,255,255,0.4)') + ';font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">\uD83D\uDCB8 Jij betaalt</button>' +
+        '<button id="vb-r-in"  onclick="vbKiesRichting(\'in\')"  style="flex:1;height:36px;border-radius:10px;border:1px solid rgba(74,222,128,0.4);background:' + (isTerug ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.04)') + ';color:' + (isTerug ? '#4ade80' : 'rgba(255,255,255,0.4)') + ';font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">\uD83D\uDCB0 Jij ontvangt</button>' +
+      '</div>' +
+      '<input id="vb-n-aan" type="text" placeholder="Naam (bijv. Thomas, Werk)" value="' + (edit ? edit.aan : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
+      '<input id="vb-n-omschr" type="text" placeholder="Omschrijving (bijv. Terras vrijdag)" value="' + (edit ? edit.omschr || '' : '') + '" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;margin-bottom:8px;font-family:inherit;"/>' +
+      '<textarea id="vb-n-notitie" placeholder="Notitie (optioneel, bijv. \'wacht op tikkie\')" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:13px;color:white;outline:none;margin-bottom:8px;font-family:inherit;resize:none;height:60px;">' + (edit ? edit.notitie || '' : '') + '</textarea>' +
       '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
-        '<input id="vb-n-bedrag" type="number" inputmode="decimal" placeholder="\u20ac Bedrag" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
-        '<input id="vb-n-datum" type="date" value="' + vandaag + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
+        '<input id="vb-n-bedrag" type="number" inputmode="decimal" placeholder="\u20ac Bedrag" value="' + (edit ? edit.bedrag : '') + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
+        '<input id="vb-n-datum" type="date" value="' + (edit ? edit.datum : vandaag) + '" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;font-size:15px;color:white;outline:none;font-family:inherit;"/>' +
       '</div>' +
       '<div style="display:flex;gap:8px;">' +
         '<button onclick="vbSluit()" style="flex:1;height:50px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;color:rgba(255,255,255,0.55);font-size:15px;cursor:pointer;font-family:inherit;">Annuleren</button>' +
-        '<button onclick="vbSlaOp()" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Toevoegen</button>' +
+        '<button onclick="vbSlaOp(' + (edit ? edit.id : 'null') + ')" style="flex:2;height:50px;background:#7c5cfc;border:none;border-radius:14px;color:white;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">' + (edit ? 'Opslaan' : 'Toevoegen') + '</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(m);
   m.addEventListener('click', function(e){ if(e.target===m) vbSluit(); });
+  m.dataset.type = selectedType;
+  m.dataset.richting = isTerug ? 'in' : 'uit';
   setTimeout(function(){ var i=document.getElementById('vb-n-aan'); if(i) i.focus(); }, 80);
 }
 
-function vbSluit() { var m=document.getElementById('vb-nieuw-modal'); if(m) m.remove(); }
+function vbSluit() { var m=document.getElementById('vb-modal'); if(m) m.remove(); }
 
-function vbSlaOp() {
+function vbKiesType(type) {
+  var m = document.getElementById('vb-modal'); if(!m) return;
+  m.dataset.type = type;
+  document.querySelectorAll('#vb-type-row button').forEach(function(b) {
+    var t = VB_TYPES.find(function(x){return x.id===b.dataset.type;});
+    var sel = b.dataset.type === type;
+    b.style.background = sel ? t.kleur : 'rgba(255,255,255,0.05)';
+    b.style.borderColor = sel ? t.kleur : 'rgba(255,255,255,0.08)';
+    b.style.color = sel ? '#0f0e1a' : 'rgba(255,255,255,0.5)';
+  });
+}
+
+function vbKiesRichting(r) {
+  var m = document.getElementById('vb-modal'); if(!m) return;
+  m.dataset.richting = r;
+  var btnUit = document.getElementById('vb-r-uit');
+  var btnIn  = document.getElementById('vb-r-in');
+  if (r === 'uit') {
+    btnUit.style.background='rgba(248,113,113,0.2)'; btnUit.style.color='#f87171';
+    btnIn.style.background='rgba(255,255,255,0.04)'; btnIn.style.color='rgba(255,255,255,0.4)';
+  } else {
+    btnIn.style.background='rgba(74,222,128,0.15)'; btnIn.style.color='#4ade80';
+    btnUit.style.background='rgba(255,255,255,0.04)'; btnUit.style.color='rgba(255,255,255,0.4)';
+  }
+}
+
+function vbSlaOp(editId) {
+  var m      = document.getElementById('vb-modal');
   var aan    = document.getElementById('vb-n-aan').value.trim();
   var omschr = document.getElementById('vb-n-omschr').value.trim();
+  var notitie= document.getElementById('vb-n-notitie').value.trim();
   var bedrag = parseFloat(document.getElementById('vb-n-bedrag').value) || 0;
   var datum  = document.getElementById('vb-n-datum').value;
+  var type   = m.dataset.type || 'tikkie';
+  var richting = m.dataset.richting || 'uit';
   if (!aan || !bedrag) { showToast('Vul naam en bedrag in.'); return; }
   var d = vbGet();
-  d.push({ id: Date.now(), aan: aan, omschr: omschr, bedrag: bedrag, datum: datum, betaald: false });
-  d.sort(function(a,b){ return a.datum.localeCompare(b.datum); });
+  if (editId) {
+    var existing = d.find(function(x){return x.id===editId;});
+    if (existing) { existing.aan=aan; existing.omschr=omschr; existing.notitie=notitie; existing.bedrag=bedrag; existing.datum=datum; existing.type=type; existing.richting=richting; }
+  } else {
+    d.push({ id:Date.now(), aan:aan, omschr:omschr, notitie:notitie, bedrag:bedrag, datum:datum, type:type, richting:richting, betaald:false });
+  }
+  d.sort(function(a,b){ return (a.betaald===b.betaald) ? a.datum.localeCompare(b.datum) : (a.betaald?1:-1); });
   vbSet(d); vbSluit(); vbRender();
-  showToast('Toegevoegd!');
+  showToast(editId ? 'Opgeslagen \u2713' : 'Toegevoegd!');
 }
 
 function vbBetaald(id) {
   var d = vbGet();
-  var p = d.find(function(x){ return x.id === id; });
-  if (p) { p.betaald = true; p.betaaldOp = new Date().toISOString().slice(0,10); }
+  var p = d.find(function(x){return x.id===id;});
+  if (p) { p.betaald=true; p.betaaldOp=new Date().toISOString().slice(0,10); }
   vbSet(d); vbRender();
   showToast('Gemarkeerd als betaald \u2713');
 }
 
 function vbVerwijder(id) {
-  var d = vbGet().filter(function(x){ return x.id !== id; });
-  vbSet(d); vbRender();
+  vbSet(vbGet().filter(function(x){return x.id!==id;}));
+  vbRender();
 }
 
 function vbDatumLabel(datum) {
@@ -3376,44 +3450,65 @@ function vbDatumLabel(datum) {
   var d = new Date(datum + 'T00:00:00');
   var now = new Date(); now.setHours(0,0,0,0);
   var diff = Math.round((d - now) / 86400000);
-  if (diff < 0)  return '<span style="color:#f87171;">Verlopen</span>';
-  if (diff === 0) return '<span style="color:#fbbf24;">Vandaag</span>';
-  if (diff === 1) return '<span style="color:#fbbf24;">Morgen</span>';
-  if (diff <= 7)  return '<span style="color:#fb923c;">Over ' + diff + ' dagen</span>';
-  return d.toLocaleDateString('nl-NL', { day:'numeric', month:'short' });
+  if (diff < -1) return '<span style="color:#f87171;font-weight:600;">\u26a0\ufe0f ' + Math.abs(diff) + ' dagen verlopen</span>';
+  if (diff === -1) return '<span style="color:#f87171;font-weight:600;">\u26a0\ufe0f Gisteren verlopen</span>';
+  if (diff === 0)  return '<span style="color:#fbbf24;font-weight:600;">Vandaag verwacht</span>';
+  if (diff === 1)  return '<span style="color:#fbbf24;">Morgen verwacht</span>';
+  if (diff <= 7)   return '<span style="color:#fb923c;">Over ' + diff + ' dagen</span>';
+  return '<span style="color:rgba(255,255,255,0.45);">' + d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'}) + '</span>';
 }
 
 function vbRender() {
-  var all    = vbGet();
-  var open   = all.filter(function(x){ return !x.betaald; });
-  var paid   = all.filter(function(x){ return x.betaald; });
+  var all  = vbGet();
+  var open = all.filter(function(x){return !x.betaald;});
+  var paid = all.filter(function(x){return x.betaald;});
 
-  // Hero
-  var totaal = open.reduce(function(s,x){ return s + x.bedrag; }, 0);
-  document.getElementById('vb-totaal').textContent = vbFmt(totaal);
-  document.getElementById('vb-sub').textContent = open.length + ' verwachte betaling' + (open.length !== 1 ? 'en' : '');
+  var uitOpen = open.filter(function(x){return x.richting!=='in';});
+  var inOpen  = open.filter(function(x){return x.richting==='in';});
+  var uitTot  = uitOpen.reduce(function(s,x){return s+x.bedrag;},0);
+  var inTot   = inOpen.reduce(function(s,x){return s+x.bedrag;},0);
 
-  // Empty / list toggle
+  document.getElementById('vb-totaal').textContent = vbFmt(uitTot);
+  document.getElementById('vb-sub').textContent = open.length + ' openstaand';
+  document.getElementById('vb-uit-totaal').textContent = vbFmt(uitTot);
+  document.getElementById('vb-in-totaal').textContent  = vbFmt(inTot);
+
   var listEl  = document.getElementById('vb-list');
   var emptyEl = document.getElementById('vb-empty');
+
   if (open.length === 0) {
     listEl.innerHTML = ''; emptyEl.style.display = 'block';
   } else {
     emptyEl.style.display = 'none';
-    listEl.innerHTML = open.map(function(p) {
-      var isLaat = p.datum && new Date(p.datum + 'T00:00:00') < new Date(new Date().setHours(0,0,0,0));
-      return '<div style="background:#1a1830;border-radius:20px;padding:1.1rem 1.25rem;margin-bottom:10px;border:1px solid ' + (isLaat ? 'rgba(248,113,113,0.3)' : 'rgba(255,255,255,0.07)') + ';">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">' +
+    // Sort: verlopen eerst, dan vandaag, dan komend
+    var sorted = open.slice().sort(function(a,b){ return a.datum.localeCompare(b.datum); });
+    listEl.innerHTML = sorted.map(function(p) {
+      var typeInfo = VB_TYPES.find(function(t){return t.id===p.type;}) || VB_TYPES[0];
+      var isTerug  = p.richting === 'in';
+      var isLaat   = p.datum && new Date(p.datum+'T00:00:00') < new Date(new Date().setHours(0,0,0,0));
+      var borderCol = isLaat ? 'rgba(248,113,113,0.35)' : 'rgba(255,255,255,0.07)';
+      var amtCol    = isTerug ? '#4ade80' : 'white';
+      var amtPrefix = isTerug ? '+' : '-';
+      return '<div style="background:#1a1830;border-radius:20px;padding:1rem 1.1rem;margin-bottom:10px;border:1px solid ' + borderCol + ';">' +
+        '<div style="display:flex;align-items:flex-start;gap:12px;">' +
+          // Type badge + info
+          '<div style="width:38px;height:38px;background:rgba(255,255,255,0.06);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">' + typeInfo.emoji + '</div>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div style="font-size:15px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + p.aan + '</div>' +
-            (p.omschr ? '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;">' + p.omschr + '</div>' : '') +
-            '<div style="font-size:12px;">' + vbDatumLabel(p.datum) + '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-bottom:1px;">' +
+              '<div style="font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + p.aan + '</div>' +
+              (isTerug ? '<span style="font-size:10px;background:rgba(74,222,128,0.15);color:#4ade80;padding:2px 7px;border-radius:6px;font-weight:600;">ontvangen</span>' : '') +
+            '</div>' +
+            (p.omschr ? '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:3px;">' + p.omschr + '</div>' : '') +
+            '<div style="font-size:12px;margin-bottom:' + (p.notitie ? '5px' : '0') + ';">' + vbDatumLabel(p.datum) + '</div>' +
+            (p.notitie ? '<div style="font-size:11px;color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:8px;padding:5px 8px;margin-top:3px;">' + p.notitie + '</div>' : '') +
           '</div>' +
-          '<div style="text-align:right;flex-shrink:0;">' +
-            '<div style="font-size:20px;font-weight:700;margin-bottom:8px;">' + vbFmt(p.bedrag) + '</div>' +
-            '<div style="display:flex;gap:6px;justify-content:flex-end;">' +
-              '<button onclick="vbBetaald(' + p.id + ')" style="height:32px;padding:0 12px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:9px;color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">\u2713 Betaald</button>' +
-              '<button onclick="vbVerwijder(' + p.id + ')" style="width:32px;height:32px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:9px;color:rgba(255,255,255,0.35);font-size:14px;cursor:pointer;">×</button>' +
+          // Rechts: bedrag + knoppen
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0;">' +
+            '<div style="font-size:20px;font-weight:700;color:' + amtCol + ';">' + amtPrefix + vbFmt(p.bedrag) + '</div>' +
+            '<div style="display:flex;gap:5px;">' +
+              '<button onclick="vbBetaald(' + p.id + ')" style="height:30px;padding:0 10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:8px;color:#4ade80;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">\u2713 ' + (isTerug ? 'Ontvangen' : 'Betaald') + '</button>' +
+              '<button onclick="vbOpenNieuw(' + p.id + ')" style="width:30px;height:30px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.35);font-size:13px;cursor:pointer;">\u270f\ufe0f</button>' +
+              '<button onclick="vbVerwijder(' + p.id + ')" style="width:30px;height:30px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.3);font-size:14px;cursor:pointer;">\xd7</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -3421,37 +3516,27 @@ function vbRender() {
     }).join('');
   }
 
-  // Paid section
+  // Betaald
   var paidSection = document.getElementById('vb-paid-section');
   var paidList    = document.getElementById('vb-paid-list');
   if (paid.length === 0) {
     paidSection.style.display = 'none';
   } else {
     paidSection.style.display = 'block';
-    paidList.innerHTML = paid.slice(0,5).map(function(p) {
-      return '<div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:0.875rem 1.1rem;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:12px;">' +
+    paidList.innerHTML = paid.slice(0,8).map(function(p) {
+      var typeInfo = VB_TYPES.find(function(t){return t.id===p.type;}) || VB_TYPES[0];
+      var isTerug  = p.richting === 'in';
+      return '<div style="background:rgba(255,255,255,0.03);border-radius:14px;padding:0.75rem 1rem;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:16px;opacity:0.5;">' + typeInfo.emoji + '</span>' +
         '<div style="flex:1;min-width:0;">' +
-          '<div style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.5);">' + p.aan + '</div>' +
-          (p.omschr ? '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + p.omschr + '</div>' : '') +
+          '<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.4);">' + p.aan + '</div>' +
+          (p.omschr ? '<div style="font-size:11px;color:rgba(255,255,255,0.25);">' + p.omschr + '</div>' : '') +
         '</div>' +
-        '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.35);text-decoration:line-through;">' + vbFmt(p.bedrag) + '</div>' +
-        '<button onclick="vbVerwijder(' + p.id + ')" style="width:28px;height:28px;background:none;border:none;color:rgba(255,255,255,0.2);font-size:14px;cursor:pointer;">×</button>' +
+        '<div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.25);text-decoration:line-through;">' + vbFmt(p.bedrag) + '</div>' +
+        '<button onclick="vbVerwijder(' + p.id + ')" style="width:26px;height:26px;background:none;border:none;color:rgba(255,255,255,0.2);font-size:14px;cursor:pointer;">\xd7</button>' +
       '</div>';
     }).join('');
   }
-}
-
-// + knop in de header injecteren als verwacht tab actief is
-function vbInjectAddBtn() {
-  if (document.getElementById('vb-add-btn')) return;
-  var header = document.querySelector('#page-zakgeld header');
-  if (!header) return;
-  var btn = document.createElement('button');
-  btn.id = 'vb-add-btn';
-  btn.textContent = '+';
-  btn.style.cssText = 'position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+24px);right:20px;width:54px;height:54px;background:#7c5cfc;border:none;border-radius:50%;color:white;font-size:26px;font-weight:300;cursor:pointer;z-index:30;box-shadow:0 4px 20px rgba(124,92,252,0.5);display:none;font-family:inherit;line-height:1;';
-  document.body.appendChild(btn);
-  btn.addEventListener('click', vbOpenNieuw);
 }
 
 
